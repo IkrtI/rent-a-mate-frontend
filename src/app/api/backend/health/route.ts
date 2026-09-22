@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { BackendClientError } from "@/modules/backend-client";
-import { requestBackendHealth } from "@/modules/backend-client/health";
+import { BackendClientError } from "@/actions/backend";
+import { requestBackendHealth } from "@/actions/backend/health";
 
 export async function GET() {
   try {

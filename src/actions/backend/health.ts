@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getServerEnv } from "@/lib/env";
+import { getServerEnv } from "@/utils/env";
 
 import { BackendClientError } from "./client";
 import { normalizeBackendError, normalizeNetworkError } from "./envelope";

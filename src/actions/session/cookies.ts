@@ -2,7 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 
-import { getServerEnv } from "@/lib/env";
+import { getServerEnv } from "@/utils/env";
 
 import type { SessionTokens } from "./types";
 
