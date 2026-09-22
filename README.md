@@ -1,1 +1,1 @@
-# Rent a mate Frontend
+# Rent a Mate Frontend
