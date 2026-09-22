@@ -2,7 +2,7 @@ import "server-only";
 
 import { z } from "zod";
 
-import { getServerEnv } from "@/utils/env";
+import { getServerEnv } from "@/lib/env";
 
 import { clearSessionTokens, writeSessionTokens, type CookieStore } from "./cookies";
 import type { SessionTokens } from "./types";

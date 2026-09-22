@@ -2,10 +2,10 @@ import "server-only";
 
 import { z } from "zod";
 
-import { getServerEnv } from "@/utils/env";
-import { refreshSession } from "@/actions/session/refresh";
-import type { CookieStore } from "@/actions/session/cookies";
-import type { SessionTokens } from "@/actions/session/types";
+import { getServerEnv } from "@/lib/env";
+import { refreshSession } from "@/modules/session/refresh";
+import type { CookieStore } from "@/modules/session/cookies";
+import type { SessionTokens } from "@/modules/session/types";
 
 import { normalizeBackendError, normalizeNetworkError, unwrapEnvelope } from "./envelope";
 import type { AppError } from "./types";
