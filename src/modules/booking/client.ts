@@ -10,8 +10,10 @@ import {
   type BookingStatus,
 } from "./schemas";
 
-export async function listBookings(input: { status?: BookingStatus; page?: number } = {}) {
-  const query = new URLSearchParams({ limit: "10" });
+export async function listBookings(
+  input: { status?: BookingStatus; page?: number; limit?: number } = {},
+) {
+  const query = new URLSearchParams({ limit: String(input.limit ?? 10) });
   if (input.status) query.set("status", input.status);
   if (input.page) query.set("page", String(input.page));
   return requestSameOrigin(`/api/bookings?${query.toString()}`, bookingPageSchema);

@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { NotificationPanel } from "@/modules/notification/components/notification-panel";
 
 import { getSession, logout } from "../client";
 
@@ -27,6 +28,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
 
   useEffect(() => {
@@ -86,6 +88,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
           </nav>
           <button
             className="grid size-9 place-items-center rounded-full hover:bg-white/60"
+            onClick={() => setNotificationsOpen(true)}
             title="Notifications"
             type="button"
           >
@@ -122,6 +125,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
           </Link>
         ))}
       </nav>
+      <NotificationPanel open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </div>
   );
 }
