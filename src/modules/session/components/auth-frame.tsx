@@ -1,36 +1,39 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function AuthFrame({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <main className="grid min-h-screen bg-[#fffaf8] lg:grid-cols-[minmax(0,1.2fr)_minmax(420px,0.8fr)]">
-      <section
-        className="relative hidden min-h-screen overflow-hidden bg-[#22202a] px-10 py-8 text-white lg:flex lg:flex-col"
-        style={{
-          backgroundImage:
-            "linear-gradient(180deg, rgba(34,32,42,.3), rgba(34,32,42,.88)), url('https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1600&q=85')",
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
-      >
-        <Link className="relative z-10 text-sm font-extrabold tracking-normal" href="/">
-          <span className="mr-2 inline-block size-3 rounded-full bg-[#ff5c67]" />
+    <main className="grid min-h-screen bg-[#fffdfa] lg:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)]">
+      <section className="hidden min-h-screen bg-[#f3f3f0] px-12 py-10 text-neutral-950 lg:flex lg:flex-col">
+        <Link className="text-sm font-bold tracking-tight" href="/">
+          <span className="mr-2 inline-block size-2 rounded-full bg-[#ff5c67]" />
           mateflow.
         </Link>
-        <div className="relative z-10 mt-auto max-w-xl pb-10">
-          <p className="mb-4 font-mono text-xs text-[#ff8991] uppercase">Meet. Plan. Remember.</p>
-          <h1 className="font-[family-name:var(--font-display)] text-5xl leading-[0.98] tracking-normal xl:text-7xl">
-            Plans are better
-            <br />
-            with good company.
+        <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center pt-8">
+          <Image
+            alt="Two people meeting"
+            className="mx-auto w-full max-w-md mix-blend-multiply"
+            height={800}
+            priority
+            src="/pictures/auth-companions.png"
+            width={800}
+          />
+        </div>
+        <div className="max-w-lg border-t border-neutral-300 pt-6 pb-8">
+          <p className="text-sm font-medium tracking-tight text-neutral-700">
+            You don't have to go alone.
+          </p>
+          <h1 className="mt-3 text-3xl leading-tight font-semibold tracking-tight xl:text-4xl">
+            Some days, you just need someone there.
           </h1>
-          <p className="mt-5 max-w-md text-sm leading-6 text-white/75">
-            Find someone who fits the moment, agree on the details, and keep every plan clear.
+          <p className="mt-4 max-w-md text-sm leading-6 text-neutral-600">
+           From a quiet coffee to a night out, find a mate who's there when you want a little company.
           </p>
         </div>
       </section>
       <section className="flex min-h-screen flex-col px-6 py-6 sm:px-10 lg:px-14">
         <div className="flex items-center justify-between lg:justify-end">
-          <Link className="text-sm font-extrabold lg:hidden" href="/">
+          <Link className="text-sm font-bold tracking-tight lg:hidden" href="/">
             <span className="mr-2 inline-block size-3 rounded-full bg-[#ff5c67]" />
             mateflow.
           </Link>

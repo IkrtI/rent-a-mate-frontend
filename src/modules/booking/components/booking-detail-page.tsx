@@ -57,10 +57,12 @@ export function BookingDetailPage({ bookingId }: { bookingId: number }) {
       <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section>
           <div className="flex flex-wrap items-center gap-3">
-            <p className="font-mono text-xs text-[#e34b58] uppercase">Booking #{item.id}</p>
+            <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
+              Booking #{item.id}
+            </p>
             <StatusBadge status={item.status} />
           </div>
-          <h1 className="mt-3 font-[family-name:var(--font-display)] text-4xl tracking-normal">
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
             {item.activity.name} with {isMate ? item.renter.name : item.mate.name}
           </h1>
           <div className="mt-8 grid gap-4 border-y border-neutral-200 py-6 sm:grid-cols-2">

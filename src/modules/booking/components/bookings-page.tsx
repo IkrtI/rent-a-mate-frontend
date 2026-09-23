@@ -40,12 +40,10 @@ export function BookingsPage() {
 
   return (
     <main className="pb-24">
-      <p className="font-mono text-xs text-[#e34b58] uppercase">Your plans</p>
+      <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">Your plans</p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-[family-name:var(--font-display)] text-4xl tracking-normal">
-            Bookings
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Bookings</h1>
           <p className="mt-2 text-sm text-neutral-600">
             Track requests and confirmed plans in one place.
           </p>

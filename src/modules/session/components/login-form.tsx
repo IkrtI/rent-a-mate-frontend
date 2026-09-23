@@ -47,12 +47,12 @@ export function LoginForm() {
 
   return (
     <div className="w-full">
-      <p className="font-mono text-xs text-[#e34b58] uppercase">Welcome back</p>
-      <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl tracking-normal text-neutral-950">
-        Good to see you.
+      <p className="font-sans text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">Sign in</p>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
+        Pick up where you left off.
       </h2>
       <p className="mt-3 text-sm leading-6 text-neutral-600">
-        Sign in to manage your plans and messages.
+        Your bookings, messages, and account are all here.
       </p>
       {searchParams.get("registered") === "1" ? (
         <p

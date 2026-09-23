@@ -10,9 +10,9 @@ import { listBookings } from "../client";
 import { formatBookingDate, formatBookingTime } from "../format";
 
 const summaryCards = [
-  { key: "pending", label: "Awaiting response", icon: Clock3, className: "bg-[#fff0f1]" },
-  { key: "confirmed", label: "Confirmed plans", icon: CalendarDays, className: "bg-[#efedff]" },
-  { key: "completed", label: "Completed", icon: CheckCircle2, className: "bg-[#edf7e9]" },
+  { key: "pending", label: "Awaiting response", icon: Clock3 },
+  { key: "confirmed", label: "Confirmed plans", icon: CalendarDays },
+  { key: "completed", label: "Completed", icon: CheckCircle2 },
 ] as const;
 
 export function DashboardPage() {
@@ -30,10 +30,12 @@ export function DashboardPage() {
 
   return (
     <main className="pb-24">
-      <p className="font-mono text-xs text-[#e34b58] uppercase">Your account</p>
+      <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
+        Your account
+      </p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-[family-name:var(--font-display)] text-4xl tracking-normal">
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Good morning{user ? `, ${user.name.split(" ")[0]}` : ""}.
           </h1>
           <p className="mt-3 text-sm text-neutral-600">
@@ -51,8 +53,8 @@ export function DashboardPage() {
       </div>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-3" aria-label="Booking summary">
-        {summaryCards.map(({ key, label, icon: Icon, className }) => (
-          <div className={`rounded-md p-5 ${className}`} key={key}>
+        {summaryCards.map(({ key, label, icon: Icon }) => (
+          <div className="rounded-md border border-neutral-200 bg-white p-5" key={key}>
             <Icon aria-hidden className="text-neutral-700" size={19} />
             <p className="mt-7 text-3xl font-bold">
               {bookings.isPending ? "—" : items.filter((booking) => booking.status === key).length}

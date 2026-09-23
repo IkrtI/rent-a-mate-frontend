@@ -2,15 +2,15 @@ import { expect, test } from "@playwright/test";
 
 test("shows login validation and the two-step signup flow", async ({ page }) => {
   await page.goto("/login");
-  await expect(page.getByRole("heading", { name: "Good to see you." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Pick up where you left off." })).toBeVisible();
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByText("Enter a valid email address.")).toBeVisible();
 
   await page.goto("/signup");
-  await expect(page.getByRole("heading", { name: "How will you use mateflow?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What brings you here?" })).toBeVisible();
   await page.getByRole("button", { name: /I want to become a mate/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByRole("heading", { name: "A few details first." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Create your account." })).toBeVisible();
 });
 
 test("redirects a guest from a private route to sign in", async ({ page }) => {

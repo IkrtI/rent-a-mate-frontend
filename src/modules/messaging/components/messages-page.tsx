@@ -48,10 +48,10 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
 
   return (
     <main className="pb-24">
-      <p className="font-mono text-xs text-[#e34b58] uppercase">Stay connected</p>
-      <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl tracking-normal">
-        Messages
-      </h1>
+      <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
+        Stay connected
+      </p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Messages</h1>
       <div className="mt-7 grid min-h-[620px] overflow-hidden rounded-md border border-neutral-200 bg-white lg:grid-cols-[280px_minmax(0,1fr)]">
         <aside
           className={`${selectedBookingId ? "hidden lg:block" : "block"} border-r border-neutral-200`}

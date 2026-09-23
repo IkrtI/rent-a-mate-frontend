@@ -60,12 +60,14 @@ export function SignupForm() {
   if (step === 1) {
     return (
       <div className="w-full">
-        <p className="font-mono text-xs text-[#e34b58] uppercase">Step 1 of 2</p>
-        <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl tracking-normal text-neutral-950">
-          How will you use mateflow?
+        <p className="font-sans text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
+          Step 1 of 2
+        </p>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
+          What brings you here?
         </h2>
         <p className="mt-3 text-sm leading-6 text-neutral-600">
-          Choose the role that matches your plans.
+          Choose how you would like to use mateflow.
         </p>
         <div className="mt-7 grid gap-3">
           {(
@@ -120,9 +122,11 @@ export function SignupForm() {
       >
         <ArrowLeft aria-hidden size={16} /> Back
       </button>
-      <p className="font-mono text-xs text-[#e34b58] uppercase">Step 2 of 2</p>
-      <h2 className="mt-3 font-[family-name:var(--font-display)] text-4xl tracking-normal text-neutral-950">
-        A few details first.
+      <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
+        Step 2 of 2
+      </p>
+      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
+        Create your account.
       </h2>
       <form className="mt-7 grid gap-4" onSubmit={onSubmit} noValidate>
         <Field label="Full name" error={errors.name?.message}>
