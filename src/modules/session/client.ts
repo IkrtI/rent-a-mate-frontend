@@ -15,6 +15,10 @@ export function getSession(): Promise<{ user: SessionUser }> {
   return requestSameOrigin("/api/auth/session", sessionResponseSchema);
 }
 
+export function refresh(): Promise<{ user: SessionUser }> {
+  return requestSameOrigin("/api/auth/refresh", sessionResponseSchema, { method: "POST" });
+}
+
 export function login(input: { email: string; password: string }): Promise<{ user: SessionUser }> {
   return requestSameOrigin("/api/auth/login", sessionResponseSchema, {
     method: "POST",

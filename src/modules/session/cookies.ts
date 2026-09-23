@@ -4,12 +4,10 @@ import { cookies } from "next/headers";
 
 import { getServerEnv } from "@/lib/env";
 
+import { sessionCookieNames } from "./cookie-names";
 import type { SessionTokens } from "./types";
 
-export const sessionCookieNames = {
-  access: "ram_access",
-  refresh: "ram_refresh",
-} as const;
+export { sessionCookieNames } from "./cookie-names";
 
 const accessCookieMaxAgeSeconds = 15 * 60;
 const refreshCookieMaxAgeSeconds = 30 * 24 * 60 * 60;
