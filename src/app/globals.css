@@ -367,7 +367,7 @@ h2 {
   position: relative;
   min-height: 710px;
   overflow: hidden;
-  padding: 105px max(7vw, calc((100vw - 1180px) / 2)) 78px;
+  padding: clamp(78px, 8.5vw, 104px) max(7vw, calc((100vw - 1180px) / 2)) 78px;
   background: #f5d6d0;
 }
 .hero-copy {
@@ -449,9 +449,9 @@ h2 {
 }
 .hero-art {
   position: absolute;
-  top: 64px;
-  right: max(6vw, calc((100vw - 1250px) / 2));
-  width: 45%;
+  top: 54px;
+  right: max(7vw, calc((100vw - 1250px) / 2));
+  width: 43%;
   height: 555px;
 }
 .hero-photo-main,
@@ -522,14 +522,14 @@ h2 {
 .section {
   width: min(1180px, calc(100% - 64px));
   margin: 0 auto;
-  padding: 100px 0;
+  padding: clamp(84px, 9vw, 108px) 0;
 }
 .section-heading {
-  margin-bottom: 32px;
+  margin-bottom: 40px;
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 24px;
+  gap: 28px;
 }
 .section-heading h2,
 .how-note h2,
@@ -554,7 +554,7 @@ h2 {
 .activity-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 .activity-card {
   min-width: 0;
@@ -624,7 +624,7 @@ h2 {
 .mate-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 24px;
 }
 .mate-card {
   min-width: 0;
