@@ -37,6 +37,11 @@ export async function readSessionTokens(store?: CookieStore): Promise<SessionTok
   return accessToken && refreshToken ? { accessToken, refreshToken } : null;
 }
 
+export async function readRefreshToken(store?: CookieStore): Promise<string | null> {
+  const resolvedStore = store ?? (await cookies());
+  return resolvedStore.get(sessionCookieNames.refresh)?.value ?? null;
+}
+
 export function writeSessionTokens(store: CookieStore, tokens: SessionTokens): void {
   const isCookieSecure = getServerEnv().isCookieSecure;
   store.set(

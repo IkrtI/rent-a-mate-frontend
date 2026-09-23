@@ -35,8 +35,8 @@ export async function refreshSession(
   cookieStore: CookieStore,
   refreshToken: string,
 ): Promise<SessionTokens> {
-  return withRefreshLock(refreshToken, async () => {
-    try {
+  try {
+    const tokens = await withRefreshLock(refreshToken, async () => {
       const { backendApiUrl } = getServerEnv();
       const response = await fetch(`${backendApiUrl}/auth/refresh`, {
         method: "POST",
@@ -49,12 +49,12 @@ export async function refreshSession(
         throw new Error("Session refresh was rejected.");
       }
 
-      const tokens = refreshResponseSchema.parse(payload).data;
-      writeSessionTokens(cookieStore, tokens);
-      return tokens;
-    } catch (error) {
-      clearSessionTokens(cookieStore);
-      throw error;
-    }
-  });
+      return refreshResponseSchema.parse(payload).data;
+    });
+    writeSessionTokens(cookieStore, tokens);
+    return tokens;
+  } catch (error) {
+    clearSessionTokens(cookieStore);
+    throw error;
+  }
 }
