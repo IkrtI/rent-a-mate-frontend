@@ -3,7 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 import { getServerEnv } from "@/lib/env";
-import { refreshSession } from "@/modules/session/refresh";
+import { refreshSession, SessionRefreshError } from "@/modules/session/refresh";
 import type { CookieStore } from "@/modules/session/cookies";
 import type { SessionTokens } from "@/modules/session/types";
 
@@ -66,12 +66,18 @@ export async function requestBackend<T>(request: BackendRequest<T>): Promise<T> 
         request.session.cookieStore,
         request.session.tokens.refreshToken,
       );
-    } catch {
+    } catch (error) {
       throw new BackendClientError({
-        status: 401,
-        code: "SESSION_EXPIRED",
-        message: "Your session has expired. Please sign in again.",
-        retryable: false,
+        status: error instanceof SessionRefreshError ? error.status : 503,
+        code:
+          error instanceof SessionRefreshError && error.isRejected
+            ? "SESSION_EXPIRED"
+            : "SESSION_REFRESH_UNAVAILABLE",
+        message:
+          error instanceof SessionRefreshError && error.isRejected
+            ? "Your session has expired. Please sign in again."
+            : "We could not refresh your session. Please try again shortly.",
+        retryable: !(error instanceof SessionRefreshError && error.isRejected),
       });
     }
 

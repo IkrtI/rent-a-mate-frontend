@@ -34,8 +34,19 @@ test("renders the private shell for an authenticated user", async ({ page }) => 
       body: JSON.stringify({ user: { id: 7, name: "Mew", role: "renter" } }),
     }),
   );
+  await page.route("**/api/bookings?**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        items: [],
+        meta: { page: 1, limit: 100, total: 0, totalPages: 0 },
+      }),
+    }),
+  );
 
   await page.goto("/dashboard");
-  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
-  await expect(page.getByText("Mew")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Good morning, Mew." })).toBeVisible();
+  await expect(page.getByText("Mew", { exact: true })).toBeVisible();
+  await expect(page.getByText("No upcoming bookings yet.")).toBeVisible();
 });

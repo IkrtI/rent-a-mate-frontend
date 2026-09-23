@@ -67,4 +67,16 @@ describe("createSessionCookieOptions", () => {
     expect(firstSet).toHaveBeenCalledTimes(2);
     expect(secondSet).toHaveBeenCalledTimes(2);
   });
+
+  it("keeps cookies when the refresh service is temporarily unavailable", async () => {
+    process.env.BACKEND_URL = "http://localhost:3000/api/v1";
+    process.env.SESSION_COOKIE_SECURE = "false";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("unavailable", { status: 503 })));
+    const store = { set: vi.fn(), delete: vi.fn() } as unknown as CookieStore;
+
+    await expect(refreshSession(store, "still-valid-refresh")).rejects.toThrow(
+      "temporarily unavailable",
+    );
+    expect(store.delete).not.toHaveBeenCalled();
+  });
 });
