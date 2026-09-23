@@ -36,7 +36,6 @@ export default function HowItWorksPage() {
   return (
     <main>
       <PageHero
-        eyebrow="A LITTLE MORE TOGETHER"
         title="Good plans start with a simple hello."
         description="A thoughtful way to find company for the things you already love doing."
       />
