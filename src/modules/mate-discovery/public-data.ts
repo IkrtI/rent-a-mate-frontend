@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { requestBackend } from "@/modules/backend-client/client";
+import { BackendClientError, requestBackend } from "@/modules/backend-client/client";
 
 const lookupSchema = z.object({ id: z.number(), name: z.string() });
 const mateSchema = z.object({
@@ -131,16 +131,18 @@ export async function getPublicMates(search: SearchInput): Promise<DirectoryResu
   }
 }
 
-export async function getPublicMate(id: number): Promise<PublicMateDetail | null> {
-  if (!Number.isSafeInteger(id) || id <= 0) return null;
+export async function getPublicMate(id: number): Promise<{ mate: PublicMateDetail | null; error: boolean }> {
+  if (!Number.isSafeInteger(id) || id <= 0) return { mate: null, error: false };
   try {
     const response = await requestBackend({
       path: `mates/${id}`,
       responseSchema: detailResponseSchema,
     });
-    return response.mate;
-  } catch {
-    return null;
+    return { mate: response.mate, error: false };
+  } catch (error) {
+    if (error instanceof BackendClientError && error.details.status === 404)
+      return { mate: null, error: false };
+    return { mate: null, error: true };
   }
 }
 

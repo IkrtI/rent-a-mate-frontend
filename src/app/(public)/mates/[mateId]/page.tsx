@@ -10,21 +10,40 @@ type Props = { params: Promise<{ mateId: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { mateId } = await params;
-  const mate = await getPublicMate(Number(mateId));
+  const { mate } = await getPublicMate(Number(mateId));
   return mate
     ? {
         title: `${mate.user.name} — Mate profile`,
         description:
           mate.bio ??
           `Meet ${mate.user.name}, a local mate in ${mate.district.name}, ${mate.province.name}.`,
-        robots: { index: true, follow: true },
+        openGraph: {
+          title: `${mate.user.name} — Mate profile`,
+          description:
+            mate.bio ?? `Meet ${mate.user.name}, a local mate in ${mate.district.name}, ${mate.province.name}.`,
+          type: "profile",
+        },
+        robots: { index: false, follow: true },
       }
     : { title: "Mate profile not found", robots: { index: false, follow: false } };
 }
 
 export default async function MateProfilePage({ params }: Props) {
   const { mateId } = await params;
-  const mate = await getPublicMate(Number(mateId));
+  const { mate, error } = await getPublicMate(Number(mateId));
+  if (error)
+    return (
+      <main className="profile-page">
+        <div className="state-card profile-state" role="status">
+          <p className="eyebrow">MATE PROFILE</p>
+          <h1>This profile is taking a moment to load.</h1>
+          <p>Please try again in a moment.</p>
+          <Link className="button button-outline" href={`/mates/${mateId}`}>
+            Try again
+          </Link>
+        </div>
+      </main>
+    );
   if (!mate || !mate.isActive)
     return (
       <main className="profile-page">

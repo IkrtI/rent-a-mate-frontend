@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Safety",
   description: "Practical guidance for comfortable, respectful meetups with matefor.",
   alternates: { canonical: "/safety" },
+  openGraph: { title: "Safety", description: "Practical guidance for comfortable, respectful meetups with matefor.", url: "/safety", type: "website" },
 };
 
 const habits = [
