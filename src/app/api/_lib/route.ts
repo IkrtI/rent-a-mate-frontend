@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { ZodError, type z } from "zod";
 
 import { BackendClientError } from "@/modules/backend-client";
+import { SessionRefreshError } from "@/modules/session/refresh";
 
 export function assertSameOrigin(request: Request): void {
   const origin = request.headers.get("origin");
@@ -28,6 +29,22 @@ export class RouteError extends Error {
 }
 
 export function routeErrorResponse(error: unknown): NextResponse {
+  if (error instanceof SessionRefreshError) {
+    const status = error.isRejected ? 401 : error.status;
+    return NextResponse.json(
+      {
+        error: {
+          status,
+          code: error.isRejected ? "SESSION_EXPIRED" : "SESSION_REFRESH_UNAVAILABLE",
+          message: error.isRejected
+            ? "Your session has expired. Please sign in again."
+            : "We could not refresh your session. Please try again shortly.",
+          retryable: !error.isRejected,
+        },
+      },
+      { status },
+    );
+  }
   if (error instanceof BackendClientError) {
     return NextResponse.json({ error: error.details }, { status: error.details.status || 503 });
   }
