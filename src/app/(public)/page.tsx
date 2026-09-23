@@ -27,9 +27,6 @@ export default async function HomePage() {
     <main>
       <section className="home-hero">
         <div className="hero-copy">
-          <p className="eyebrow">
-            <span className="eyebrow-dot" /> GOOD PLANS BEGIN HERE
-          </p>
           <h1>
             Find the right
             <br />
@@ -59,9 +56,6 @@ export default async function HomePage() {
               <ArrowRight aria-hidden="true" size={18} />
             </button>
           </form>
-          <p className="trust-note">
-            <span aria-hidden="true">✦</span> Real people for plans that matter.
-          </p>
         </div>
         <div className="hero-art">
           <div className="hero-photo-main">
@@ -98,7 +92,6 @@ export default async function HomePage() {
       <section className="section activity-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">01 / MOOD OF THE DAY</p>
             <h2>
               Plans for every <em>mood.</em>
             </h2>

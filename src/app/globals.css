@@ -375,15 +375,6 @@ h2 {
   z-index: 2;
   width: min(610px, 55%);
 }
-.eyebrow-dot {
-  width: 7px;
-  height: 7px;
-  display: inline-block;
-  margin-right: 6px;
-  border-radius: 50%;
-  background: #ff5d63;
-  vertical-align: 1px;
-}
 .home-hero h1,
 .page-hero h1,
 .home-cta h2 {
@@ -393,6 +384,9 @@ h2 {
   font-weight: 500;
   letter-spacing: -0.055em;
   line-height: 0.99;
+}
+.home-hero .hero-copy > h1 {
+  margin-top: 0;
 }
 .home-hero h1 em,
 .section-heading h2 em,
@@ -438,14 +432,6 @@ h2 {
 }
 .hero-search .button {
   min-height: 48px;
-}
-.trust-note {
-  margin: 18px 0 0;
-  color: #665d58;
-  font-size: 12px;
-}
-.trust-note span {
-  color: #c7484e;
 }
 .hero-art {
   position: absolute;
@@ -540,6 +526,9 @@ h2 {
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1.05;
+}
+.activity-section .section-heading h2 {
+  margin-top: 0;
 }
 .text-link,
 .profile-link {
@@ -763,6 +752,12 @@ h2 {
   border-bottom: 1px solid #e5deda;
   background: #f5d6d0;
 }
+.page-hero-no-eyebrow {
+  padding-top: 72px;
+}
+.page-hero-no-eyebrow h1 {
+  margin-top: 0;
+}
 .page-hero-inner {
   width: min(1180px, 100%);
   margin: 0 auto;
@@ -974,7 +969,7 @@ h2 {
   text-align: center;
 }
 .directory-intro h1 {
-  margin: 10px 0;
+  margin: 0 0 10px;
   font-family: var(--font-display), Georgia, serif;
   font-size: clamp(48px, 6vw, 66px);
   font-weight: 500;

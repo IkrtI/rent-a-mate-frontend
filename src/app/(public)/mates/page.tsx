@@ -43,7 +43,6 @@ export default async function MatesPage({ searchParams }: Props) {
   return (
     <main className="directory-page">
       <section className="directory-intro">
-        <p className="eyebrow">GOOD PEOPLE, LOCAL PLANS</p>
         <h1>
           Find your <em>Mate.</em>
         </h1>
