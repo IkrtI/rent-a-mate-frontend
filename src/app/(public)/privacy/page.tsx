@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Privacy",
   description: "A clear overview of the information that supports your matefor experience.",
   alternates: { canonical: "/privacy" },
+  openGraph: { title: "Privacy", description: "A clear overview of the information that supports your matefor experience.", url: "/privacy", type: "website" },
   robots: { index: true, follow: true },
 };
 

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "How it works",
   description: "From first search to a good plan, see how matefor works.",
   alternates: { canonical: "/how-it-works" },
+  openGraph: { title: "How it works", description: "From first search to a good plan, see how matefor works.", url: "/how-it-works", type: "website" },
 };
 
 const steps = [

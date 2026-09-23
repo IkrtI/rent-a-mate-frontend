@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Terms of service",
   description: "The essential rules for using matefor as a renter or Mate.",
   alternates: { canonical: "/terms" },
+  openGraph: { title: "Terms of service", description: "The essential rules for using matefor as a renter or Mate.", url: "/terms", type: "website" },
   robots: { index: true, follow: true },
 };
 

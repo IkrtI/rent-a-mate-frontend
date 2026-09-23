@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Find your kind of company",
   description: "Meet local mates for coffee, gaming, study, the gym, and city plans.",
   alternates: { canonical: "/" },
+  openGraph: { title: "Find your kind of company", description: "Meet local mates for coffee, gaming, study, the gym, and city plans.", url: "/", type: "website" },
 };
 export const dynamic = "force-dynamic";
 

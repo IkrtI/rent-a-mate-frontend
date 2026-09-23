@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { CalendarDays, Clock3 } from "lucide-react";
 
 type Activity = { id: number; name: string };
@@ -31,7 +32,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
   const [slot, setSlot] = useState("");
   const [activityId, setActivityId] = useState(activities[0]?.id ? String(activities[0].id) : "");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [successId, setSuccessId] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const [retry, setRetry] = useState(0);
 
@@ -68,7 +69,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setSuccess("");
+    setSuccessId(null);
     if (!activityId || !slot) {
       setError("Choose an activity and an available time to continue.");
       return;
@@ -113,7 +114,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
         setError("We couldn’t confirm your request. Please try again.");
         return;
       }
-      setSuccess(`Request #${data.id} sent. It will be confirmed when the Mate accepts.`);
+      setSuccessId(data.id);
     } catch {
       setError("We couldn’t send your request. Check your connection and try again.");
     } finally {
@@ -135,7 +136,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
             setSlots([]);
             setSlot("");
             setError("");
-            setSuccess("");
+            setSuccessId(null);
           }}
           required
           type="date"
@@ -192,9 +193,10 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
           {error}
         </p>
       )}
-      {success && (
+      {successId !== null && (
         <p className="booking-success" role="status">
-          {success}
+          Request #{successId} sent. It will be confirmed when the Mate accepts. {" "}
+          <Link href={`/bookings/${successId}`}>View booking</Link>
         </p>
       )}
       {availability === "error" && (
