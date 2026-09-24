@@ -7,9 +7,10 @@ const mocks = vi.hoisted(() => {
       const value = values.get(name);
       return value === undefined ? undefined : { value };
     }),
-    set: vi.fn((name: string, value: string, _options?: Record<string, unknown>) =>
-      values.set(name, value),
-    ),
+    set: vi.fn((name: string, value: string, options?: Record<string, unknown>) => {
+      void options;
+      return values.set(name, value);
+    }),
     delete: vi.fn((name: string) => values.delete(name)),
   };
   return { values, store, cookies: vi.fn(async () => store), requestBackend: vi.fn() };
@@ -47,10 +48,10 @@ describe("BFF auth and session routes", () => {
   it("sets opaque HttpOnly session cookies at login and resolves the user through the backend", async () => {
     mocks.requestBackend.mockResolvedValueOnce({ accessToken, refreshToken, user });
     const loginResponse = await login(
-      new Request("https://test-host.invalid/api/auth/login", {
+      new Request("https://app.example.test/api/auth/login", {
         method: "POST",
         headers: {
-          origin: "https://test-host.invalid",
+          origin: "https://app.example.test",
           "content-type": "application/json",
         },
         body: JSON.stringify({ email: user.email, password: "synthetic-test-password" }),
@@ -92,9 +93,9 @@ describe("BFF auth and session routes", () => {
     mocks.requestBackend.mockResolvedValueOnce(null);
 
     const response = await logout(
-      new Request("https://test-host.invalid/api/auth/logout", {
+      new Request("https://app.example.test/api/auth/logout", {
         method: "POST",
-        headers: { origin: "https://test-host.invalid" },
+        headers: { origin: "https://app.example.test" },
       }),
     );
 

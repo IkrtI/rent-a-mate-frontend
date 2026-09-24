@@ -6,10 +6,7 @@ RUN npm ci
 COPY . .
 
 ARG BACKEND_URL=http://192.168.1.161:3002/api/v1
-ARG NEXT_PUBLIC_APP_URL=https://test-host.invalid
 ENV BACKEND_URL=$BACKEND_URL
-ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-ENV APP_ORIGIN=https://test-host.invalid
 ENV SESSION_COOKIE_SECURE=true
 RUN npm run build
 

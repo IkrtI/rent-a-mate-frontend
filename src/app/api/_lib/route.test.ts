@@ -26,11 +26,11 @@ describe("assertSameOrigin", () => {
   });
 
   it("accepts the public HTTPS origin behind an HTTP tunnel", () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://test-host.invalid");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://app.example.test");
     const request = (origin: string) =>
-      new Request("http://test-host.invalid/api/auth/login", { headers: { origin } });
+      new Request("http://app.example.test/api/auth/login", { headers: { origin } });
 
-    expect(() => assertSameOrigin(request("https://test-host.invalid"))).not.toThrow();
+    expect(() => assertSameOrigin(request("https://app.example.test"))).not.toThrow();
     expect(() => assertSameOrigin(request("https://other.example"))).toThrow(RouteError);
   });
 
@@ -40,21 +40,21 @@ describe("assertSameOrigin", () => {
       new Request("http://internal-app:3000/api/auth/login", {
         headers: {
           origin,
-          "x-forwarded-host": "test-host.invalid",
+          "x-forwarded-host": "app.example.test",
           "x-forwarded-proto": "https",
         },
       });
 
-    expect(() => assertSameOrigin(request("https://test-host.invalid"))).not.toThrow();
+    expect(() => assertSameOrigin(request("https://app.example.test"))).not.toThrow();
     expect(() => assertSameOrigin(request("https://other.example"))).toThrow(RouteError);
   });
 
   it("uses the explicit public origin configured for the deployment", () => {
-    vi.stubEnv("APP_ORIGIN", "https://test-host.invalid");
+    vi.stubEnv("APP_ORIGIN", "https://configured.example.test");
     const request = (origin: string) =>
       new Request("http://internal-app:3000/api/auth/login", { headers: { origin } });
 
-    expect(() => assertSameOrigin(request("https://test-host.invalid"))).not.toThrow();
+    expect(() => assertSameOrigin(request("https://configured.example.test"))).not.toThrow();
     expect(() => assertSameOrigin(request("https://other.example"))).toThrow(RouteError);
   });
 });
