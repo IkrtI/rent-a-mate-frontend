@@ -31,6 +31,8 @@ export function LoginForm() {
     formState: { errors, isSubmitting },
   } = useForm<Values>({
     resolver: zodResolver(schema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: { email: searchParams.get("email") ?? "", password: "" },
   });
 
@@ -74,18 +76,26 @@ export function LoginForm() {
         </p>
       ) : null}
       <form className="mt-7 grid gap-5" onSubmit={onSubmit} noValidate>
-        <Field label="Email address" error={errors.email?.message}>
+        <Field id="login-email" label="Email address" error={errors.email?.message}>
           <input
+            aria-describedby={errors.email ? "login-email-error" : undefined}
+            aria-invalid={Boolean(errors.email)}
             autoComplete="email"
             className={inputClassName}
+            id="login-email"
+            required
             type="email"
             {...registerField("email")}
           />
         </Field>
-        <Field label="Password" error={errors.password?.message}>
+        <Field id="login-password" label="Password" error={errors.password?.message}>
           <input
+            aria-describedby={errors.password ? "login-password-error" : undefined}
+            aria-invalid={Boolean(errors.password)}
             autoComplete="current-password"
             className={inputClassName}
+            id="login-password"
+            required
             type="password"
             {...registerField("password")}
           />

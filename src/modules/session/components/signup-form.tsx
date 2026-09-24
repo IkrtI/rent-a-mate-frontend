@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { register, SessionRequestError } from "../client";
@@ -17,6 +17,7 @@ const schema = z
     email: z.string().trim().email("Enter a valid email address."),
     password: z.string().min(8, "Password must be at least 8 characters."),
     confirmPassword: z.string(),
+    acceptPolicies: z.boolean().refine(Boolean, "Please accept the Terms and Privacy Policy."),
   })
   .refine((value) => value.password === value.confirmPassword, {
     message: "Passwords do not match.",
@@ -32,11 +33,26 @@ export function SignupForm() {
   const {
     register: registerField,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    control,
+    trigger,
+    formState: { errors, isSubmitting, touchedFields },
   } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      acceptPolicies: false,
+    },
   });
+  const password = useWatch({ control, name: "password" });
+
+  useEffect(() => {
+    if (touchedFields.confirmPassword) void trigger("confirmPassword");
+  }, [password, touchedFields.confirmPassword, trigger]);
 
   const onSubmit = handleSubmit(async (values) => {
     setMessage(null);
@@ -77,6 +93,7 @@ export function SignupForm() {
             ] as const
           ).map(([value, title, description]) => (
             <button
+              aria-pressed={role === value}
               className={`flex min-h-24 items-start gap-3 rounded-md border p-4 text-left transition-colors ${
                 role === value
                   ? "border-[#ff5c67] bg-[#fff0f1]"
@@ -129,33 +146,105 @@ export function SignupForm() {
         Create your account.
       </h2>
       <form className="mt-7 grid gap-4" onSubmit={onSubmit} noValidate>
-        <Field label="Full name" error={errors.name?.message}>
-          <input autoComplete="name" className={inputClassName} {...registerField("name")} />
-        </Field>
-        <Field label="Email address" error={errors.email?.message}>
+        <Field id="signup-name" label="Full name" error={errors.name?.message}>
           <input
+            aria-describedby={errors.name ? "signup-name-error" : undefined}
+            aria-invalid={Boolean(errors.name)}
+            autoComplete="name"
+            className={inputClassName}
+            id="signup-name"
+            required
+            {...registerField("name")}
+          />
+        </Field>
+        <Field id="signup-email" label="Email address" error={errors.email?.message}>
+          <input
+            aria-describedby={errors.email ? "signup-email-error" : undefined}
+            aria-invalid={Boolean(errors.email)}
             autoComplete="email"
             className={inputClassName}
+            id="signup-email"
+            required
             type="email"
             {...registerField("email")}
           />
         </Field>
-        <Field label="Password" error={errors.password?.message}>
+        <Field
+          id="signup-password"
+          label="Password"
+          error={errors.password?.message}
+          hint="At least 8 characters."
+        >
           <input
+            aria-describedby={errors.password ? "signup-password-error" : "signup-password-hint"}
+            aria-invalid={Boolean(errors.password)}
             autoComplete="new-password"
             className={inputClassName}
+            id="signup-password"
+            required
             type="password"
             {...registerField("password")}
           />
         </Field>
-        <Field label="Confirm password" error={errors.confirmPassword?.message}>
+        <Field
+          id="signup-confirm-password"
+          label="Confirm password"
+          error={errors.confirmPassword?.message}
+        >
           <input
+            aria-describedby={errors.confirmPassword ? "signup-confirm-password-error" : undefined}
+            aria-invalid={Boolean(errors.confirmPassword)}
             autoComplete="new-password"
             className={inputClassName}
+            id="signup-confirm-password"
+            required
             type="password"
             {...registerField("confirmPassword")}
           />
         </Field>
+        <div className="grid gap-2">
+          <div className="flex items-start gap-3 text-sm leading-5 text-neutral-700">
+            <input
+              aria-describedby={errors.acceptPolicies ? "signup-policies-error" : undefined}
+              aria-invalid={Boolean(errors.acceptPolicies)}
+              aria-labelledby="signup-policies-label"
+              className="mt-0.5 size-4 shrink-0 accent-[#ff5c67]"
+              id="signup-policies"
+              type="checkbox"
+              {...registerField("acceptPolicies")}
+            />
+            <span id="signup-policies-label">
+              I agree to the{" "}
+              <Link
+                className="font-semibold text-[#e34b58] underline"
+                href="/terms"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Terms
+              </Link>{" "}
+              and{" "}
+              <Link
+                className="font-semibold text-[#e34b58] underline"
+                href="/privacy"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </span>
+          </div>
+          {errors.acceptPolicies ? (
+            <span
+              className="text-xs font-medium text-red-600"
+              id="signup-policies-error"
+              role="alert"
+            >
+              {errors.acceptPolicies.message}
+            </span>
+          ) : null}
+        </div>
         {message ? (
           <p className="text-sm text-red-600" role="alert">
             {message}
@@ -165,9 +254,6 @@ export function SignupForm() {
           {isSubmitting ? "Creating account..." : "Create account"}
         </button>
       </form>
-      <p className="mt-4 text-center text-xs leading-5 text-neutral-500">
-        By continuing, you agree to our Terms and Privacy Policy.
-      </p>
     </div>
   );
 }
