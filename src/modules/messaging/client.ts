@@ -11,10 +11,10 @@ export function listMessages(bookingId: number) {
   return requestSameOrigin(`/api/bookings/${bookingId}/messages?limit=100`, messagePageSchema);
 }
 
-export function sendMessage(bookingId: number, content: string) {
+export function sendMessage(bookingId: number, content: string, clientMessageId: string) {
   return requestSameOrigin(`/api/bookings/${bookingId}/messages`, messageSchema, {
     method: "POST",
-    body: JSON.stringify(sendMessageSchema.parse({ content })),
+    body: JSON.stringify(sendMessageSchema.parse({ clientMessageId, content })),
   });
 }
 

@@ -4,7 +4,11 @@ import { sendMessageSchema } from "./schemas";
 
 describe("sendMessageSchema", () => {
   it("trims a message and rejects empty content", () => {
-    expect(sendMessageSchema.parse({ content: "  hello  " })).toEqual({ content: "hello" });
-    expect(() => sendMessageSchema.parse({ content: "   " })).toThrow();
+    const clientMessageId = "fd3b5666-9e9d-49d9-a843-098bebf786db";
+    expect(sendMessageSchema.parse({ clientMessageId, content: "  hello  " })).toEqual({
+      clientMessageId,
+      content: "hello",
+    });
+    expect(() => sendMessageSchema.parse({ clientMessageId, content: "   " })).toThrow();
   });
 });

@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Send } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { listBookings } from "@/modules/booking/client";
 import { formatBookingDate } from "@/modules/booking/format";
@@ -16,6 +16,7 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const pendingMessageRef = useRef<{ bookingId: number; id: string } | null>(null);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const bookings = useQuery({
     queryKey: ["bookings", "conversations"],
@@ -48,9 +49,11 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     refetchInterval: realtime.status === "connected" ? false : 10_000,
   });
   const send = useMutation({
-    mutationFn: () => sendMessage(selectedBookingId!, content),
+    mutationFn: (input: { content: string; clientMessageId: string }) =>
+      sendMessage(selectedBookingId!, input.content, input.clientMessageId),
     onSuccess: async (message) => {
       mergeMessage(message);
+      pendingMessageRef.current = null;
       setContent("");
       setError(null);
       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -174,7 +177,15 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
               className="border-t border-neutral-200 p-3"
               onSubmit={(event) => {
                 event.preventDefault();
-                if (content.trim()) send.mutate();
+                if (content.trim() && selectedBookingId) {
+                  if (pendingMessageRef.current?.bookingId !== selectedBookingId) {
+                    pendingMessageRef.current = {
+                      bookingId: selectedBookingId,
+                      id: crypto.randomUUID(),
+                    };
+                  }
+                  send.mutate({ content, clientMessageId: pendingMessageRef.current.id });
+                }
               }}
             >
               <div className="flex items-end gap-2 rounded-md bg-neutral-100 p-2">
@@ -185,7 +196,10 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                   className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none"
                   id="message-content"
                   maxLength={2000}
-                  onChange={(event) => setContent(event.target.value)}
+                  onChange={(event) => {
+                    pendingMessageRef.current = null;
+                    setContent(event.target.value);
+                  }}
                   placeholder="Write a message..."
                   rows={1}
                   value={content}
