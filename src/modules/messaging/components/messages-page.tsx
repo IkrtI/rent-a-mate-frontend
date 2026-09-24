@@ -9,6 +9,8 @@ import { listBookings } from "@/modules/booking/client";
 import { formatBookingDate } from "@/modules/booking/format";
 import { getSession } from "@/modules/session/client";
 import { listMessages, sendMessage } from "../client";
+import { RealtimeSendError, useBookingRealtime } from "../realtime";
+import type { MessagePage } from "../schemas";
 
 export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number }) {
   const queryClient = useQueryClient();
@@ -19,14 +21,36 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     queryKey: ["bookings", "conversations"],
     queryFn: () => listBookings({ limit: 100 }),
   });
+  const realtime = useBookingRealtime(selectedBookingId, (message) => {
+    queryClient.setQueryData<MessagePage>(["messages", selectedBookingId], (current) => {
+      if (!current || current.items.some((item) => item.id === message.id)) return current;
+      return {
+        ...current,
+        items: [...current.items, message],
+        meta: { ...current.meta, total: current.meta.total + 1 },
+      };
+    });
+  });
   const messages = useQuery({
     queryKey: ["messages", selectedBookingId],
     queryFn: () => listMessages(selectedBookingId!),
     enabled: selectedBookingId !== undefined,
-    refetchInterval: 10_000,
+    refetchInterval: realtime.status === "connected" ? false : 10_000,
   });
   const send = useMutation({
-    mutationFn: () => sendMessage(selectedBookingId!, content),
+    mutationFn: async () => {
+      if (realtime.status === "connected") {
+        try {
+          await realtime.send(content);
+          return;
+        } catch (sendError) {
+          if (!(sendError instanceof RealtimeSendError) || !sendError.canFallBackToRest) {
+            throw sendError;
+          }
+        }
+      }
+      await sendMessage(selectedBookingId!, content);
+    },
     onSuccess: async () => {
       setContent("");
       setError(null);
@@ -103,6 +127,13 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
               {selected ? (
                 <p className="mt-1 text-xs text-neutral-500">{selected.activity.name}</p>
               ) : null}
+              <p className="mt-2 text-xs text-neutral-500" role="status">
+                {realtime.status === "connected"
+                  ? "Live updates connected"
+                  : realtime.status === "connecting"
+                    ? "Connecting live updates…"
+                    : "Live updates unavailable — using refresh fallback"}
+              </p>
             </div>
             <div className="flex flex-1 flex-col justify-end gap-3 overflow-y-auto bg-[#fffdfc] p-5">
               {messages.isPending ? (

@@ -5,8 +5,13 @@ import { requestSameOrigin } from "@/modules/backend-client/browser";
 import {
   bookingPageSchema,
   bookingSchema,
+  createPaymentSchema,
   createBookingInputSchema,
   createBookingResultSchema,
+  paymentPageSchema,
+  paymentSchema,
+  reviewInputSchema,
+  reviewSchema,
   type BookingStatus,
 } from "./schemas";
 
@@ -39,4 +44,40 @@ export function updateBooking(
     bookingSchema.partial().required({ id: true, status: true }),
     { method: "PATCH" },
   );
+}
+
+export function createReview(bookingId: number, input: unknown) {
+  return requestSameOrigin(`/api/bookings/${bookingId}/review`, reviewSchema, {
+    method: "POST",
+    body: JSON.stringify(reviewInputSchema.parse(input)),
+  });
+}
+
+export function updateReview(reviewId: number, input: unknown) {
+  return requestSameOrigin(`/api/reviews/${reviewId}`, reviewSchema, {
+    method: "PATCH",
+    body: JSON.stringify(reviewInputSchema.parse(input)),
+  });
+}
+
+export function deleteReview(reviewId: number) {
+  return requestSameOrigin(`/api/reviews/${reviewId}`, reviewSchema.pick({ id: true }), {
+    method: "DELETE",
+  });
+}
+
+export function getPayment(bookingId: number) {
+  return requestSameOrigin(`/api/bookings/${bookingId}/payment`, paymentSchema);
+}
+
+export function createPayment(bookingId: number) {
+  return requestSameOrigin(`/api/bookings/${bookingId}/payment`, createPaymentSchema, {
+    method: "POST",
+  });
+}
+
+export function listPayments(input: { page?: number; limit?: number } = {}) {
+  const query = new URLSearchParams({ limit: String(input.limit ?? 20) });
+  if (input.page) query.set("page", String(input.page));
+  return requestSameOrigin(`/api/payments?${query}`, paymentPageSchema);
 }

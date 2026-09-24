@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   CalendarDays,
+  CreditCard,
   LayoutDashboard,
   LogOut,
   MessageCircle,
@@ -21,6 +22,7 @@ import { getSession, logout } from "../client";
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
+  { href: "/payments", label: "Payments", icon: CreditCard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
 ];
 
@@ -112,7 +114,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
       </header>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</div>
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-neutral-200 bg-white md:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-neutral-200 bg-white md:hidden"
         aria-label="Mobile navigation"
       >
         {navigation.map(({ href, label, icon: Icon }) => (

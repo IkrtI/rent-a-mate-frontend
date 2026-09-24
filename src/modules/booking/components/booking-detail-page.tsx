@@ -8,6 +8,8 @@ import { useState } from "react";
 import { getSession } from "@/modules/session/client";
 import { getBooking, updateBooking } from "../client";
 import { formatBookingDate, formatBookingTime, formatPrice } from "../format";
+import { BookingPayment } from "./booking-payment";
+import { BookingReview } from "./booking-review";
 import { StatusBadge } from "./status-badge";
 
 export function BookingDetailPage({ bookingId }: { bookingId: number }) {
@@ -42,9 +44,13 @@ export function BookingDetailPage({ bookingId }: { bookingId: number }) {
 
   const item = booking.data;
   const isMate = session.data?.user.role === "mate";
+  const isRenter = session.data?.user.id === item.renter.id;
   const canRespond = isMate && item.status === "pending";
-  const canCancel = item.status === "pending" || item.status === "confirmed";
+  const canCancel =
+    (isMate || isRenter) && (item.status === "pending" || item.status === "confirmed");
   const canComplete = isMate && item.status === "confirmed";
+  const canReview = isRenter && item.status === "completed";
+  const canPay = isRenter && item.status === "confirmed";
 
   return (
     <main className="pb-24">
@@ -104,6 +110,7 @@ export function BookingDetailPage({ bookingId }: { bookingId: number }) {
               <MessageCircle aria-hidden size={17} /> Open conversation
             </Link>
           ) : null}
+          <BookingReview booking={item} canManage={canReview} />
         </section>
         <aside className="h-fit rounded-md border border-neutral-200 bg-white p-5 shadow-sm">
           <p className="text-xs text-neutral-500">Total</p>
@@ -155,6 +162,7 @@ export function BookingDetailPage({ bookingId }: { bookingId: number }) {
               {message}
             </p>
           ) : null}
+          <BookingPayment bookingId={item.id} canPay={canPay} />
         </aside>
       </div>
     </main>
