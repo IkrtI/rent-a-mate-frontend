@@ -33,6 +33,21 @@ describe("assertSameOrigin", () => {
     expect(() => assertSameOrigin(request("https://test-host.invalid"))).not.toThrow();
     expect(() => assertSameOrigin(request("https://other.example"))).toThrow(RouteError);
   });
+
+  it("uses forwarded host and protocol when a reverse proxy changes the request origin", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://internal-app:3000");
+    const request = (origin: string) =>
+      new Request("http://internal-app:3000/api/auth/login", {
+        headers: {
+          origin,
+          "x-forwarded-host": "test-host.invalid",
+          "x-forwarded-proto": "https",
+        },
+      });
+
+    expect(() => assertSameOrigin(request("https://test-host.invalid"))).not.toThrow();
+    expect(() => assertSameOrigin(request("https://other.example"))).toThrow(RouteError);
+  });
 });
 
 describe("routeErrorResponse", () => {

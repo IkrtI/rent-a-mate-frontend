@@ -8,11 +8,16 @@ import { SessionRefreshError } from "@/modules/session/refresh";
 
 export function assertSameOrigin(request: Request): void {
   const origin = request.headers.get("origin");
-  // A tunnel can terminate HTTPS before forwarding the request over HTTP.
-  // Compare with the configured browser origin instead of the internal URL.
-  const expectedOrigin = process.env.NEXT_PUBLIC_APP_URL
+  // Reverse proxies can terminate HTTPS and forward an internal HTTP request.
+  // Prefer the externally visible origin forwarded by the trusted proxy.
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const forwardedProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const forwardedOrigin =
+    forwardedHost && forwardedProtocol ? `${forwardedProtocol}://${forwardedHost}` : undefined;
+  const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL
     ? new URL(process.env.NEXT_PUBLIC_APP_URL).origin
-    : new URL(request.url).origin;
+    : undefined;
+  const expectedOrigin = forwardedOrigin ?? configuredOrigin ?? new URL(request.url).origin;
   if (origin && origin !== expectedOrigin) {
     throw new RouteError(403, "CROSS_ORIGIN_REQUEST", "Cross-origin request rejected.");
   }
