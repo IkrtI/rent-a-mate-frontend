@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { assertSameOrigin, RouteError } from "./route";
 import { SessionRefreshError } from "@/modules/session/refresh";
 import { routeErrorResponse } from "./route";
 
 describe("assertSameOrigin", () => {
+  afterEach(() => vi.unstubAllEnvs());
+
   it("accepts same-origin and rejects cross-origin mutations", () => {
     expect(() =>
       assertSameOrigin(
@@ -21,6 +23,15 @@ describe("assertSameOrigin", () => {
         }),
       ),
     ).toThrow(RouteError);
+  });
+
+  it("accepts the public HTTPS origin behind an HTTP tunnel", () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://test-host.invalid");
+    const request = (origin: string) =>
+      new Request("http://test-host.invalid/api/auth/login", { headers: { origin } });
+
+    expect(() => assertSameOrigin(request("https://test-host.invalid"))).not.toThrow();
+    expect(() => assertSameOrigin(request("https://other.example"))).toThrow(RouteError);
   });
 });
 
