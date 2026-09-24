@@ -64,8 +64,9 @@ export async function requireAdminPage(): Promise<AdminContext> {
     return await getAdminContext();
   } catch (error) {
     if (error instanceof AdminAccessError) {
-      const reason = error.status === 403 ? "forbidden" : "session";
-      redirect(`/admin/login?reason=${reason}`);
+      const params = new URLSearchParams({ returnTo: "/admin" });
+      if (error.status === 403) params.set("reason", "forbidden");
+      redirect(`/login?${params.toString()}`);
     }
     throw error;
   }

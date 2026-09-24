@@ -101,12 +101,6 @@ export const adminIdentitySchema = z.object({
   }),
 });
 
-export const adminLoginSchema = z.object({
-  accessToken: z.string().min(1),
-  refreshToken: z.string().min(1),
-  user: z.object({ id: z.number(), name: z.string(), role: z.enum(["admin", "mate", "renter"]) }),
-});
-
 export type AdminUser = z.infer<typeof adminUserSchema>;
 export type AdminReport = z.infer<typeof adminReportSchema>;
 export type AdminBooking = z.infer<typeof adminBookingSchema>;

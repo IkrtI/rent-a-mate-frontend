@@ -14,6 +14,7 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
+import { logout as endSession } from "@/modules/session/client";
 
 type AdminIdentity = { id: number; name: string; email: string; role: "admin" };
 
@@ -34,9 +35,9 @@ export function AdminShell({ user, children }: { user: AdminIdentity; children: 
   async function logout() {
     setLoggingOut(true);
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
+      await endSession();
     } finally {
-      router.replace("/admin/login");
+      router.replace("/login?returnTo=%2Fadmin");
       router.refresh();
     }
   }

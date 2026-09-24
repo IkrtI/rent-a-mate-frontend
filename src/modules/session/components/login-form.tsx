@@ -20,7 +20,11 @@ type Values = z.infer<typeof schema>;
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(
+    searchParams.get("reason") === "forbidden"
+      ? "This account does not have administrator access. Sign in with an Admin account."
+      : null,
+  );
   const {
     register: registerField,
     handleSubmit,
@@ -33,8 +37,15 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (values) => {
     setMessage(null);
     try {
-      await login(values);
-      router.replace(safeReturnTo(searchParams.get("returnTo")));
+      const { user } = await login(values);
+      const requestedDestination = searchParams.get("returnTo");
+      router.replace(
+        requestedDestination
+          ? safeReturnTo(requestedDestination)
+          : user.role === "admin"
+            ? "/admin"
+            : "/dashboard",
+      );
       router.refresh();
     } catch (error) {
       setMessage(
