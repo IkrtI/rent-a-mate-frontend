@@ -9,8 +9,8 @@ import { listBookings } from "@/modules/booking/client";
 import { formatBookingDate } from "@/modules/booking/format";
 import { getSession } from "@/modules/session/client";
 import { listMessages, sendMessage } from "../client";
-import { RealtimeSendError, useBookingRealtime } from "../realtime";
-import type { MessagePage } from "../schemas";
+import { useBookingRealtime } from "../realtime";
+import type { Message, MessagePage } from "../schemas";
 
 export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number }) {
   const queryClient = useQueryClient();
@@ -21,7 +21,7 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     queryKey: ["bookings", "conversations"],
     queryFn: () => listBookings({ limit: 100 }),
   });
-  const realtime = useBookingRealtime(selectedBookingId, (message) => {
+  const mergeMessage = (message: Message) => {
     queryClient.setQueryData<MessagePage>(["messages", selectedBookingId], (current) => {
       if (!current || current.items.some((item) => item.id === message.id)) return current;
       return {
@@ -30,7 +30,17 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
         meta: { ...current.meta, total: current.meta.total + 1 },
       };
     });
-  });
+  };
+  const realtime = useBookingRealtime(
+    selectedBookingId,
+    (message) => {
+      mergeMessage(message);
+      void queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
+    },
+    () => {
+      void queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
+    },
+  );
   const messages = useQuery({
     queryKey: ["messages", selectedBookingId],
     queryFn: () => listMessages(selectedBookingId!),
@@ -38,32 +48,15 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     refetchInterval: realtime.status === "connected" ? false : 10_000,
   });
   const send = useMutation({
-    mutationFn: async () => {
-      if (realtime.status === "connected") {
-        try {
-          await realtime.send(content);
-          return;
-        } catch (sendError) {
-          if (!(sendError instanceof RealtimeSendError) || !sendError.canFallBackToRest) {
-            throw sendError;
-          }
-        }
-      }
-      await sendMessage(selectedBookingId!, content);
-    },
-    onSuccess: async () => {
+    mutationFn: () => sendMessage(selectedBookingId!, content),
+    onSuccess: async (message) => {
+      mergeMessage(message);
       setContent("");
       setError(null);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] }),
-        queryClient.invalidateQueries({ queryKey: ["notifications"] }),
-      ]);
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
-    onError: async (sendError) => {
+    onError: (sendError) => {
       setError(sendError instanceof Error ? sendError.message : "The message could not be sent.");
-      if (sendError instanceof RealtimeSendError) {
-        await queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
-      }
     },
   });
 
