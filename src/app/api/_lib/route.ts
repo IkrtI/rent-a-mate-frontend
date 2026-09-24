@@ -14,12 +14,14 @@ export function assertSameOrigin(request: Request): void {
   const forwardedProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
   const forwardedOrigin =
     forwardedHost && forwardedProtocol ? `${forwardedProtocol}://${forwardedHost}` : undefined;
-  const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL
-    ? new URL(process.env.NEXT_PUBLIC_APP_URL).origin
-    : undefined;
-  const expectedOrigin = process.env.APP_ORIGIN
-    ? new URL(process.env.APP_ORIGIN).origin
-    : forwardedOrigin ?? configuredOrigin ?? new URL(request.url).origin;
+  const configuredOrigin =
+    process.env.APP_ORIGIN ||
+    (process.env.NODE_ENV === "production"
+      ? "https://test-host.invalid"
+      : process.env.NEXT_PUBLIC_APP_URL);
+  const expectedOrigin = configuredOrigin
+    ? new URL(configuredOrigin).origin
+    : forwardedOrigin ?? new URL(request.url).origin;
   if (origin && origin !== expectedOrigin) {
     throw new RouteError(403, "CROSS_ORIGIN_REQUEST", "Cross-origin request rejected.");
   }

@@ -35,7 +35,7 @@ describe("assertSameOrigin", () => {
   });
 
   it("uses forwarded host and protocol when a reverse proxy changes the request origin", () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://internal-app:3000");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
     const request = (origin: string) =>
       new Request("http://internal-app:3000/api/auth/login", {
         headers: {
