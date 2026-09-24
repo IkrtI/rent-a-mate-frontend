@@ -25,6 +25,8 @@ type ProfileProps = {
   interests: Lookup[];
   provinces: Lookup[];
   districts: Lookup[];
+  lookupError: boolean;
+  loadError: boolean;
 };
 function errorText(error: unknown) {
   return error instanceof BrowserClientError
@@ -41,6 +43,7 @@ export function ProfileEditor({
   interests,
   provinces,
   districts: initialDistricts,
+  lookupError,
 }: ProfileProps) {
   const [provinceId, setProvinceId] = useState(String(mate?.province.id ?? ""));
   const [districts, setDistricts] = useState(initialDistricts);
@@ -78,7 +81,7 @@ export function ProfileEditor({
     try {
       const body = JSON.stringify(input);
       await requestSameOrigin(
-        "/api/mates/me",
+        mate ? "/api/mates/me" : "/api/mates",
         mateResultSchema,
         mate ? { method: "PATCH", body } : { method: "POST", body },
       );
@@ -107,6 +110,11 @@ export function ProfileEditor({
   return (
     <section className="mx-auto max-w-3xl rounded-2xl border border-rose-100 bg-white p-6 shadow-sm sm:p-8">
       <form className="grid gap-5 sm:grid-cols-2" onSubmit={submit}>
+        {lookupError && (
+          <p className="text-sm text-amber-800 sm:col-span-2" role="alert">
+            Some profile options could not load. Retry this page before changing your profile.
+          </p>
+        )}
         <label className="grid gap-2 text-sm font-semibold">
           Age
           <input
@@ -226,7 +234,7 @@ export function ProfileEditor({
         <div className="flex flex-wrap gap-3 sm:col-span-2">
           <button
             className="button"
-            disabled={busy || (mate !== null && !mate.isActive)}
+            disabled={busy || lookupError || (mate !== null && !mate.isActive)}
             type="submit"
           >
             {busy ? "Saving…" : mate ? "Save profile" : "Create profile"}

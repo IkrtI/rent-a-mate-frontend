@@ -38,7 +38,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
 
   useEffect(() => {
     const controller = new AbortController();
-    void fetch(`/api/v1/mates/${mateId}/availability?date=${encodeURIComponent(date)}`, {
+    void fetch(`/api/mates/${mateId}/availability?date=${encodeURIComponent(date)}`, {
       signal: controller.signal,
     })
       .then(async (response) => {

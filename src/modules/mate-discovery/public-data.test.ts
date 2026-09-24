@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildMateSearchParams } from "./public-data";
+import { buildMateSearchParams, isValidCalendarDate } from "./public-data";
 
 describe("buildMateSearchParams", () => {
   it("keeps repeated lookup filters and the documented discovery fields", () => {
@@ -58,5 +58,13 @@ describe("buildMateSearchParams", () => {
     expect(params.has("availableDate")).toBe(false);
     expect(params.get("sort")).toBe("-createdAt");
     expect(params.get("page")).toBe("1");
+  });
+
+  it("rejects impossible calendar dates while accepting leap days", () => {
+    expect(isValidCalendarDate("2026-02-31")).toBe(false);
+    expect(isValidCalendarDate("2024-02-29")).toBe(true);
+    expect(
+      buildMateSearchParams({ availableDate: "2026-02-31" }, "2026-01-01").has("availableDate"),
+    ).toBe(false);
   });
 });

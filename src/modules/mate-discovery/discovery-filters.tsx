@@ -7,6 +7,7 @@ type Props = {
   activities: Lookup[];
   interests: Lookup[];
   provinces: Lookup[];
+  lookupError: boolean;
   search: Record<string, string | string[] | undefined>;
 };
 
@@ -17,8 +18,9 @@ function selected(value: string | string[] | undefined) {
   return (Array.isArray(value) ? value : value ? [value] : []).map(String);
 }
 
-export function DiscoveryFilters({ activities, interests, provinces, search }: Props) {
+export function DiscoveryFilters({ activities, interests, provinces, lookupError, search }: Props) {
   const [districts, setDistricts] = useState<Lookup[]>([]);
+  const [districtError, setDistrictError] = useState(false);
   const provinceId = first(search.provinceId);
   useEffect(() => {
     if (!provinceId) return;
@@ -31,13 +33,21 @@ export function DiscoveryFilters({ activities, interests, provinces, search }: P
       )
       .then((payload: { items?: Lookup[] }) => setDistricts(payload.items ?? []))
       .catch(() => {
-        if (!controller.signal.aborted) setDistricts([]);
+        if (!controller.signal.aborted) {
+          setDistricts([]);
+          setDistrictError(true);
+        }
       });
     return () => controller.abort();
   }, [provinceId]);
 
   return (
     <form action="/mates" className="filter-bar">
+      {(lookupError || districtError) && (
+        <p className="text-sm text-amber-800" role="status">
+          Some filter options could not load. You can still search with the options available.
+        </p>
+      )}
       <label className="directory-search">
         <span className="sr-only">Search mates</span>
         <input

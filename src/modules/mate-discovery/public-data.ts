@@ -62,6 +62,7 @@ export type DiscoveryLookups = {
   activities: { id: number; name: string }[];
   interests: { id: number; name: string }[];
   provinces: { id: number; name: string }[];
+  error: boolean;
 };
 export type PublicMateDetail = z.infer<typeof publicDetailSchema>;
 export type DirectoryResult = {
@@ -90,13 +91,21 @@ export async function getDiscoveryLookups(): Promise<DiscoveryLookups> {
   const results = await Promise.all(
     endpoints.map(async (path) => {
       try {
-        return (await requestBackend({ path, responseSchema: resultSchema })).items;
+        return {
+          items: (await requestBackend({ path, responseSchema: resultSchema })).items,
+          error: false,
+        };
       } catch {
-        return [];
+        return { items: [], error: true };
       }
     }),
   );
-  return { activities: results[0], interests: results[1], provinces: results[2] };
+  return {
+    activities: results[0].items,
+    interests: results[1].items,
+    provinces: results[2].items,
+    error: results.some((result) => result.error),
+  };
 }
 
 function first(value: string | string[] | undefined) {
@@ -108,6 +117,15 @@ function values(value: string | string[] | undefined) {
 }
 
 const sortValues = ["rating", "-rating", "rate", "-rate", "createdAt", "-createdAt"] as const;
+
+export function isValidCalendarDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
+  );
+}
 
 export function buildMateSearchParams(search: SearchInput, today = bangkokToday()) {
   const params = new URLSearchParams();
@@ -148,7 +166,7 @@ export function buildMateSearchParams(search: SearchInput, today = bangkokToday(
   if (districtId && provinceId && /^[1-9]\d*$/.test(districtId))
     params.set("districtId", String(Number(districtId)));
   const availableDate = first(search.availableDate);
-  if (availableDate && /^\d{4}-\d{2}-\d{2}$/.test(availableDate) && availableDate >= today)
+  if (availableDate && isValidCalendarDate(availableDate) && availableDate >= today)
     params.set("availableDate", availableDate);
   if (query) params.set("q", query);
   params.set("sort", sort);

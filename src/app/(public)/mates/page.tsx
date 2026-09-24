@@ -4,7 +4,11 @@ import type { Metadata } from "next";
 import { ArrowLeft, ArrowRight, Star } from "lucide-react";
 
 import { DiscoveryFilters } from "@/modules/mate-discovery/discovery-filters";
-import { getDiscoveryLookups, getPublicMates } from "@/modules/mate-discovery/public-data";
+import {
+  buildMateSearchParams,
+  getDiscoveryLookups,
+  getPublicMates,
+} from "@/modules/mate-discovery/public-data";
 
 export const metadata: Metadata = {
   title: "Find a Mate",
@@ -29,10 +33,26 @@ export default async function MatesPage({ searchParams }: Props) {
   const search = await searchParams;
   const [result, lookups] = await Promise.all([getPublicMates(search), getDiscoveryLookups()]);
   const q = Array.isArray(search.q) ? search.q[0] : (search.q ?? "");
+  const normalized = buildMateSearchParams(search);
   const filterParams = new URLSearchParams();
-  for (const [key, value] of Object.entries(search)) {
-    if (key === "page" || value === undefined) continue;
-    for (const entry of Array.isArray(value) ? value : [value]) filterParams.append(key, entry);
+  const filterKeys = [
+    "q",
+    "activityId",
+    "interestId",
+    "provinceId",
+    "districtId",
+    "availableDate",
+    "minRate",
+    "maxRate",
+    "minRating",
+    "sort",
+  ] as const;
+  const normalizedSearch: Record<string, string | string[]> = {};
+  for (const key of filterKeys) {
+    const values = normalized.getAll(key);
+    for (const value of values) filterParams.append(key, value);
+    if (values.length === 1) normalizedSearch[key] = values[0];
+    else if (values.length > 1) normalizedSearch[key] = values;
   }
   const hasFilters = [...filterParams.keys()].some(
     (key) => key !== "sort" || filterParams.get(key) !== "-createdAt",
@@ -50,8 +70,15 @@ export default async function MatesPage({ searchParams }: Props) {
           activities={lookups.activities}
           interests={lookups.interests}
           provinces={lookups.provinces}
-          search={search}
+          lookupError={lookups.error}
+          search={normalizedSearch}
         />
+        {lookups.error && (
+          <p className="text-sm text-amber-800" role="status">
+            Filter options may be incomplete.{" "}
+            <Link href={`/mates?${filterParams}`}>Retry options</Link>
+          </p>
+        )}
         <div aria-live="polite" className="directory-results-head">
           <p>
             {result.error

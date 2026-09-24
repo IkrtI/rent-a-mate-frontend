@@ -3,10 +3,13 @@ import Link from "next/link";
 import { PhotosEditor } from "@/modules/mate-profile/management-panels";
 import { getMateEditorData } from "@/modules/mate-profile/server-data";
 
-export const metadata = { title: "Mate photos | mateflow." };
+export const metadata = {
+  title: "Mate photos | mateflow.",
+  robots: { index: false, follow: false },
+};
 
 export default async function MatePhotosPage() {
-  const { mate } = await getMateEditorData();
+  const { mate, loadError } = await getMateEditorData();
   return (
     <main className="grid gap-6">
       <header>
@@ -16,7 +19,14 @@ export default async function MatePhotosPage() {
           Back to profile
         </Link>
       </header>
-      {mate ? (
+      {loadError ? (
+        <section className="rounded-2xl bg-white p-6" role="alert">
+          <h2 className="text-xl font-semibold">We couldn’t load your Mate profile.</h2>
+          <Link className="mt-3 inline-block underline" href="/mate/photos">
+            Retry
+          </Link>
+        </section>
+      ) : mate ? (
         <PhotosEditor mate={mate} />
       ) : (
         <section className="rounded-2xl bg-white p-6">
