@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Send } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { listBookings } from "@/modules/booking/client";
 import { formatBookingDate } from "@/modules/booking/format";
@@ -16,7 +16,10 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isPageVisible, setIsPageVisible] = useState(false);
   const pendingMessageRef = useRef<{ bookingId: number; id: string } | null>(null);
+  const typingSentRef = useRef(false);
+  const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const bookings = useQuery({
     queryKey: ["bookings", "conversations"],
@@ -32,10 +35,14 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
       };
     });
   };
-  const realtime = useBookingRealtime(
+  const { status, isOtherTyping, setTyping, markRead } = useBookingRealtime(
     selectedBookingId,
     (message) => {
       mergeMessage(message);
+      void queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
+    },
+    () => {
+      typingSentRef.current = false;
       void queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
     },
     () => {
@@ -46,14 +53,51 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     queryKey: ["messages", selectedBookingId],
     queryFn: () => listMessages(selectedBookingId!),
     enabled: selectedBookingId !== undefined,
-    refetchInterval: realtime.status === "connected" ? false : 10_000,
+    refetchInterval: status === "connected" ? false : 10_000,
   });
+  useEffect(() => {
+    const updateVisibility = () => setIsPageVisible(document.visibilityState === "visible");
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
+
+  useEffect(() => {
+    if (
+      isPageVisible &&
+      status === "connected" &&
+      messages.data?.items.some(
+        (message) => message.senderId !== session.data?.user.id && !message.readAt,
+      )
+    ) {
+      markRead();
+    }
+  }, [isPageVisible, markRead, messages.data?.items, session.data?.user.id, status]);
+
+  useEffect(
+    () => () => {
+      if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);
+    },
+    [],
+  );
+
+  const publishTyping = (isTyping: boolean) => {
+    if (typingSentRef.current === isTyping) return;
+    typingSentRef.current = isTyping;
+    setTyping(isTyping);
+  };
+
+  const stopTyping = () => {
+    if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);
+    publishTyping(false);
+  };
   const send = useMutation({
     mutationFn: (input: { content: string; clientMessageId: string }) =>
       sendMessage(selectedBookingId!, input.content, input.clientMessageId),
     onSuccess: async (message) => {
       mergeMessage(message);
       pendingMessageRef.current = null;
+      stopTyping();
       setContent("");
       setError(null);
       await queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -67,8 +111,13 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     bookings.data?.items.filter(
       (booking) => booking.status === "confirmed" || booking.status === "completed",
     ) ?? [];
-  const selected = conversations.find((booking) => booking.id === selectedBookingId);
   const user = session.data?.user;
+  const selected = conversations.find((booking) => booking.id === selectedBookingId);
+  const otherName = selected
+    ? user?.role === "mate"
+      ? selected.renter.name
+      : selected.mate.name
+    : "Conversation";
 
   return (
     <main className="pb-24">
@@ -117,20 +166,14 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
               >
                 Back to conversations
               </Link>
-              <h2 className="font-bold">
-                {selected
-                  ? user?.role === "mate"
-                    ? selected.renter.name
-                    : selected.mate.name
-                  : "Conversation"}
-              </h2>
+              <h2 className="font-bold">{otherName}</h2>
               {selected ? (
                 <p className="mt-1 text-xs text-neutral-500">{selected.activity.name}</p>
               ) : null}
               <p className="mt-2 text-xs text-neutral-500" role="status">
-                {realtime.status === "connected"
+                {status === "connected"
                   ? "Live updates connected"
-                  : realtime.status === "connecting"
+                  : status === "connecting"
                     ? "Connecting live updates…"
                     : "Live updates unavailable — using refresh fallback"}
               </p>
@@ -168,10 +211,14 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                         minute: "2-digit",
                         timeZone: "Asia/Bangkok",
                       }).format(new Date(message.createdAt))}
+                      {mine && message.readAt ? " · Read" : ""}
                     </p>
                   </div>
                 );
               })}
+            </div>
+            <div className="h-7 px-5 pt-1 text-xs text-neutral-500" aria-live="polite">
+              {isOtherTyping ? `${otherName} is typing…` : null}
             </div>
             <form
               className="border-t border-neutral-200 p-3"
@@ -196,9 +243,18 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                   className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none"
                   id="message-content"
                   maxLength={2000}
+                  onBlur={stopTyping}
                   onChange={(event) => {
                     pendingMessageRef.current = null;
-                    setContent(event.target.value);
+                    const nextContent = event.target.value;
+                    setContent(nextContent);
+                    if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);
+                    if (!nextContent.trim()) {
+                      publishTyping(false);
+                      return;
+                    }
+                    publishTyping(true);
+                    typingStopTimerRef.current = setTimeout(() => publishTyping(false), 1_500);
                   }}
                   placeholder="Write a message..."
                   rows={1}
