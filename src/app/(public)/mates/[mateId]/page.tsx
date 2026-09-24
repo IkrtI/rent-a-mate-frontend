@@ -20,7 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
           title: `${mate.user.name} — Mate profile`,
           description:
-            mate.bio ?? `Meet ${mate.user.name}, a local mate in ${mate.district.name}, ${mate.province.name}.`,
+            mate.bio ??
+            `Meet ${mate.user.name}, a local mate in ${mate.district.name}, ${mate.province.name}.`,
           type: "profile",
         },
         robots: { index: false, follow: true },

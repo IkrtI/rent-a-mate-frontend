@@ -230,7 +230,7 @@ body {
   border: 0;
   border-radius: 999px;
   color: #fff;
-  background: #ff5d63;
+  background: #c44048;
   box-shadow: 0 3px 0 #d63d47;
   font-size: 14px;
   font-weight: 700;
@@ -242,7 +242,7 @@ body {
     background-color 0.18s ease;
 }
 .button:hover {
-  background: #f64f57;
+  background: #b93c43;
   box-shadow: 0 2px 0 #d63d47;
   transform: translateY(1px);
 }
@@ -500,7 +500,7 @@ h2 {
   left: max(7vw, calc((100vw - 1180px) / 2));
   display: flex;
   justify-content: space-between;
-  color: #776762;
+  color: #66514e;
   font-family: var(--font-mono), monospace;
   font-size: 10px;
   letter-spacing: 0.1em;
@@ -716,7 +716,7 @@ h2 {
   border-top: 1px solid #d9ccc6;
 }
 .steps-grid article > span {
-  color: #c8585c;
+  color: #b74349;
   font-family: var(--font-mono), monospace;
   font-size: 12px;
 }

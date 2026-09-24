@@ -21,13 +21,14 @@ export function AuthFrame({ children }: Readonly<{ children: React.ReactNode }>)
         </div>
         <div className="max-w-lg border-t border-neutral-300 pt-6 pb-8">
           <p className="text-sm font-medium tracking-tight text-neutral-700">
-            You don't have to go alone.
+            You don&apos;t have to go alone.
           </p>
           <h1 className="mt-3 text-3xl leading-tight font-semibold tracking-tight xl:text-4xl">
             Some days, you just need someone there.
           </h1>
           <p className="mt-4 max-w-md text-sm leading-6 text-neutral-600">
-           From a quiet coffee to a night out, find a mate who's there when you want a little company.
+            From a quiet coffee to a night out, find a mate who&apos;s there when you want a little
+            company.
           </p>
         </div>
       </section>
