@@ -14,9 +14,15 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rent a Mate",
-  description: "Rent a Mate frontend foundation",
-  robots: { index: false, follow: false },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001"),
+  title: { default: "matefor. — Good company, thoughtfully connected", template: "%s | matefor." },
+  description:
+    "Find a local mate for coffee, games, study, and the little plans that are better together.",
+  openGraph: {
+    title: "matefor. — Good company, thoughtfully connected",
+    description: "Find a local mate for your next plan.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
