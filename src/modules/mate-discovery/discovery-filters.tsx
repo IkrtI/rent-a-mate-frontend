@@ -21,6 +21,7 @@ function selected(value: string | string[] | undefined) {
 export function DiscoveryFilters({ activities, interests, provinces, lookupError, search }: Props) {
   const [districts, setDistricts] = useState<Lookup[]>([]);
   const [districtError, setDistrictError] = useState(false);
+  const [districtRetry, setDistrictRetry] = useState(0);
   const provinceId = first(search.provinceId);
   useEffect(() => {
     if (!provinceId) return;
@@ -31,7 +32,10 @@ export function DiscoveryFilters({ activities, interests, provinces, lookupError
       .then((response) =>
         response.ok ? response.json() : Promise.reject(new Error("lookup failed")),
       )
-      .then((payload: { items?: Lookup[] }) => setDistricts(payload.items ?? []))
+      .then((payload: { items?: Lookup[] }) => {
+        setDistricts(payload.items ?? []);
+        setDistrictError(false);
+      })
       .catch(() => {
         if (!controller.signal.aborted) {
           setDistricts([]);
@@ -39,14 +43,25 @@ export function DiscoveryFilters({ activities, interests, provinces, lookupError
         }
       });
     return () => controller.abort();
-  }, [provinceId]);
+  }, [districtRetry, provinceId]);
 
   return (
     <form action="/mates" className="filter-bar">
       {(lookupError || districtError) && (
-        <p className="text-sm text-amber-800" role="status">
-          Some filter options could not load. You can still search with the options available.
-        </p>
+        <div className="flex flex-wrap gap-3 text-sm text-amber-800" role="status">
+          <span>
+            Some filter options could not load. You can still search with the options available.
+          </span>
+          {districtError && (
+            <button
+              className="font-semibold underline"
+              onClick={() => setDistrictRetry((count) => count + 1)}
+              type="button"
+            >
+              Retry districts
+            </button>
+          )}
+        </div>
       )}
       <label className="directory-search">
         <span className="sr-only">Search mates</span>

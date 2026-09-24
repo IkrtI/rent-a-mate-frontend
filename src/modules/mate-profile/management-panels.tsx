@@ -47,21 +47,27 @@ export function ProfileEditor({
 }: ProfileProps) {
   const [provinceId, setProvinceId] = useState(String(mate?.province.id ?? ""));
   const [districts, setDistricts] = useState(initialDistricts);
+  const [districtsForProvince, setDistrictsForProvince] = useState(String(mate?.province.id ?? ""));
   const [districtId, setDistrictId] = useState(String(mate?.district.id ?? ""));
+  const [profileExists, setProfileExists] = useState(mate !== null);
+  const [profileActive, setProfileActive] = useState(mate?.isActive ?? true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   useEffect(() => {
-    if (!provinceId || provinceId === String(mate?.province.id ?? "")) return;
+    if (!provinceId || provinceId === districtsForProvince) return;
     const controller = new AbortController();
     fetch(`/api/provinces/${provinceId}/districts`, { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then((payload: { items?: Lookup[] }) => setDistricts(payload.items ?? []))
+      .then((payload: { items?: Lookup[] }) => {
+        setDistricts(payload.items ?? []);
+        setDistrictsForProvince(provinceId);
+      })
       .catch(() => {
         if (!controller.signal.aborted) setDistricts([]);
       });
     return () => controller.abort();
-  }, [provinceId, mate?.province.id]);
+  }, [districtsForProvince, provinceId]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,11 +86,13 @@ export function ProfileEditor({
     };
     try {
       const body = JSON.stringify(input);
-      await requestSameOrigin(
-        mate ? "/api/mates/me" : "/api/mates",
+      const result = await requestSameOrigin(
+        profileExists ? "/api/mates/me" : "/api/mates",
         mateResultSchema,
-        mate ? { method: "PATCH", body } : { method: "POST", body },
+        profileExists ? { method: "PATCH", body } : { method: "POST", body },
       );
+      setProfileExists(true);
+      setProfileActive(result.mate.isActive);
       setMessage("Profile saved.");
     } catch (cause) {
       setError(errorText(cause));
@@ -99,7 +107,10 @@ export function ProfileEditor({
     setError("");
     setMessage("");
     try {
-      await requestSameOrigin("/api/mates/me", z.unknown(), { method: "DELETE" });
+      const result = await requestSameOrigin("/api/mates/me", z.object({ isActive: z.boolean() }), {
+        method: "DELETE",
+      });
+      setProfileActive(result.isActive);
       setMessage("Profile deactivated. Contact support if you want to reactivate it.");
     } catch (cause) {
       setError(errorText(cause));
@@ -111,9 +122,19 @@ export function ProfileEditor({
     <section className="mx-auto max-w-3xl rounded-2xl border border-rose-100 bg-white p-6 shadow-sm sm:p-8">
       <form className="grid gap-5 sm:grid-cols-2" onSubmit={submit}>
         {lookupError && (
-          <p className="text-sm text-amber-800 sm:col-span-2" role="alert">
-            Some profile options could not load. Retry this page before changing your profile.
-          </p>
+          <div
+            className="flex flex-wrap items-center gap-3 text-sm text-amber-800 sm:col-span-2"
+            role="alert"
+          >
+            <span>Some profile options could not load. Retry before changing your profile.</span>
+            <button
+              className="font-semibold underline"
+              onClick={() => window.location.reload()}
+              type="button"
+            >
+              Retry options
+            </button>
+          </div>
         )}
         <label className="grid gap-2 text-sm font-semibold">
           Age
@@ -234,12 +255,12 @@ export function ProfileEditor({
         <div className="flex flex-wrap gap-3 sm:col-span-2">
           <button
             className="button"
-            disabled={busy || lookupError || (mate !== null && !mate.isActive)}
+            disabled={busy || lookupError || (profileExists && !profileActive)}
             type="submit"
           >
-            {busy ? "Saving…" : mate ? "Save profile" : "Create profile"}
+            {busy ? "Saving…" : profileExists ? "Save profile" : "Create profile"}
           </button>
-          {mate?.isActive && (
+          {profileExists && profileActive && (
             <button
               className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700"
               disabled={busy}
@@ -250,7 +271,7 @@ export function ProfileEditor({
             </button>
           )}
         </div>
-        {mate && !mate.isActive && (
+        {profileExists && !profileActive && (
           <p className="text-sm text-amber-800 sm:col-span-2">
             This profile is inactive and hidden from discovery.
           </p>
