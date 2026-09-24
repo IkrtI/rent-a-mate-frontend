@@ -3,48 +3,121 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Send } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { listBookings } from "@/modules/booking/client";
 import { formatBookingDate } from "@/modules/booking/format";
 import { getSession } from "@/modules/session/client";
 import { listMessages, sendMessage } from "../client";
+import { useBookingRealtime } from "../realtime";
+import type { Message, MessagePage } from "../schemas";
 
 export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number }) {
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isPageVisible, setIsPageVisible] = useState(false);
+  const pendingMessageRef = useRef<{ bookingId: number; id: string } | null>(null);
+  const typingSentRef = useRef(false);
+  const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const bookings = useQuery({
     queryKey: ["bookings", "conversations"],
     queryFn: () => listBookings({ limit: 100 }),
   });
+  const mergeMessage = (message: Message) => {
+    queryClient.setQueryData<MessagePage>(["messages", selectedBookingId], (current) => {
+      if (!current || current.items.some((item) => item.id === message.id)) return current;
+      return {
+        ...current,
+        items: [...current.items, message],
+        meta: { ...current.meta, total: current.meta.total + 1 },
+      };
+    });
+  };
+  const { status, isOtherTyping, setTyping, markRead } = useBookingRealtime(
+    selectedBookingId,
+    (message) => {
+      mergeMessage(message);
+      void queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
+    },
+    () => {
+      typingSentRef.current = false;
+      void queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
+    },
+    () => {
+      void queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
+    },
+  );
   const messages = useQuery({
     queryKey: ["messages", selectedBookingId],
     queryFn: () => listMessages(selectedBookingId!),
     enabled: selectedBookingId !== undefined,
-    refetchInterval: 10_000,
+    refetchInterval: status === "connected" ? false : 10_000,
   });
+  useEffect(() => {
+    const updateVisibility = () => setIsPageVisible(document.visibilityState === "visible");
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
+
+  useEffect(() => {
+    if (
+      isPageVisible &&
+      status === "connected" &&
+      messages.data?.items.some(
+        (message) => message.senderId !== session.data?.user.id && !message.readAt,
+      )
+    ) {
+      markRead();
+    }
+  }, [isPageVisible, markRead, messages.data?.items, session.data?.user.id, status]);
+
+  useEffect(
+    () => () => {
+      if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);
+    },
+    [],
+  );
+
+  const publishTyping = (isTyping: boolean) => {
+    if (typingSentRef.current === isTyping) return;
+    typingSentRef.current = isTyping;
+    setTyping(isTyping);
+  };
+
+  const stopTyping = () => {
+    if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);
+    publishTyping(false);
+  };
   const send = useMutation({
-    mutationFn: () => sendMessage(selectedBookingId!, content),
-    onSuccess: async () => {
+    mutationFn: (input: { content: string; clientMessageId: string }) =>
+      sendMessage(selectedBookingId!, input.content, input.clientMessageId),
+    onSuccess: async (message) => {
+      mergeMessage(message);
+      pendingMessageRef.current = null;
+      stopTyping();
       setContent("");
       setError(null);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] }),
-        queryClient.invalidateQueries({ queryKey: ["notifications"] }),
-      ]);
+      await queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
-    onError: (sendError) =>
-      setError(sendError instanceof Error ? sendError.message : "The message could not be sent."),
+    onError: (sendError) => {
+      setError(sendError instanceof Error ? sendError.message : "The message could not be sent.");
+    },
   });
 
   const conversations =
     bookings.data?.items.filter(
       (booking) => booking.status === "confirmed" || booking.status === "completed",
     ) ?? [];
-  const selected = conversations.find((booking) => booking.id === selectedBookingId);
   const user = session.data?.user;
+  const selected = conversations.find((booking) => booking.id === selectedBookingId);
+  const otherName = selected
+    ? user?.role === "mate"
+      ? selected.renter.name
+      : selected.mate.name
+    : "Conversation";
 
   return (
     <main className="pb-24">
@@ -93,16 +166,17 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
               >
                 Back to conversations
               </Link>
-              <h2 className="font-bold">
-                {selected
-                  ? user?.role === "mate"
-                    ? selected.renter.name
-                    : selected.mate.name
-                  : "Conversation"}
-              </h2>
+              <h2 className="font-bold">{otherName}</h2>
               {selected ? (
                 <p className="mt-1 text-xs text-neutral-500">{selected.activity.name}</p>
               ) : null}
+              <p className="mt-2 text-xs text-neutral-500" role="status">
+                {status === "connected"
+                  ? "Live updates connected"
+                  : status === "connecting"
+                    ? "Connecting live updates…"
+                    : "Live updates unavailable — using refresh fallback"}
+              </p>
             </div>
             <div className="flex flex-1 flex-col justify-end gap-3 overflow-y-auto bg-[#fffdfc] p-5">
               {messages.isPending ? (
@@ -137,16 +211,28 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                         minute: "2-digit",
                         timeZone: "Asia/Bangkok",
                       }).format(new Date(message.createdAt))}
+                      {mine && message.readAt ? " · Read" : ""}
                     </p>
                   </div>
                 );
               })}
             </div>
+            <div className="h-7 px-5 pt-1 text-xs text-neutral-500" aria-live="polite">
+              {isOtherTyping ? `${otherName} is typing…` : null}
+            </div>
             <form
               className="border-t border-neutral-200 p-3"
               onSubmit={(event) => {
                 event.preventDefault();
-                if (content.trim()) send.mutate();
+                if (content.trim() && selectedBookingId) {
+                  if (pendingMessageRef.current?.bookingId !== selectedBookingId) {
+                    pendingMessageRef.current = {
+                      bookingId: selectedBookingId,
+                      id: crypto.randomUUID(),
+                    };
+                  }
+                  send.mutate({ content, clientMessageId: pendingMessageRef.current.id });
+                }
               }}
             >
               <div className="flex items-end gap-2 rounded-md bg-neutral-100 p-2">
@@ -157,7 +243,19 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                   className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none"
                   id="message-content"
                   maxLength={2000}
-                  onChange={(event) => setContent(event.target.value)}
+                  onBlur={stopTyping}
+                  onChange={(event) => {
+                    pendingMessageRef.current = null;
+                    const nextContent = event.target.value;
+                    setContent(nextContent);
+                    if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);
+                    if (!nextContent.trim()) {
+                      publishTyping(false);
+                      return;
+                    }
+                    publishTyping(true);
+                    typingStopTimerRef.current = setTimeout(() => publishTyping(false), 1_500);
+                  }}
                   placeholder="Write a message..."
                   rows={1}
                   value={content}

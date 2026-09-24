@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   CalendarDays,
+  CreditCard,
   LayoutDashboard,
   LogOut,
   MessageCircle,
@@ -22,6 +23,7 @@ import { getSession, logout } from "../client";
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
+  { href: "/payments", label: "Payments", icon: CreditCard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
 ];
 

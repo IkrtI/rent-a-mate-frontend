@@ -69,19 +69,32 @@ test("lists conversations and sends a REST message", async ({ page }) => {
       }),
     }),
   );
-  let messages = [
+  let messages: Array<{
+    id: number;
+    bookingId: number;
+    senderId: number;
+    content: string;
+    readAt: string | null;
+    createdAt: string;
+  }> = [
     {
       id: 1,
       bookingId: 42,
-      senderId: 11,
+      senderId: 7,
       content: "See you there!",
-      readAt: null,
+      readAt: "2026-09-23T03:01:00.000Z",
       createdAt: "2026-09-23T03:00:00.000Z",
     },
   ];
   await page.route("**/api/bookings/42/messages*", async (route) => {
     if (route.request().method() === "POST") {
-      const input = (await route.request().postDataJSON()) as { content: string };
+      const input = (await route.request().postDataJSON()) as {
+        clientMessageId: string;
+        content: string;
+      };
+      expect(input.clientMessageId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
       const message = {
         id: 2,
         bookingId: 42,
@@ -110,6 +123,7 @@ test("lists conversations and sends a REST message", async ({ page }) => {
 
   await page.goto("/messages/42");
   await expect(page.getByText("See you there!")).toBeVisible();
+  await expect(page.getByText(/· Read$/)).toBeVisible();
   await page.getByLabel("Message").fill("On my way");
   await page.getByTitle("Send message").click();
   await expect(page.getByText("On my way")).toBeVisible();
