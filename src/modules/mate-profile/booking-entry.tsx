@@ -44,7 +44,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       .then(async (response) => {
         if (!response.ok) throw new Error("Availability is unavailable.");
         const payload: unknown = await response.json();
-        const data = isRecord(payload) && isRecord(payload.data) ? payload.data : null;
+        const data = isRecord(payload) ? (isRecord(payload.data) ? payload.data : payload) : null;
         const openSlots =
           data && Array.isArray(data.openSlots)
             ? data.openSlots.filter(
