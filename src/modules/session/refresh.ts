@@ -17,6 +17,20 @@ const refreshResponseSchema = z.object({
 
 const refreshLocks = new Map<string, Promise<SessionTokens>>();
 
+export class SessionRefreshError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "SessionRefreshError";
+  }
+
+  get isRejected(): boolean {
+    return this.status === 401 || this.status === 403;
+  }
+}
+
 export function withRefreshLock(
   refreshToken: string,
   refresh: () => Promise<SessionTokens>,
@@ -35,8 +49,8 @@ export async function refreshSession(
   cookieStore: CookieStore,
   refreshToken: string,
 ): Promise<SessionTokens> {
-  return withRefreshLock(refreshToken, async () => {
-    try {
+  try {
+    const tokens = await withRefreshLock(refreshToken, async () => {
       const { backendApiUrl } = getServerEnv();
       const response = await fetch(`${backendApiUrl}/auth/refresh`, {
         method: "POST",
@@ -46,15 +60,26 @@ export async function refreshSession(
       });
       const payload: unknown = await response.json().catch(() => undefined);
       if (!response.ok) {
-        throw new Error("Session refresh was rejected.");
+        throw new SessionRefreshError(
+          response.status,
+          response.status === 401 || response.status === 403
+            ? "Session refresh was rejected."
+            : "Session refresh is temporarily unavailable.",
+        );
       }
 
-      const tokens = refreshResponseSchema.parse(payload).data;
-      writeSessionTokens(cookieStore, tokens);
-      return tokens;
-    } catch (error) {
+      try {
+        return refreshResponseSchema.parse(payload).data;
+      } catch {
+        throw new SessionRefreshError(502, "Session refresh returned an invalid response.");
+      }
+    });
+    writeSessionTokens(cookieStore, tokens);
+    return tokens;
+  } catch (error) {
+    if (error instanceof SessionRefreshError && error.isRejected) {
       clearSessionTokens(cookieStore);
-      throw error;
     }
-  });
+    throw error;
+  }
 }
