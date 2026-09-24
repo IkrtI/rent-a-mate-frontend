@@ -40,7 +40,7 @@ export const profileInputSchema = z.object({
   hourlyRate: z
     .number()
     .positive()
-    .refine((value) => Number.isInteger(value * 100), "Use at most two decimal places."),
+    .refine((value) => Number(value.toFixed(2)) === value, "Use at most two decimal places."),
   provinceId: z.number().int().positive(),
   districtId: z.number().int().positive(),
   activityIds: z.array(z.number().int().positive()).max(100),

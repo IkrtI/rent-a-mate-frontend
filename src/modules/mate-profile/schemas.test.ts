@@ -7,7 +7,7 @@ describe("mate profile form schemas", () => {
     const profile = {
       age: 18,
       bio: "Coffee walks",
-      hourlyRate: 125.5,
+      hourlyRate: 19.99,
       provinceId: 1,
       districtId: 2,
       activityIds: [3],
