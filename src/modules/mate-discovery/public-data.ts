@@ -131,7 +131,9 @@ export async function getPublicMates(search: SearchInput): Promise<DirectoryResu
   }
 }
 
-export async function getPublicMate(id: number): Promise<{ mate: PublicMateDetail | null; error: boolean }> {
+export async function getPublicMate(
+  id: number,
+): Promise<{ mate: PublicMateDetail | null; error: boolean }> {
   if (!Number.isSafeInteger(id) || id <= 0) return { mate: null, error: false };
   try {
     const response = await requestBackend({
