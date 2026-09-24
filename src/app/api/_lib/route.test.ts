@@ -48,6 +48,15 @@ describe("assertSameOrigin", () => {
     expect(() => assertSameOrigin(request("https://test-host.invalid"))).not.toThrow();
     expect(() => assertSameOrigin(request("https://other.example"))).toThrow(RouteError);
   });
+
+  it("uses the explicit public origin configured for the deployment", () => {
+    vi.stubEnv("APP_ORIGIN", "https://test-host.invalid");
+    const request = (origin: string) =>
+      new Request("http://internal-app:3000/api/auth/login", { headers: { origin } });
+
+    expect(() => assertSameOrigin(request("https://test-host.invalid"))).not.toThrow();
+    expect(() => assertSameOrigin(request("https://other.example"))).toThrow(RouteError);
+  });
 });
 
 describe("routeErrorResponse", () => {
