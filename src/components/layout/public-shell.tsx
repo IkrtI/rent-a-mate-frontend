@@ -101,7 +101,7 @@ export function PageHero({
   description: string;
 }) {
   return (
-    <section className={`page-hero${eyebrow ? "" : " page-hero-no-eyebrow"}`}>
+    <section className={`page-hero${eyebrow ? "" : "page-hero-no-eyebrow"}`}>
       <div className="page-hero-inner">
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>

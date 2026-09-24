@@ -18,6 +18,45 @@ export class RealtimeSendError extends Error {
 }
 
 type ChatAck = { ok: true } | { ok: false; error: string };
+type ChatSocket = Pick<Socket, "connected" | "emit" | "off" | "once">;
+
+export function sendSocketMessage(socket: ChatSocket | null, bookingId: number, content: string) {
+  return new Promise<void>((resolve, reject) => {
+    if (!socket?.connected) {
+      reject(new RealtimeSendError("Live connection unavailable.", true));
+      return;
+    }
+    let settled = false;
+    const settle = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      socket.off("disconnect", handleDisconnect);
+      callback();
+    };
+    const handleDisconnect = () => {
+      // `emit` was already attempted, so a REST retry could duplicate a
+      // persisted message if the server received it before disconnecting.
+      settle(() => reject(new RealtimeSendError("Live connection closed.", false)));
+    };
+    const timeout = setTimeout(() => {
+      // The server may have persisted the message before its ACK was lost.
+      // Reconcile via query invalidation; never create it again.
+      settle(() => reject(new RealtimeSendError("Live message acknowledgement timed out.", false)));
+    }, 3_000);
+    socket.once("disconnect", handleDisconnect);
+    try {
+      socket.emit("send_message", { bookingId, content }, (ack: ChatAck) => {
+        settle(() => {
+          if (ack.ok) resolve();
+          else reject(new RealtimeSendError(ack.error, false));
+        });
+      });
+    } catch {
+      settle(() => reject(new RealtimeSendError("Live message could not be sent.", false)));
+    }
+  });
+}
 
 /**
  * Opens one booking room. Every connection (including a reconnect) obtains a
@@ -45,7 +84,11 @@ export function useBookingRealtime(
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
     let activeSocket: Socket | null = null;
     const scheduleReconnect = () => {
-      if (!stopped) reconnectTimer = setTimeout(() => void connect(), 1_500);
+      if (stopped || reconnectTimer) return;
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = undefined;
+        void connect();
+      }, 1_500);
     };
     const connect = async () => {
       try {
@@ -99,22 +142,9 @@ export function useBookingRealtime(
 
   const send = useCallback(
     (content: string) =>
-      new Promise<void>((resolve, reject) => {
-        const socket = socketRef.current;
-        if (!bookingId || status !== "connected" || !socket?.connected) {
-          reject(new RealtimeSendError("Live connection unavailable.", true));
-          return;
-        }
-        const timeout = setTimeout(
-          () => reject(new RealtimeSendError("Live message acknowledgement timed out.", true)),
-          3_000,
-        );
-        socket.emit("send_message", { bookingId, content }, (ack: ChatAck) => {
-          clearTimeout(timeout);
-          if (ack.ok) resolve();
-          else reject(new RealtimeSendError(ack.error, false));
-        });
-      }),
+      !bookingId || status !== "connected"
+        ? Promise.reject(new RealtimeSendError("Live connection unavailable.", true))
+        : sendSocketMessage(socketRef.current, bookingId, content),
     [bookingId, status],
   );
 

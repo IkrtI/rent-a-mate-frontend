@@ -195,7 +195,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       )}
       {successId !== null && (
         <p className="booking-success" role="status">
-          Request #{successId} sent. It will be confirmed when the Mate accepts. {" "}
+          Request #{successId} sent. It will be confirmed when the Mate accepts.{" "}
           <Link href={`/bookings/${successId}`}>View booking</Link>
         </p>
       )}

@@ -59,8 +59,12 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
         queryClient.invalidateQueries({ queryKey: ["notifications"] }),
       ]);
     },
-    onError: (sendError) =>
-      setError(sendError instanceof Error ? sendError.message : "The message could not be sent."),
+    onError: async (sendError) => {
+      setError(sendError instanceof Error ? sendError.message : "The message could not be sent.");
+      if (sendError instanceof RealtimeSendError) {
+        await queryClient.invalidateQueries({ queryKey: ["messages", selectedBookingId] });
+      }
+    },
   });
 
   const conversations =

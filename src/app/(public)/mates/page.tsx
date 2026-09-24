@@ -112,9 +112,16 @@ export default async function MatesPage({ searchParams }: Props) {
               : `${result.total} ${result.total === 1 ? "Mate" : "Mates"} to meet`}
             {activity ? ` for ${activity}` : ""}
           </p>
-          {Array.from(new URLSearchParams(Object.entries(search).flatMap(([key, value]) =>
-            (Array.isArray(value) ? value : value === undefined ? [] : [value]).map((item) => [key, item]),
-          ))).some(([key, value]) => key !== "page" && !(key === "sort" && value === "-rating")) && (
+          {Array.from(
+            new URLSearchParams(
+              Object.entries(search).flatMap(([key, value]) =>
+                (Array.isArray(value) ? value : value === undefined ? [] : [value]).map((item) => [
+                  key,
+                  item,
+                ]),
+              ),
+            ),
+          ).some(([key, value]) => key !== "page" && !(key === "sort" && value === "-rating")) && (
             <Link href="/mates">Clear filters</Link>
           )}
         </div>
