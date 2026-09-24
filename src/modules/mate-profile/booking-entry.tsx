@@ -38,13 +38,13 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
 
   useEffect(() => {
     const controller = new AbortController();
-    void fetch(`/api/v1/mates/${mateId}/availability?date=${encodeURIComponent(date)}`, {
+    void fetch(`/api/mates/${mateId}/availability?date=${encodeURIComponent(date)}`, {
       signal: controller.signal,
     })
       .then(async (response) => {
         if (!response.ok) throw new Error("Availability is unavailable.");
         const payload: unknown = await response.json();
-        const data = isRecord(payload) && isRecord(payload.data) ? payload.data : null;
+        const data = isRecord(payload) ? (isRecord(payload.data) ? payload.data : payload) : null;
         const openSlots =
           data && Array.isArray(data.openSlots)
             ? data.openSlots.filter(

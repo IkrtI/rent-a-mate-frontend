@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
+  Clock3,
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
@@ -56,6 +57,15 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   }
 
   const user = session.data.user;
+  const visibleNavigation =
+    user.role === "mate"
+      ? [
+          ...navigation,
+          { href: "/mate/profile", label: "Mate profile", icon: UserRound },
+          { href: "/mate/photos", label: "Photos", icon: UserRound },
+          { href: "/mate/availability", label: "Availability", icon: Clock3 },
+        ]
+      : navigation;
   const handleLogout = async () => {
     try {
       await logout();
@@ -75,7 +85,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
             mateflow.
           </Link>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Private navigation">
-            {navigation.map(({ href, label, icon: Icon }) => (
+            {visibleNavigation.map(({ href, label, icon: Icon }) => (
               <Link
                 className={cn(
                   "inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold text-neutral-600 hover:bg-white/60 hover:text-neutral-950",
@@ -114,10 +124,10 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
       </header>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</div>
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-neutral-200 bg-white md:hidden"
+        className={`fixed inset-x-0 bottom-0 z-30 grid ${user.role === "mate" ? "grid-cols-6" : "grid-cols-3"} border-t border-neutral-200 bg-white md:hidden`}
         aria-label="Mobile navigation"
       >
-        {navigation.map(({ href, label, icon: Icon }) => (
+        {visibleNavigation.map(({ href, label, icon: Icon }) => (
           <Link
             className="grid min-h-16 place-items-center gap-1 py-2 text-xs font-semibold"
             href={href}

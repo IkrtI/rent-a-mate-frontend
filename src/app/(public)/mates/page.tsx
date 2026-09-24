@@ -1,9 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowLeft, ArrowRight, Search, SlidersHorizontal, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, Star } from "lucide-react";
 
-import { getPublicMates } from "@/modules/mate-discovery/public-data";
+import { DiscoveryFilters } from "@/modules/mate-discovery/discovery-filters";
+import {
+  buildMateSearchParams,
+  getDiscoveryLookups,
+  getPublicMates,
+} from "@/modules/mate-discovery/public-data";
 
 export const metadata: Metadata = {
   title: "Find a Mate",
@@ -26,20 +31,32 @@ const money = new Intl.NumberFormat("th-TH", {
 
 export default async function MatesPage({ searchParams }: Props) {
   const search = await searchParams;
-  const result = await getPublicMates(search);
+  const [result, lookups] = await Promise.all([getPublicMates(search), getDiscoveryLookups()]);
   const q = Array.isArray(search.q) ? search.q[0] : (search.q ?? "");
-  const activity = Array.isArray(search.activity) ? search.activity[0] : (search.activity ?? "");
-  const sort = Array.isArray(search.sort) ? search.sort[0] : (search.sort ?? "-rating");
-  const minRate = Array.isArray(search.minRate) ? search.minRate[0] : (search.minRate ?? "");
-  const maxRate = Array.isArray(search.maxRate) ? search.maxRate[0] : (search.maxRate ?? "");
-  const rating = Array.isArray(search.rating) ? search.rating[0] : (search.rating ?? "");
-  const next = new URLSearchParams();
-  if (q) next.set("q", q);
-  if (activity) next.set("activity", activity);
-  if (sort) next.set("sort", sort);
-  if (minRate) next.set("minRate", minRate);
-  if (maxRate) next.set("maxRate", maxRate);
-  if (rating) next.set("rating", rating);
+  const normalized = buildMateSearchParams(search);
+  const filterParams = new URLSearchParams();
+  const filterKeys = [
+    "q",
+    "activityId",
+    "interestId",
+    "provinceId",
+    "districtId",
+    "availableDate",
+    "minRate",
+    "maxRate",
+    "minRating",
+    "sort",
+  ] as const;
+  const normalizedSearch: Record<string, string | string[]> = {};
+  for (const key of filterKeys) {
+    const values = normalized.getAll(key);
+    for (const value of values) filterParams.append(key, value);
+    if (values.length === 1) normalizedSearch[key] = values[0];
+    else if (values.length > 1) normalizedSearch[key] = values;
+  }
+  const hasFilters = [...filterParams.keys()].some(
+    (key) => key !== "sort" || filterParams.get(key) !== "-createdAt",
+  );
   return (
     <main className="directory-page">
       <section className="directory-intro">
@@ -49,68 +66,25 @@ export default async function MatesPage({ searchParams }: Props) {
         <p>A good coffee, a new neighbourhood, or a little company while you study.</p>
       </section>
       <section aria-label="Find and filter mates" className="directory-wrap">
-        <form action="/mates" className="filter-bar">
-          <label className="directory-search">
-            <Search aria-hidden="true" size={18} />
-            <span className="sr-only">Search mates</span>
-            <input defaultValue={q} name="q" placeholder="Try ‘coffee’ or a name" />
-          </label>
-          <label className="filter-select">
-            <span className="sr-only">Activity</span>
-            <select defaultValue={activity} name="activity">
-              <option value="">All activities</option>
-              {["Cafe", "Gaming", "Study", "Gym", "Events", "City walks"].map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </label>
-          <label className="filter-select sort-select">
-            <span className="sr-only">Sort mates</span>
-            <select defaultValue={sort} name="sort">
-              <option value="-rating">Top rated</option>
-              <option value="-createdAt">Newest</option>
-              <option value="rate">Price: low to high</option>
-              <option value="-rate">Price: high to low</option>
-            </select>
-          </label>
-          <label className="filter-number">
-            <span>Min ฿ / hour</span>
-            <input
-              inputMode="decimal"
-              min="0"
-              name="minRate"
-              type="number"
-              defaultValue={minRate}
-            />
-          </label>
-          <label className="filter-number">
-            <span>Max ฿ / hour</span>
-            <input
-              inputMode="decimal"
-              min="0"
-              name="maxRate"
-              type="number"
-              defaultValue={maxRate}
-            />
-          </label>
-          <label className="filter-select rating-select">
-            <span className="sr-only">Minimum rating</span>
-            <select defaultValue={rating} name="rating">
-              <option value="">Any rating</option>
-              <option value="4">4+ stars</option>
-              <option value="4.5">4.5+ stars</option>
-            </select>
-          </label>
-          <button className="button" type="submit">
-            <SlidersHorizontal aria-hidden="true" size={17} /> Apply filters
-          </button>
-        </form>
+        <DiscoveryFilters
+          activities={lookups.activities}
+          interests={lookups.interests}
+          provinces={lookups.provinces}
+          lookupError={lookups.error}
+          search={normalizedSearch}
+        />
+        {lookups.error && (
+          <p className="text-sm text-amber-800" role="status">
+            Filter options may be incomplete.{" "}
+            <Link href={`/mates?${filterParams}`}>Retry options</Link>
+          </p>
+        )}
         <div aria-live="polite" className="directory-results-head">
           <p>
             {result.error
               ? "Mates are taking a moment to load"
               : `${result.total} ${result.total === 1 ? "Mate" : "Mates"} to meet`}
-            {activity ? ` for ${activity}` : ""}
+            {q ? ` matching “${q}”` : ""}
           </p>
           {Array.from(
             new URLSearchParams(
@@ -131,7 +105,7 @@ export default async function MatesPage({ searchParams }: Props) {
             <p>Your filters are still here. Try again in a moment.</p>
             <Link
               className="button button-outline"
-              href={`/mates?${new URLSearchParams({ ...(q ? { q } : {}), ...(activity ? { activity } : {}), ...(sort ? { sort } : {}), ...(minRate ? { minRate } : {}), ...(maxRate ? { maxRate } : {}), ...(rating ? { rating } : {}), _retry: "1" }).toString()}`}
+              href={`/mates?${new URLSearchParams([...filterParams, ["_retry", "1"]]).toString()}`}
             >
               Retry
             </Link>
@@ -196,7 +170,7 @@ export default async function MatesPage({ searchParams }: Props) {
           <nav aria-label="Mate result pages" className="pagination">
             {result.page > 1 && (
               <Link
-                href={`/mates?${new URLSearchParams([...next, ["page", String(result.page - 1)]])}`}
+                href={`/mates?${new URLSearchParams([...filterParams, ["page", String(result.page - 1)]])}`}
               >
                 <ArrowLeft size={16} /> Previous
               </Link>
@@ -206,7 +180,7 @@ export default async function MatesPage({ searchParams }: Props) {
             </span>
             {result.page < result.totalPages && (
               <Link
-                href={`/mates?${new URLSearchParams([...next, ["page", String(result.page + 1)]])}`}
+                href={`/mates?${new URLSearchParams([...filterParams, ["page", String(result.page + 1)]])}`}
               >
                 Next <ArrowRight size={16} />
               </Link>
