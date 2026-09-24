@@ -44,10 +44,17 @@ export async function requestBackend<T>(request: BackendRequest<T>): Promise<T> 
       method: request.method ?? "GET",
       headers: {
         Accept: "application/json",
-        ...(request.body === undefined ? {} : { "Content-Type": "application/json" }),
+        ...(request.body === undefined || request.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" }),
         ...(accessToken === undefined ? {} : { Authorization: `Bearer ${accessToken}` }),
       },
-      body: request.body === undefined ? undefined : JSON.stringify(request.body),
+      body:
+        request.body === undefined
+          ? undefined
+          : request.body instanceof FormData
+            ? request.body
+            : JSON.stringify(request.body),
       cache: "no-store",
       signal: request.signal,
     });
