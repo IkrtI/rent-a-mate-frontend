@@ -2931,3 +2931,20 @@ html.dark .mobile-menu nav button:hover {
     background: var(--foreground);
   }
 }
+
+html.dark .eyebrow {
+  color: var(--ring);
+}
+
+html.dark .steps-grid p,
+html.dark .safety-help p {
+  color: var(--muted-foreground);
+}
+
+html.dark .safety-help h2 {
+  color: var(--foreground);
+}
+
+html.dark .safety-help p a {
+  color: var(--ring);
+}
