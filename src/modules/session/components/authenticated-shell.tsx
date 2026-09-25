@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
 import { NotificationPanel } from "@/modules/notification/components/notification-panel";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 import { getSession, logout } from "../client";
 
@@ -42,7 +43,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
 
   if (session.isPending) {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#fffaf8]" aria-busy="true">
+      <main className="account-loading grid min-h-screen place-items-center" aria-busy="true">
         <p className="text-sm text-neutral-600">Loading your account...</p>
       </main>
     );
@@ -50,7 +51,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
 
   if (session.isError) {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#fffaf8]">
+      <main className="account-loading grid min-h-screen place-items-center">
         <p className="text-sm text-neutral-600">Taking you to sign in...</p>
       </main>
     );
@@ -77,8 +78,8 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   };
 
   return (
-    <div className="min-h-screen bg-[#fffaf8] text-neutral-950">
-      <header className="sticky top-0 z-30 border-b border-[#efc9c6] bg-[#f9d9d4]/95 backdrop-blur">
+    <div className="authenticated-shell min-h-screen">
+      <header className="authenticated-header sticky top-0 z-30 border-b backdrop-blur">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-5 px-4 sm:px-6">
           <Link className="mr-auto text-sm font-extrabold" href="/dashboard">
             <span className="mr-2 inline-block size-3 rounded-full bg-[#ff5c67]" />
@@ -88,8 +89,8 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
             {visibleNavigation.map(({ href, label, icon: Icon }) => (
               <Link
                 className={cn(
-                  "inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold text-neutral-600 hover:bg-white/60 hover:text-neutral-950",
-                  pathname.startsWith(href) && "bg-white/75 text-neutral-950",
+                  "authenticated-nav-link inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold",
+                  pathname.startsWith(href) && "is-active",
                 )}
                 href={href}
                 key={href}
@@ -99,13 +100,14 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
             ))}
           </nav>
           <button
-            className="grid size-9 place-items-center rounded-full hover:bg-white/60"
+            className="account-icon-button grid size-9 place-items-center rounded-full"
             onClick={() => setNotificationsOpen(true)}
             title="Notifications"
             type="button"
           >
             <Bell aria-hidden size={18} />
           </button>
+          <ThemeToggle />
           <div className="hidden items-center gap-2 sm:flex">
             <span className="grid size-8 place-items-center rounded-full bg-[#23212b] text-white">
               <UserRound aria-hidden size={16} />
@@ -113,7 +115,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
             <span className="max-w-32 truncate text-sm font-semibold">{user.name}</span>
           </div>
           <button
-            className="grid size-9 place-items-center rounded-full hover:bg-white/60"
+            className="account-icon-button grid size-9 place-items-center rounded-full"
             onClick={handleLogout}
             title="Sign out"
             type="button"
@@ -122,14 +124,14 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
           </button>
         </div>
       </header>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</div>
+      <div className="account-page mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</div>
       <nav
-        className={`fixed inset-x-0 bottom-0 z-30 grid ${user.role === "mate" ? "grid-cols-6" : "grid-cols-3"} border-t border-neutral-200 bg-white md:hidden`}
+        className={`account-mobile-nav fixed inset-x-0 bottom-0 z-30 grid ${user.role === "mate" ? "grid-cols-6" : "grid-cols-3"} border-t md:hidden`}
         aria-label="Mobile navigation"
       >
         {visibleNavigation.map(({ href, label, icon: Icon }) => (
           <Link
-            className="grid min-h-16 place-items-center gap-1 py-2 text-xs font-semibold"
+            className={`account-mobile-link grid min-h-16 place-items-center gap-1 py-2 text-xs font-semibold ${pathname.startsWith(href) ? "is-active" : ""}`}
             href={href}
             key={href}
           >

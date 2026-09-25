@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { englishLookupName } from "@/lib/i18n/english-labels";
 import { Search, SlidersHorizontal } from "lucide-react";
 
 type Lookup = { id: number; name: string };
@@ -44,7 +45,9 @@ export function DiscoveryFilters({ activities, interests, provinces, lookupError
         response.ok ? response.json() : Promise.reject(new Error("lookup failed")),
       )
       .then((payload: { items?: Lookup[] }) => {
-        setDistricts(payload.items ?? []);
+        setDistricts(
+          (payload.items ?? []).map((item) => ({ ...item, name: englishLookupName(item.name) })),
+        );
         setDistrictError(false);
       })
       .catch(() => {
@@ -142,7 +145,7 @@ export function DiscoveryFilters({ activities, interests, provinces, lookupError
               <option value="">All provinces</option>
               {provinces.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.name}
+                  {englishLookupName(item.name)}
                 </option>
               ))}
             </select>

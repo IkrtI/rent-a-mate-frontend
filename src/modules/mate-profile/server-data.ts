@@ -4,6 +4,11 @@ import { requestAuthenticatedBackend } from "@/app/api/_lib/session";
 import { BackendClientError, requestBackend } from "@/modules/backend-client/client";
 
 import { lookupSchema, mateProfileSchema, mateResultSchema } from "./schemas";
+import {
+  englishActivityName,
+  englishInterestName,
+  englishLookupName,
+} from "@/lib/i18n/english-labels";
 
 const lookupResultSchema = z.object({ items: z.array(lookupSchema) });
 
@@ -30,6 +35,18 @@ export async function getMateEditorData() {
     mateResult && "mate" in mateResult && mateResult.mate
       ? mateProfileSchema.parse(mateResult.mate)
       : null;
+  if (mate) {
+    mate.province.name = englishLookupName(mate.province.name);
+    mate.district.name = englishLookupName(mate.district.name);
+    mate.activities = mate.activities.map((item) => ({
+      ...item,
+      name: englishActivityName(item.name),
+    }));
+    mate.interests = mate.interests.map((item) => ({
+      ...item,
+      name: englishInterestName(item.name),
+    }));
+  }
   let districts: { id: number; name: string }[] = [];
   let districtLookupError = false;
   if (mate) {
@@ -39,16 +56,16 @@ export async function getMateEditorData() {
     })
       .then((data) => ({ ...data, failed: false }))
       .catch(() => ({ items: [], failed: true }));
-    districts = result.items;
+    districts = result.items.map((item) => ({ ...item, name: englishLookupName(item.name) }));
     districtLookupError = result.failed;
   }
   return {
     mate,
     loadError: mateResult && "loadError" in mateResult ? mateResult.loadError : false,
     lookupError: activities.failed || interests.failed || provinces.failed || districtLookupError,
-    activities: activities.items,
-    interests: interests.items,
-    provinces: provinces.items,
+    activities: activities.items.map((item) => ({ ...item, name: englishActivityName(item.name) })),
+    interests: interests.items.map((item) => ({ ...item, name: englishInterestName(item.name) })),
+    provinces: provinces.items.map((item) => ({ ...item, name: englishLookupName(item.name) })),
     districts,
   };
 }

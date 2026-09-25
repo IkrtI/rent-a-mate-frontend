@@ -17,6 +17,11 @@ import {
   replaceAvailabilitySchema,
 } from "./schemas";
 import type { MateProfile } from "./schemas";
+import {
+  englishActivityName,
+  englishInterestName,
+  englishLookupName,
+} from "@/lib/i18n/english-labels";
 
 type Lookup = { id: number; name: string };
 type ProfileProps = {
@@ -60,7 +65,9 @@ export function ProfileEditor({
     fetch(`/api/provinces/${provinceId}/districts`, { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject()))
       .then((payload: { items?: Lookup[] }) => {
-        setDistricts(payload.items ?? []);
+        setDistricts(
+          (payload.items ?? []).map((item) => ({ ...item, name: englishLookupName(item.name) })),
+        );
         setDistrictsForProvince(provinceId);
       })
       .catch(() => {
@@ -174,7 +181,7 @@ export function ProfileEditor({
             <option value="">Choose province</option>
             {provinces.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.name}
+                {englishLookupName(item.name)}
               </option>
             ))}
           </select>
@@ -191,7 +198,7 @@ export function ProfileEditor({
             <option value="">Choose district</option>
             {districts.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.name}
+                {englishLookupName(item.name)}
               </option>
             ))}
           </select>
@@ -216,7 +223,7 @@ export function ProfileEditor({
           >
             {activities.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.name}
+                {englishActivityName(item.name)}
               </option>
             ))}
           </select>
@@ -234,7 +241,7 @@ export function ProfileEditor({
           >
             {interests.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.name}
+                {englishInterestName(item.name)}
               </option>
             ))}
           </select>

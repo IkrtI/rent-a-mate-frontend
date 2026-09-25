@@ -74,6 +74,7 @@ export default async function MatesPage({ searchParams }: Props) {
       </section>
       <section aria-label="Find and filter mates" className="directory-wrap">
         <DiscoveryFilters
+          key={filterParams.toString()}
           activities={lookups.activities}
           interests={lookups.interests}
           provinces={lookups.provinces}

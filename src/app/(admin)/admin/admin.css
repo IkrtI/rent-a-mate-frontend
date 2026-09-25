@@ -12,6 +12,88 @@
   --admin-surface: var(--card);
   --admin-canvas: var(--background);
 }
+
+html.dark .admin-shell {
+  --admin-primary-hover: #f17a81;
+  --admin-primary-soft: #382a2c;
+  --admin-ink: var(--foreground);
+  --admin-muted: var(--muted-foreground);
+  --admin-line: var(--border);
+  --admin-surface: var(--card);
+  --admin-canvas: var(--background);
+}
+html.dark .admin-sidebar {
+  color: var(--foreground);
+  background: #292327;
+}
+html.dark .admin-nav-label,
+html.dark .admin-brand-copy small,
+html.dark .admin-login-brand small {
+  color: #df9da0;
+}
+html.dark .admin-nav-link {
+  color: #d4c8c7;
+}
+html.dark .admin-nav-link:hover,
+html.dark .admin-nav-link.is-active {
+  border-color: #604045;
+  color: #fff0ef;
+  background: #3b2c30;
+}
+html.dark .admin-sidebar-foot {
+  border-color: var(--admin-line);
+  background: #302b30;
+}
+html.dark .admin-topbar,
+html.dark .admin-footer,
+html.dark .admin-icon-button,
+html.dark .admin-select,
+html.dark .admin-search,
+html.dark .admin-search input,
+html.dark .admin-filter-select select,
+html.dark .admin-input,
+html.dark .admin-table-wrap,
+html.dark .admin-panel,
+html.dark .admin-card,
+html.dark .admin-dialog {
+  border-color: var(--admin-line);
+  color: var(--admin-ink);
+  background-color: var(--admin-surface);
+}
+html.dark .admin-main {
+  background: var(--admin-canvas);
+}
+html.dark .admin-table th,
+html.dark .admin-table td,
+html.dark .admin-table tr,
+html.dark .admin-profile-chip {
+  border-color: var(--admin-line);
+}
+html.dark .admin-table th,
+html.dark .admin-muted-panel,
+html.dark .admin-empty-state,
+html.dark .admin-pagination,
+html.dark .admin-toolbar {
+  color: var(--admin-muted);
+  background: var(--muted);
+}
+html.dark .admin-table td,
+html.dark .admin-search input,
+html.dark .admin-input,
+html.dark .admin-select,
+html.dark .admin-filter-select select {
+  color: var(--admin-ink);
+}
+html.dark .admin-badge,
+html.dark .admin-status,
+html.dark .admin-callout,
+html.dark .admin-notice {
+  border-color: var(--admin-line);
+}
+html.dark .admin-icon-button:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
 .admin-shell {
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr);
@@ -1541,6 +1623,67 @@
   .admin-login-intro {
     margin-bottom: 22px;
   }
+}
+
+html.dark
+  .admin-shell
+  :where(
+    .admin-panel,
+    .admin-metric,
+    .admin-status-panel,
+    .admin-filter-panel,
+    .admin-table-wrap,
+    .admin-resolution-dialog,
+    .admin-queue-card,
+    .admin-select,
+    .admin-input,
+    .admin-search,
+    .admin-search input,
+    .admin-filter-select select
+  ) {
+  border-color: var(--admin-line);
+  color: var(--admin-ink);
+  background-color: var(--admin-surface);
+}
+html.dark .admin-shell :where(.admin-panel-header, .admin-toolbar, .admin-pagination) {
+  border-color: var(--admin-line);
+  color: var(--admin-muted);
+  background-color: var(--muted);
+}
+html.dark
+  .admin-shell
+  :where(
+    .admin-table-primary,
+    .admin-page-heading-copy h2,
+    .admin-panel-header h3,
+    .admin-metric-value,
+    .admin-queue-copy h3
+  ) {
+  color: var(--admin-ink);
+}
+html.dark
+  .admin-shell
+  :where(
+    .admin-table-secondary,
+    .admin-panel-header p,
+    .admin-metric-label,
+    .admin-metric-hint,
+    .admin-queue-copy > p:last-child
+  ) {
+  color: var(--admin-muted);
+}
+html.dark .admin-shell .admin-table tbody tr:hover {
+  background: #30292d;
+}
+html.dark .admin-shell .admin-filter-clear,
+html.dark .admin-shell .admin-secondary-button {
+  border-color: var(--admin-line);
+  color: var(--admin-ink);
+  background: var(--muted);
+}
+html.dark .admin-shell .admin-secondary-button:hover,
+html.dark .admin-shell .admin-filter-clear:hover {
+  background: var(--accent);
 }
 @media (max-width: 420px) {
   .admin-metric-grid {

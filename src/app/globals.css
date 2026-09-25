@@ -79,37 +79,38 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.459 0.187 3.815);
-  --primary-foreground: oklch(0.971 0.014 343.198);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  color-scheme: dark;
+  --background: #17171b;
+  --foreground: #f6f0ed;
+  --card: #222126;
+  --card-foreground: #f6f0ed;
+  --popover: #26242a;
+  --popover-foreground: #f6f0ed;
+  --primary: #ed6870;
+  --primary-foreground: #fff;
+  --secondary: #382a2c;
+  --secondary-foreground: #f6f0ed;
+  --muted: #252429;
+  --muted-foreground: #b8aeab;
+  --accent: #382a2c;
+  --accent-foreground: #f6f0ed;
+  --destructive: #fb7880;
+  --border: #403b3d;
+  --input: #4a4142;
+  --ring: #f17a81;
   --chart-1: oklch(0.823 0.12 346.018);
   --chart-2: oklch(0.656 0.241 354.308);
   --chart-3: oklch(0.592 0.249 0.584);
   --chart-4: oklch(0.525 0.223 3.958);
   --chart-5: oklch(0.459 0.187 3.815);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.656 0.241 354.308);
-  --sidebar-primary-foreground: oklch(0.971 0.014 343.198);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: #222126;
+  --sidebar-foreground: #f6f0ed;
+  --sidebar-primary: #ed6870;
+  --sidebar-primary-foreground: #fff;
+  --sidebar-accent: #382a2c;
+  --sidebar-accent-foreground: #f6f0ed;
+  --sidebar-border: #403b3d;
+  --sidebar-ring: #f17a81;
 }
 
 :root,
@@ -149,6 +150,234 @@ body {
 ::selection {
   background: #ffd9d2;
   color: #20212a;
+}
+
+html.dark body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  min-width: 40px;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: var(--foreground);
+  background: var(--card);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+.theme-toggle:hover {
+  border-color: var(--primary);
+  background: var(--accent);
+}
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dark .site-header,
+.dark .site-footer,
+.dark .home-hero,
+.dark .steps-section,
+.dark .page-hero,
+.dark .directory-page,
+.dark .profile-page,
+.dark .editorial-layout {
+  color: var(--foreground);
+  background-color: var(--background);
+}
+.dark .featured-section,
+.dark .how-steps,
+.dark .directory-intro,
+.dark .filter-bar,
+.dark .editorial-aside {
+  color: var(--foreground);
+  background-color: var(--muted);
+}
+.dark .brand,
+.dark .desktop-nav a,
+.dark .login-link,
+.dark .footer-nav a,
+.dark .profile-copy > h1,
+.dark .profile-section h2,
+.dark .booking-price,
+.dark .booking-cost strong,
+.dark .activity-card-bottom,
+.dark .mate-name-row h2,
+.dark .mate-name-row h3,
+.dark .directory-intro h1,
+.dark .home-hero h1,
+.dark .section-heading h2,
+.dark .how-step h2,
+.dark .how-note h2,
+.dark .safety-lead h2,
+.dark .editorial-article h2 {
+  color: var(--foreground);
+}
+.dark .home-hero :where(p),
+.dark .section-heading :where(p),
+.dark .mate-name-row p,
+.dark .mate-interests,
+.dark .profile-location,
+.dark .profile-section > p,
+.dark .booking-price span,
+.dark .booking-description,
+.dark .booking-note,
+.dark .booking-field,
+.dark .booking-cost,
+.dark .directory-intro-copy > p:last-child,
+.dark .directory-results-head,
+.dark .editorial-article p,
+.dark .footer-brand p,
+.dark .copyright,
+.dark .how-step p,
+.dark .safety-item p {
+  color: var(--muted-foreground);
+}
+.dark .activity-card,
+.dark .mate-card,
+.dark .steps-grid article,
+.dark .how-step,
+.dark .safety-item,
+.dark .editorial-article,
+.dark .filter-options-group,
+.dark .filter-select select,
+.dark .filter-number input,
+.dark .directory-search,
+.dark .directory-search input,
+.dark .filter-option,
+.dark .state-card,
+.dark .pill,
+.dark .review-card,
+.dark .booking-card,
+.dark .booking-field input,
+.dark .booking-field select {
+  border-color: var(--border);
+  color: var(--foreground);
+  background-color: var(--card);
+}
+.dark .activity-card:nth-child(n),
+.dark .activity-image,
+.dark .mate-photo,
+.dark .directory-grid .mate-card:hover,
+.dark .filter-select select:disabled {
+  background-color: var(--muted);
+}
+.dark .directory-search input::placeholder,
+.dark .booking-field select:disabled {
+  color: var(--muted-foreground);
+}
+.dark .filter-option:hover,
+.dark .filter-option:has(input:checked),
+.dark .directory-filter-disclosure > summary:hover,
+.dark .directory-filter-disclosure[open] > summary,
+.dark .button-outline {
+  border-color: var(--border);
+  color: var(--foreground);
+  background: var(--accent);
+}
+.dark .booking-error {
+  color: #ffc4c4;
+  background: #48292c;
+}
+.dark .booking-success {
+  color: #c7f0d5;
+  background: #203a2d;
+}
+.dark .profile-section,
+.dark .profile-top-link,
+.dark .footer-inner {
+  border-color: var(--border);
+}
+.dark .profile-top-link a,
+.dark .pagination,
+.dark .profile-link {
+  color: #f28a8e;
+}
+
+.authenticated-shell {
+  color: var(--foreground);
+  background: var(--background);
+}
+.authenticated-header {
+  border-color: var(--border);
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--secondary) 92%, transparent);
+}
+.authenticated-nav-link,
+.account-icon-button,
+.account-mobile-link {
+  color: var(--muted-foreground);
+  background: transparent;
+  text-decoration: none;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+.authenticated-nav-link:hover,
+.authenticated-nav-link.is-active,
+.account-icon-button:hover,
+.account-mobile-link:hover,
+.account-mobile-link.is-active {
+  color: var(--foreground);
+  background: var(--card);
+}
+.account-mobile-nav {
+  border-color: var(--border);
+  background: var(--card);
+}
+.account-page {
+  color: var(--foreground);
+}
+.account-loading,
+.auth-frame {
+  color: var(--foreground);
+  background: var(--background);
+}
+.auth-frame-aside {
+  color: var(--foreground);
+  background: var(--muted);
+}
+.auth-frame-copy {
+  border-color: var(--border);
+}
+.auth-frame-description,
+.auth-back-link {
+  color: var(--muted-foreground);
+}
+.auth-frame-form {
+  background: var(--background);
+}
+.dark .authenticated-shell [class*="bg-white"],
+.dark .auth-frame-form [class*="bg-white"],
+.dark .account-page [class*="bg-white"] {
+  background-color: var(--card) !important;
+}
+.dark .authenticated-shell [class*="text-neutral-"],
+.dark .auth-frame [class*="text-neutral-"] {
+  color: var(--foreground) !important;
+}
+.dark .authenticated-shell [class*="border-neutral-"],
+.dark .auth-frame [class*="border-neutral-"] {
+  border-color: var(--border) !important;
+}
+.dark .auth-frame-aside img {
+  mix-blend-mode: normal;
+}
+.dark :where(input, select, textarea) {
+  color-scheme: dark;
 }
 :focus-visible {
   outline: 3px solid #d63d47;
@@ -2469,4 +2698,175 @@ h2 {
   .footer-nav a {
     min-height: 44px;
   }
+}
+
+/* Dark palette adjustments for the full public experience. */
+html.dark .home-hero {
+  color: var(--foreground);
+  background:
+    radial-gradient(ellipse at 78% 48%, #57373a 0, #57373a82 24%, transparent 50%),
+    linear-gradient(112deg, #211e22 0%, #1a191e 58%, #292025 100%);
+}
+html.dark .home-hero h1,
+html.dark .page-hero h1,
+html.dark .directory-intro h1 {
+  color: var(--foreground);
+}
+html.dark .home-hero h1 em,
+html.dark .page-hero h1 em,
+html.dark .directory-intro h1 em,
+html.dark .section-heading h2 em,
+html.dark .home-cta h2 em {
+  color: #fa9293;
+}
+html.dark .hero-description,
+html.dark .hero-bottom,
+html.dark .page-hero-copy,
+html.dark .how-step p:last-child,
+html.dark .how-note > p:not(.eyebrow),
+html.dark .safety-lead > p:last-child,
+html.dark .safety-item p,
+html.dark .editorial-article p,
+html.dark .editorial-aside p,
+html.dark .directory-intro-copy > p:last-child,
+html.dark .directory-intro-note p {
+  color: var(--muted-foreground);
+}
+html.dark .hero-search,
+html.dark .hero-search input {
+  border-color: var(--border);
+  color: var(--foreground);
+  background: var(--card);
+}
+html.dark .hero-search input::placeholder {
+  color: var(--muted-foreground);
+}
+html.dark .home-cta {
+  color: var(--foreground);
+  background: #283c36;
+}
+html.dark .home-cta h2 {
+  color: var(--foreground);
+}
+html.dark .home-cta .eyebrow,
+html.dark .home-cta h2 em {
+  color: #f1b6a8;
+}
+html.dark .page-hero {
+  border-color: var(--border);
+  background:
+    radial-gradient(ellipse at 82% 42%, #55383a 0, #55383a75 20%, transparent 44%),
+    linear-gradient(112deg, #211e22 0%, #1a191e 60%, #292025 100%);
+}
+html.dark .how-steps,
+html.dark .how-note,
+html.dark .steps-section,
+html.dark .directory-intro,
+html.dark .filter-bar {
+  background: #1e1d22;
+}
+html.dark .how-step,
+html.dark .safety-help,
+html.dark .editorial-aside,
+html.dark .directory-intro-note,
+html.dark .filter-options-group,
+html.dark .filter-option,
+html.dark .directory-search,
+html.dark .directory-search input,
+html.dark .filter-select select,
+html.dark .filter-number input {
+  border-color: var(--border);
+  color: var(--foreground);
+  background: var(--card);
+}
+html.dark .filter-option-list {
+  border-color: var(--border);
+  background: #1e1d22;
+}
+html.dark .filter-select > span,
+html.dark .filter-options-group legend,
+html.dark .filter-options-group legend small,
+html.dark .directory-kicker,
+html.dark .directory-intro-note strong {
+  color: var(--muted-foreground);
+}
+html.dark .how-step-mark,
+html.dark .safety-item > span {
+  color: #ffb2b2;
+  background: #382a2c;
+}
+html.dark .activity-card,
+html.dark .mate-card,
+html.dark .steps-grid article,
+html.dark .review-card,
+html.dark .booking-card,
+html.dark .pill,
+html.dark .state-card {
+  border-color: var(--border);
+  color: var(--foreground);
+  background: var(--card);
+}
+html.dark .activity-card-bottom,
+html.dark .mate-name-row h2,
+html.dark .mate-name-row h3,
+html.dark .profile-section h2,
+html.dark .editorial-article h2,
+html.dark .how-step h2,
+html.dark .safety-item h3,
+html.dark .directory-results-head p,
+html.dark .state-card h1,
+html.dark .state-card h2 {
+  color: var(--foreground);
+}
+html.dark .mate-name-row p,
+html.dark .mate-interests,
+html.dark .profile-location,
+html.dark .profile-section > p,
+html.dark .review-card p,
+html.dark .booking-description,
+html.dark .booking-note,
+html.dark .booking-field,
+html.dark .booking-cost,
+html.dark .directory-intro-note .directory-note-label,
+html.dark .directory-results-head,
+html.dark .editorial-aside,
+html.dark .editorial-article,
+html.dark .footer-brand p,
+html.dark .copyright {
+  color: var(--muted-foreground);
+}
+html.dark .directory-search input::placeholder,
+html.dark .filter-select select:disabled,
+html.dark .booking-field select:disabled {
+  color: var(--muted-foreground);
+}
+html.dark .booking-field select:disabled {
+  background: var(--muted);
+}
+html.dark .button-outline,
+html.dark .directory-filter-disclosure > summary,
+html.dark .directory-filter-disclosure > summary:hover,
+html.dark .directory-filter-disclosure[open] > summary,
+html.dark .filter-option:hover,
+html.dark .filter-option:has(input:checked) {
+  border-color: var(--border);
+  color: var(--foreground);
+  background: var(--accent);
+}
+html.dark .profile-cover {
+  background: linear-gradient(135deg, #3c3030, #28252a);
+}
+html.dark .profile-section {
+  border-color: var(--border);
+}
+html.dark .booking-price,
+html.dark .booking-cost strong {
+  color: var(--foreground);
+}
+html.dark .profile-top-link a,
+html.dark .text-link,
+html.dark .profile-link,
+html.dark .editorial-aside a,
+html.dark .editorial-contact a {
+  color: #f28a8e;
 }

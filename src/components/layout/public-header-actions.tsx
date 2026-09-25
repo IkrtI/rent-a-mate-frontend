@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { getSession, logout } from "@/modules/session/client";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function PublicHeaderActions({ links }: { links: { href: string; label: string }[] }) {
   const router = useRouter();
@@ -25,6 +26,7 @@ export function PublicHeaderActions({ links }: { links: { href: string; label: s
 
   return (
     <>
+      <ThemeToggle />
       {session.isSuccess ? (
         <>
           <Link className="login-link" href="/dashboard">
