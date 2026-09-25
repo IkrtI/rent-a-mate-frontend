@@ -1200,6 +1200,7 @@ h2 {
   cursor: pointer;
 }
 .filter-options-group {
+  grid-column: span 2;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -1210,7 +1211,7 @@ h2 {
 }
 .filter-options-group legend {
   width: 100%;
-  margin-bottom: 7px;
+  margin-bottom: 0;
   padding: 0;
   color: #746760;
   font-size: 11px;
@@ -1225,23 +1226,24 @@ h2 {
 .filter-option-list {
   min-height: 48px;
   padding: 10px;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   align-content: start;
-  align-items: flex-start;
-  flex-wrap: wrap;
   gap: 8px;
   border: 1px solid #e8ded8;
   border-radius: 12px;
   background: #fff;
 }
 .filter-option {
-  min-height: 38px;
-  padding: 0 11px;
-  display: inline-flex;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 10px;
+  display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 8px;
   border: 1px solid #eee4de;
-  border-radius: 999px;
+  border-radius: 9px;
   color: #4d443f;
   background: #fdfaf8;
   font-size: 12px;
@@ -1755,10 +1757,14 @@ h2 {
     gap: 5%;
   }
   .filter-controls {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-options-group.filter-multiple {
+    grid-column: span 1;
   }
   .filter-submit {
-    grid-column: 3;
+    grid-column: 2;
   }
   .directory-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2039,8 +2045,8 @@ h2 {
     gap: 13px 9px;
     padding: 14px 2px 3px;
   }
-  .filter-multiple {
-    grid-column: span 2;
+  .filter-options-group.filter-multiple {
+    grid-column: 1 / -1;
   }
   .filter-submit {
     grid-column: 2;
@@ -2101,6 +2107,9 @@ h2 {
   }
   .filter-multiple,
   .filter-submit {
+    grid-column: 1;
+  }
+  .filter-options-group.filter-multiple {
     grid-column: 1;
   }
   .filter-submit {
