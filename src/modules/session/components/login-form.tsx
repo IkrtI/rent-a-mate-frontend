@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,6 +20,7 @@ type Values = z.infer<typeof schema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<string | null>(
     searchParams.get("reason") === "forbidden"
@@ -40,6 +42,7 @@ export function LoginForm() {
     setMessage(null);
     try {
       const { user } = await login(values);
+      queryClient.setQueryData(["session"], { user });
       const requestedDestination = searchParams.get("returnTo");
       router.replace(
         requestedDestination

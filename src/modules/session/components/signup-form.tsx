@@ -25,10 +25,14 @@ const schema = z
   });
 type Values = z.infer<typeof schema>;
 
-export function SignupForm() {
+export function SignupForm({
+  initialRole = "renter",
+}: {
+  initialRole?: "renter" | "mate";
+} = {}) {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
-  const [role, setRole] = useState<"renter" | "mate">("renter");
+  const [role, setRole] = useState<"renter" | "mate">(initialRole);
   const [message, setMessage] = useState<string | null>(null);
   const {
     register: registerField,

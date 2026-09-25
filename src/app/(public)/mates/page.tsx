@@ -54,9 +54,6 @@ export default async function MatesPage({ searchParams }: Props) {
     if (values.length === 1) normalizedSearch[key] = values[0];
     else if (values.length > 1) normalizedSearch[key] = values;
   }
-  const hasFilters = [...filterParams.keys()].some(
-    (key) => key !== "sort" || filterParams.get(key) !== "-createdAt",
-  );
   return (
     <main className="directory-page">
       <section className="directory-intro">
