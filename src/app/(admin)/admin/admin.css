@@ -1685,6 +1685,26 @@ html.dark .admin-shell .admin-secondary-button:hover,
 html.dark .admin-shell .admin-filter-clear:hover {
   background: var(--accent);
 }
+html.dark .admin-shell .admin-icon-button,
+html.dark .admin-shell .admin-mobile-menu,
+html.dark .admin-shell .admin-chart-metric-controls button,
+html.dark .admin-shell .admin-field input,
+html.dark .admin-shell .admin-field select,
+html.dark .admin-shell .admin-field textarea,
+html.dark .admin-shell .admin-input-wrap {
+  border-color: var(--admin-line);
+  color: var(--admin-ink);
+  background-color: var(--admin-surface);
+}
+html.dark .admin-shell .admin-field input[type="date"] {
+  color-scheme: dark;
+}
+html.dark .admin-shell .admin-chart-metric-controls button:hover,
+html.dark .admin-shell .admin-chart-metric-controls button.is-active {
+  border-color: var(--ring);
+  color: var(--foreground);
+  background: var(--accent);
+}
 @media (max-width: 420px) {
   .admin-metric-grid {
     grid-template-columns: minmax(0, 1fr);

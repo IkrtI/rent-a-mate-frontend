@@ -7,7 +7,7 @@ import type { AdminAnalytics } from "@/modules/admin/contracts";
 type Metric = "bookings" | "paidRevenue" | "newUsers";
 
 const metrics: Array<{ key: Metric; label: string; color: string }> = [
-  { key: "bookings", label: "Bookings", color: "#3158c8" },
+  { key: "bookings", label: "Bookings", color: "var(--admin-primary)" },
   { key: "paidRevenue", label: "Paid revenue", color: "#14866d" },
   { key: "newUsers", label: "New active users", color: "#d97706" },
 ];
