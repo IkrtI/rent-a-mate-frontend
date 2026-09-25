@@ -26,7 +26,7 @@ export function PublicHeaderActions({ links }: { links: { href: string; label: s
 
   return (
     <>
-      <ThemeToggle />
+      <ThemeToggle className="desktop-theme-toggle" />
       {session.isSuccess ? (
         <>
           <Link className="login-link" href="/dashboard">
@@ -70,6 +70,10 @@ export function PublicHeaderActions({ links }: { links: { href: string; label: s
               <Link href="/signup">Sign up</Link>
             </>
           )}
+          <div className="mobile-menu-theme">
+            <span>Appearance</span>
+            <ThemeToggle className="mobile-theme-toggle" />
+          </div>
         </nav>
       </details>
     </>

@@ -531,6 +531,13 @@ html.dark body {
   font-size: 14px;
   text-decoration: none;
 }
+.desktop-theme-toggle {
+  display: inline-flex;
+}
+.mobile-menu-theme,
+.mobile-theme-toggle {
+  display: none;
+}
 .site-footer {
   background: #20212a;
   color: #fff;
@@ -2012,7 +2019,29 @@ h2 {
     display: block;
   }
   .header-actions {
-    gap: 4px;
+    gap: 12px;
+  }
+  .desktop-theme-toggle {
+    display: none;
+  }
+  .mobile-menu-theme {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 8px 4px 2px;
+    padding: 11px 8px 0;
+    border-top: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .mobile-theme-toggle {
+    display: inline-flex;
+    min-width: 40px;
+    min-height: 36px;
+    flex: none;
+    padding: 0 10px;
   }
   .header-actions > .button {
     min-height: 38px;
@@ -2869,4 +2898,23 @@ html.dark .profile-link,
 html.dark .editorial-aside a,
 html.dark .editorial-contact a {
   color: #f28a8e;
+}
+html.dark .mate-rate {
+  color: var(--muted-foreground);
+}
+html.dark .mate-rate strong {
+  color: var(--foreground);
+}
+html.dark .mobile-menu nav {
+  border-color: var(--border);
+  background: var(--card);
+  box-shadow: 0 16px 40px #0006;
+}
+html.dark .mobile-menu nav a,
+html.dark .mobile-menu nav button {
+  color: var(--foreground);
+}
+html.dark .mobile-menu nav a:hover,
+html.dark .mobile-menu nav button:hover {
+  background: var(--accent);
 }
