@@ -76,6 +76,12 @@ export function createPayment(bookingId: number) {
   });
 }
 
+export function confirmLocalMockPayment(bookingId: number) {
+  return requestSameOrigin(`/api/bookings/${bookingId}/payment/confirm`, paymentSchema, {
+    method: "POST",
+  });
+}
+
 export function listPayments(input: { page?: number; limit?: number } = {}) {
   const query = new URLSearchParams({ limit: String(input.limit ?? 20) });
   if (input.page) query.set("page", String(input.page));

@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { listBookings } from "@/modules/booking/client";
 import { formatBookingDate } from "@/modules/booking/format";
 import { getSession } from "@/modules/session/client";
-import { listMessages, sendMessage } from "../client";
+import { listMessages, sendMessage as sendRestMessage } from "../client";
 import { useBookingRealtime } from "../realtime";
 import type { Message, MessagePage } from "../schemas";
 
@@ -17,7 +17,6 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPageVisible, setIsPageVisible] = useState(false);
-  const pendingMessageRef = useRef<{ bookingId: number; id: string } | null>(null);
   const typingSentRef = useRef(false);
   const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
@@ -35,7 +34,13 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
       };
     });
   };
-  const { status, isOtherTyping, setTyping, markRead } = useBookingRealtime(
+  const {
+    status,
+    isOtherTyping,
+    setTyping,
+    markRead,
+    sendMessage: sendRealtimeMessage,
+  } = useBookingRealtime(
     selectedBookingId,
     (message) => {
       mergeMessage(message);
@@ -92,11 +97,12 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     publishTyping(false);
   };
   const send = useMutation({
-    mutationFn: (input: { content: string; clientMessageId: string }) =>
-      sendMessage(selectedBookingId!, input.content, input.clientMessageId),
+    mutationFn: (content: string) =>
+      status === "connected"
+        ? sendRealtimeMessage(content)
+        : sendRestMessage(selectedBookingId!, content),
     onSuccess: async (message) => {
       mergeMessage(message);
-      pendingMessageRef.current = null;
       stopTyping();
       setContent("");
       setError(null);
@@ -225,13 +231,7 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
               onSubmit={(event) => {
                 event.preventDefault();
                 if (content.trim() && selectedBookingId) {
-                  if (pendingMessageRef.current?.bookingId !== selectedBookingId) {
-                    pendingMessageRef.current = {
-                      bookingId: selectedBookingId,
-                      id: crypto.randomUUID(),
-                    };
-                  }
-                  send.mutate({ content, clientMessageId: pendingMessageRef.current.id });
+                  send.mutate(content);
                 }
               }}
             >
@@ -245,7 +245,6 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                   maxLength={2000}
                   onBlur={stopTyping}
                   onChange={(event) => {
-                    pendingMessageRef.current = null;
                     const nextContent = event.target.value;
                     setContent(nextContent);
                     if (typingStopTimerRef.current) clearTimeout(typingStopTimerRef.current);

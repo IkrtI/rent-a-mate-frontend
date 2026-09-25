@@ -5,10 +5,15 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { createPayment, getPayment } from "../client";
+import { confirmLocalMockPayment, createPayment, getPayment } from "../client";
 
 const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-const stripePromise = publishableKey ? loadStripe(publishableKey) : null;
+const stripePromise =
+  process.env.NEXT_PUBLIC_PAYMENTS_MODE === "mock"
+    ? null
+    : publishableKey
+      ? loadStripe(publishableKey)
+      : null;
 
 const statusCopy = {
   pending: "Payment is pending confirmation.",
@@ -78,12 +83,23 @@ export function BookingPayment({ bookingId, canPay }: { bookingId: number; canPa
       ]);
     },
   });
+  const confirmMock = useMutation({
+    mutationFn: () => confirmLocalMockPayment(bookingId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["payment", bookingId] }),
+        queryClient.invalidateQueries({ queryKey: ["payments"] }),
+        queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+      ]);
+    },
+  });
 
   if (!canPay) return null;
   const status = payment.data?.status;
   const hasIntent = Boolean(payment.data?.providerReference);
   const final = status === "paid" || status === "refunded" || status === "refunding";
   const error = initiate.error instanceof Error ? initiate.error.message : null;
+  const localMock = clientSecret?.startsWith("local_mock_client_secret_") ?? false;
 
   return (
     <section className="mt-5 border-t border-neutral-200 pt-5" aria-labelledby="payment-heading">
@@ -108,7 +124,27 @@ export function BookingPayment({ bookingId, canPay }: { bookingId: number; canPa
           {initiate.isPending ? "Preparing payment…" : hasIntent ? "Continue payment" : "Pay now"}
         </button>
       ) : null}
-      {clientSecret && stripePromise ? (
+      {clientSecret && localMock ? (
+        <div className="mt-4 grid gap-3 border-t border-neutral-200 pt-4">
+          <p className="text-sm text-neutral-600">Local test payment. No card will be charged.</p>
+          {!final ? (
+            <button
+              className="h-10 rounded-md bg-[#23212b] text-sm font-bold text-white disabled:opacity-50"
+              disabled={confirmMock.isPending}
+              onClick={() => confirmMock.mutate()}
+              type="button"
+            >
+              {confirmMock.isPending ? "Completing test payment…" : "Complete test payment"}
+            </button>
+          ) : null}
+          {confirmMock.error instanceof Error ? (
+            <p className="text-sm text-red-600" role="alert">
+              {confirmMock.error.message}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      {clientSecret && !localMock && stripePromise ? (
         <Elements
           options={{ clientSecret, appearance: { theme: "stripe" } }}
           stripe={stripePromise}
@@ -124,7 +160,7 @@ export function BookingPayment({ bookingId, canPay }: { bookingId: number; canPa
           />
         </Elements>
       ) : null}
-      {clientSecret && !stripePromise ? (
+      {clientSecret && !localMock && !stripePromise ? (
         <p className="mt-3 text-sm text-red-600" role="alert">
           Payments are not configured. Contact support.
         </p>
