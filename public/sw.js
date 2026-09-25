@@ -1,4 +1,4 @@
-const CACHE_NAME = "matefor-offline-v2";
+const CACHE_NAME = "matefor-offline-v3";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {

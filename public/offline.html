@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#fcf8f6" />
     <title>You’re offline · matefor.</title>
+    <script>
+      try {
+        const cookieTheme = document.cookie
+          .split("; ")
+          .find((item) => item.startsWith("matefor-theme="))
+          ?.split("=")[1];
+        const savedTheme = localStorage.getItem("matefor-theme") || cookieTheme;
+        const theme =
+          savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.classList.toggle("dark", theme === "dark");
+        document.documentElement.classList.toggle("light", theme !== "dark");
+        document.documentElement.style.colorScheme = theme;
+      } catch {}
+    </script>
     <style>
       :root {
         color-scheme: light;
@@ -14,17 +28,17 @@
         --line: #e5deda;
         --surface: #fff;
         --primary: #d63d47;
+        --primary-text: #20212a;
       }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          color-scheme: dark;
-          --bg: #17171b;
-          --fg: #f6f0ed;
-          --muted: #b8aeab;
-          --line: #403b3d;
-          --surface: #222126;
-          --primary: #ed6870;
-        }
+      :root.dark {
+        color-scheme: dark;
+        --bg: #17171b;
+        --fg: #f6f0ed;
+        --muted: #b8aeab;
+        --line: #403b3d;
+        --surface: #222126;
+        --primary: #ed6870;
+        --primary-text: #17171b;
       }
       * {
         box-sizing: border-box;
@@ -57,7 +71,7 @@
         place-items: center;
         border-radius: 50%;
         background: #ed6870;
-        color: #fff;
+        color: var(--primary-text);
         font-size: 20px;
       }
       .icon {
@@ -102,7 +116,7 @@
         border-radius: 999px;
         padding: 14px 20px;
         background: var(--primary);
-        color: #fff;
+        color: var(--primary-text);
         font: inherit;
         font-weight: 700;
         cursor: pointer;

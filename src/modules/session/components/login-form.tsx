@@ -63,7 +63,9 @@ export function LoginForm() {
 
   return (
     <div className="w-full">
-      <p className="font-sans text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">Sign in</p>
+      <p className="font-sans text-[11px] tracking-[0.12em] text-[var(--primary-text-accent)] uppercase">
+        Sign in
+      </p>
       <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
         Pick up where you left off.
       </h2>
@@ -114,7 +116,10 @@ export function LoginForm() {
       </form>
       <p className="mt-6 text-center text-sm text-neutral-600">
         New here?{" "}
-        <Link className="font-bold text-[#e34b58] hover:underline" href="/signup">
+        <Link
+          className="font-bold text-[var(--primary-text-accent)] hover:underline"
+          href="/signup"
+        >
           Create an account
         </Link>
       </p>

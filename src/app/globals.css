@@ -51,7 +51,9 @@
   --popover: #fff;
   --popover-foreground: #20212a;
   --primary: #ff5d63;
-  --primary-foreground: #fff;
+  --primary-text-accent: #b43740;
+  --primary-foreground: #20212a;
+  --destructive-foreground: #fff;
   --secondary: #f5d6d0;
   --secondary-foreground: #20212a;
   --muted: #f3eeeb;
@@ -71,7 +73,7 @@
   --sidebar: #fcf8f6;
   --sidebar-foreground: #20212a;
   --sidebar-primary: #ff5d63;
-  --sidebar-primary-foreground: #fff;
+  --sidebar-primary-foreground: #20212a;
   --sidebar-accent: #f9e8e3;
   --sidebar-accent-foreground: #20212a;
   --sidebar-border: #e5deda;
@@ -87,7 +89,9 @@
   --popover: #26242a;
   --popover-foreground: #f6f0ed;
   --primary: #ed6870;
-  --primary-foreground: #fff;
+  --primary-text-accent: #fa9293;
+  --primary-foreground: #17171b;
+  --destructive-foreground: #17171b;
   --secondary: #382a2c;
   --secondary-foreground: #f6f0ed;
   --muted: #252429;
@@ -106,7 +110,7 @@
   --sidebar: #222126;
   --sidebar-foreground: #f6f0ed;
   --sidebar-primary: #ed6870;
-  --sidebar-primary-foreground: #fff;
+  --sidebar-primary-foreground: #17171b;
   --sidebar-accent: #382a2c;
   --sidebar-accent-foreground: #f6f0ed;
   --sidebar-border: #403b3d;
@@ -128,7 +132,7 @@
   --color-neutral: var(--foreground);
   --color-neutral-content: var(--background);
   --color-error: var(--destructive);
-  --color-error-content: var(--primary-foreground);
+  --color-error-content: var(--destructive-foreground);
   --radius-selector: 9999px;
   --radius-field: var(--radius);
   --radius-box: calc(var(--radius) + 0.6rem);
@@ -177,6 +181,9 @@ html.dark body {
     background-color 160ms ease,
     border-color 160ms ease,
     color 160ms ease;
+}
+.theme-toggle-label {
+  color: inherit;
 }
 .theme-toggle:hover {
   border-color: var(--primary);
@@ -280,6 +287,7 @@ html.dark body {
   color: var(--muted-foreground);
 }
 .dark .filter-option:hover,
+.dark .filter-option,
 .dark .filter-option:has(input:checked),
 .dark .directory-filter-disclosure > summary:hover,
 .dark .directory-filter-disclosure[open] > summary,
@@ -417,7 +425,7 @@ html.dark body {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: #fff;
+  color: var(--primary-foreground);
   background: #ff5d63;
   box-shadow: 0 5px 0 #d63d47;
   font-size: 18px;
@@ -632,7 +640,7 @@ h2 {
 .home-cta em,
 .how-note h2 em,
 .safety-lead h2 em {
-  color: #d9444c;
+  color: var(--primary-text-accent);
   font-weight: 500;
 }
 .hero-description {
@@ -1254,7 +1262,7 @@ h2 {
   text-wrap: balance;
 }
 .directory-intro h1 em {
-  color: #bd4a4d;
+  color: #b43740;
 }
 .directory-intro-copy > p:last-child {
   max-width: 39rem;
@@ -1345,7 +1353,7 @@ h2 {
   font-size: 14px;
 }
 .directory-search input::placeholder {
-  color: #8b7d76;
+  color: #716b68;
 }
 .directory-search-button,
 .filter-submit {
@@ -2745,6 +2753,8 @@ html.dark .home-hero h1 em,
 html.dark .page-hero h1 em,
 html.dark .directory-intro h1 em,
 html.dark .section-heading h2 em,
+html.dark .how-note h2 em,
+html.dark .safety-lead h2 em,
 html.dark .home-cta h2 em {
   color: #fa9293;
 }
@@ -2818,6 +2828,24 @@ html.dark .filter-options-group legend small,
 html.dark .directory-kicker,
 html.dark .directory-intro-note strong {
   color: var(--muted-foreground);
+}
+html.dark .filter-option {
+  color: var(--foreground) !important;
+  background-color: var(--card) !important;
+}
+html.dark .filter-select > span,
+html.dark .filter-number > span,
+html.dark .filter-options-group legend,
+html.dark .filter-options-group legend small {
+  color: var(--muted-foreground) !important;
+}
+html.dark .filter-submit,
+html.dark .button-outline:hover {
+  color: var(--foreground);
+  background: var(--accent);
+}
+html.dark .theme-toggle-label {
+  color: var(--foreground) !important;
 }
 html.dark .how-step-mark,
 html.dark .safety-item > span {
@@ -3004,7 +3032,7 @@ html.dark .directory-intro-note {
 }
 .status-page__code {
   margin: clamp(52px, 10vh, 100px) 0 4px;
-  color: var(--primary);
+  color: var(--primary-text-accent);
   font-family: var(--font-mono), monospace;
   font-size: 13px;
   font-weight: 700;
@@ -3026,6 +3054,7 @@ html.dark .directory-intro-note {
   font-weight: 600;
   letter-spacing: -0.055em;
   line-height: 1.02;
+  color: var(--foreground);
 }
 .status-page__description {
   max-width: 490px;
