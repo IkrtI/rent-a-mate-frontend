@@ -100,36 +100,42 @@ export function DiscoveryFilters({ activities, interests, provinces, lookupError
           )}
         </summary>
         <div className="filter-controls">
-          <label className="filter-select filter-multiple">
-            <span>Activities</span>
-            <select
-              defaultValue={selected(search.activityId)}
-              multiple
-              name="activityId"
-              aria-label="Activities"
-            >
+          <fieldset className="filter-options-group filter-multiple">
+            <legend>
+              Activities <small>Select any that fit your plan</small>
+            </legend>
+            <div className="filter-option-list">
               {activities.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
+                <label className="filter-option" key={item.id}>
+                  <input
+                    defaultChecked={selected(search.activityId).includes(String(item.id))}
+                    name="activityId"
+                    type="checkbox"
+                    value={item.id}
+                  />
+                  <span>{item.name}</span>
+                </label>
               ))}
-            </select>
-          </label>
-          <label className="filter-select filter-multiple">
-            <span>Interests</span>
-            <select
-              defaultValue={selected(search.interestId)}
-              multiple
-              name="interestId"
-              aria-label="Interests"
-            >
+            </div>
+          </fieldset>
+          <fieldset className="filter-options-group filter-multiple">
+            <legend>
+              Interests <small>Select any that fit your plan</small>
+            </legend>
+            <div className="filter-option-list">
               {interests.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
+                <label className="filter-option" key={item.id}>
+                  <input
+                    defaultChecked={selected(search.interestId).includes(String(item.id))}
+                    name="interestId"
+                    type="checkbox"
+                    value={item.id}
+                  />
+                  <span>{item.name}</span>
+                </label>
               ))}
-            </select>
-          </label>
+            </div>
+          </fieldset>
           <label className="filter-select">
             <span>Province</span>
             <select defaultValue={provinceId} name="provinceId" aria-label="Province">
