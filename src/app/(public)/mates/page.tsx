@@ -57,10 +57,20 @@ export default async function MatesPage({ searchParams }: Props) {
   return (
     <main className="directory-page">
       <section className="directory-intro">
-        <h1>
-          Find your <em>Mate.</em>
-        </h1>
-        <p>A good coffee, a new neighbourhood, or a little company while you study.</p>
+        <div className="directory-intro-inner">
+          <div className="directory-intro-copy">
+            <p className="directory-kicker">Local people · shared plans</p>
+            <h1>
+              Find your <em>Mate.</em>
+            </h1>
+            <p>A good coffee, a new neighbourhood, or a little company while you study.</p>
+          </div>
+          <aside className="directory-intro-note" aria-label="About the mate directory">
+            <span className="directory-note-label">A little company goes a long way</span>
+            <strong>Make room for a good plan.</strong>
+            <p>Meet people nearby who are up for the same things you are.</p>
+          </aside>
+        </div>
       </section>
       <section aria-label="Find and filter mates" className="directory-wrap">
         <DiscoveryFilters
@@ -80,7 +90,7 @@ export default async function MatesPage({ searchParams }: Props) {
           <p>
             {result.error
               ? "Mates are taking a moment to load"
-              : `${result.total} ${result.total === 1 ? "Mate" : "Mates"} to meet`}
+              : `${result.total} ${result.total === 1 ? "mate" : "mates"} to meet`}
             {q ? ` matching “${q}”` : ""}
           </p>
           {Array.from(
@@ -134,7 +144,8 @@ export default async function MatesPage({ searchParams }: Props) {
                     />
                   ) : (
                     <span aria-hidden="true" className="avatar-placeholder">
-                      {mate.name.slice(0, 1)}
+                      <span className="avatar-initial">{mate.name.slice(0, 1)}</span>
+                      <span className="avatar-caption">Say hello to {mate.name}</span>
                     </span>
                   )}
                 </Link>
@@ -143,13 +154,19 @@ export default async function MatesPage({ searchParams }: Props) {
                     <div>
                       <h2>{mate.name}</h2>
                       <p>
-                        {mate.district}, {mate.province}
+                        {mate.district ? `${mate.district}, ` : ""}
+                        {mate.province}
                       </p>
                     </div>
-                    <span className="mate-rating">
-                      <Star aria-hidden="true" fill="currentColor" size={14} />{" "}
-                      {mate.avgRating?.toFixed(1) ?? "New"} <small>({mate.reviewCount})</small>
-                    </span>
+                    {mate.avgRating === null ? (
+                      <span className="mate-new-label">New profile</span>
+                    ) : (
+                      <span className="mate-rating">
+                        <Star aria-hidden="true" fill="currentColor" size={14} />
+                        {mate.avgRating.toFixed(1)}
+                        <small>{mate.reviewCount} reviews</small>
+                      </span>
+                    )}
                   </div>
                   <p className="mate-interests">{mate.activities.slice(0, 3).join(" · ")}</p>
                   <p className="mate-rate">
