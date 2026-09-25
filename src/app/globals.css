@@ -2948,3 +2948,8 @@ html.dark .safety-help h2 {
 html.dark .safety-help p a {
   color: var(--ring);
 }
+
+html.dark .safety-item,
+html.dark .editorial-article {
+  background-color: transparent;
+}
