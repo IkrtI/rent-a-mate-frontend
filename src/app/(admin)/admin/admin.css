@@ -11,6 +11,15 @@
   --admin-line: var(--border);
   --admin-surface: var(--card);
   --admin-canvas: var(--background);
+  --admin-success: #16704c;
+  --admin-success-soft: #effaf4;
+  --admin-success-line: #d0eddf;
+  --admin-warning: #9c6411;
+  --admin-warning-soft: #fff8e9;
+  --admin-warning-line: #f3dfb8;
+  --admin-danger: #a6373e;
+  --admin-danger-soft: #fff2f2;
+  --admin-danger-line: #f1d4d5;
 }
 
 html.dark .admin-shell {
@@ -21,6 +30,33 @@ html.dark .admin-shell {
   --admin-line: var(--border);
   --admin-surface: var(--card);
   --admin-canvas: var(--background);
+  --admin-success: #a5d8b7;
+  --admin-success-soft: #263a30;
+  --admin-success-line: #3e5a49;
+  --admin-warning: #e8c17f;
+  --admin-warning-soft: #3a3225;
+  --admin-warning-line: #59482f;
+  --admin-danger: #f1a2a4;
+  --admin-danger-soft: #40292c;
+  --admin-danger-line: #614045;
+}
+html.dark .admin-login-shell {
+  --admin-primary-hover: #f17a81;
+  --admin-primary-soft: #382a2c;
+  --admin-ink: var(--foreground);
+  --admin-muted: var(--muted-foreground);
+  --admin-line: var(--border);
+  --admin-surface: var(--card);
+  --admin-canvas: var(--background);
+  --admin-success: #a5d8b7;
+  --admin-success-soft: #263a30;
+  --admin-success-line: #3e5a49;
+  --admin-warning: #e8c17f;
+  --admin-warning-soft: #3a3225;
+  --admin-warning-line: #59482f;
+  --admin-danger: #f1a2a4;
+  --admin-danger-soft: #40292c;
+  --admin-danger-line: #614045;
 }
 html.dark .admin-sidebar {
   color: var(--foreground);
@@ -1019,19 +1055,19 @@ html.dark .admin-icon-button:hover {
   background: var(--muted);
 }
 .admin-badge.success {
-  border-color: #d0eddf;
-  color: #16704c;
-  background: #effaf4;
+  border-color: var(--admin-success-line);
+  color: var(--admin-success);
+  background: var(--admin-success-soft);
 }
 .admin-badge.warning {
-  border-color: #f3dfb8;
-  color: #9c6411;
-  background: #fff8e9;
+  border-color: var(--admin-warning-line);
+  color: var(--admin-warning);
+  background: var(--admin-warning-soft);
 }
 .admin-badge.danger {
-  border-color: #f1d4d5;
-  color: #a6373e;
-  background: #fff2f2;
+  border-color: var(--admin-danger-line);
+  color: var(--admin-danger);
+  background: var(--admin-danger-soft);
 }
 .admin-badge.info {
   border-color: #f0c0bb;
@@ -1104,21 +1140,21 @@ html.dark .admin-icon-button:hover {
 }
 .admin-inline-error {
   margin: 10px 0 0;
-  color: #a9343d;
+  color: var(--admin-danger);
   font-size: 11px;
   line-height: 1.5;
 }
 .admin-inline-success {
   margin: 10px 0 0;
-  color: #16704c;
+  color: var(--admin-success);
   font-size: 11px;
 }
 .admin-form-alert {
-  border: 1px solid #f0caca;
+  border: 1px solid var(--admin-danger-line);
   border-radius: 9px;
   padding: 10px 12px;
-  color: #8f2932;
-  background: #fff1f1;
+  color: var(--admin-danger);
+  background: var(--admin-danger-soft);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -1153,11 +1189,11 @@ html.dark .admin-icon-button:hover {
   line-height: 1.6;
 }
 .admin-error-state {
-  border: 1px solid #f0caca;
+  border: 1px solid var(--admin-danger-line);
   border-radius: 12px;
   padding: 14px 16px;
-  color: #8f2932;
-  background: #fff5f5;
+  color: var(--admin-danger);
+  background: var(--admin-danger-soft);
   font-size: 12px;
 }
 .admin-error-state-block {
@@ -1167,7 +1203,7 @@ html.dark .admin-icon-button:hover {
   border: 0;
   border-radius: 0 0 12px 12px;
   padding: 18px;
-  background: #fff8f8;
+  background: var(--admin-danger-soft);
 }
 .admin-error-state-icon {
   display: grid;
@@ -1176,8 +1212,8 @@ html.dark .admin-icon-button:hover {
   flex: none;
   place-items: center;
   border-radius: 9px;
-  color: #a6373e;
-  background: #feecec;
+  color: var(--admin-danger);
+  background: color-mix(in srgb, var(--admin-danger-soft) 82%, var(--admin-surface));
 }
 .admin-error-state-block > span:nth-child(2) {
   flex: 1;
@@ -1382,7 +1418,7 @@ html.dark .admin-icon-button:hover {
 }
 .admin-login-form .admin-field {
   gap: 8px;
-  color: #3b4a62;
+  color: var(--admin-muted);
   font-size: 11px;
 }
 .admin-input-wrap {
@@ -1704,6 +1740,127 @@ html.dark .admin-shell .admin-chart-metric-controls button.is-active {
   border-color: var(--ring);
   color: var(--foreground);
   background: var(--accent);
+}
+html.dark .admin-shell .admin-badge.success,
+html.dark .admin-login-shell .admin-badge.success {
+  border-color: var(--admin-success-line);
+  color: var(--admin-success);
+  background: var(--admin-success-soft);
+}
+html.dark .admin-shell .admin-badge.warning,
+html.dark .admin-login-shell .admin-badge.warning {
+  border-color: var(--admin-warning-line);
+  color: var(--admin-warning);
+  background: var(--admin-warning-soft);
+}
+html.dark .admin-shell .admin-badge.danger,
+html.dark .admin-login-shell .admin-badge.danger {
+  border-color: var(--admin-danger-line);
+  color: var(--admin-danger);
+  background: var(--admin-danger-soft);
+}
+html.dark .admin-shell .admin-verified-mark,
+html.dark .admin-login-shell .admin-verified-mark,
+html.dark .admin-shell .admin-inline-success,
+html.dark .admin-login-shell .admin-inline-success {
+  color: var(--admin-success);
+}
+html.dark .admin-shell .admin-inline-error,
+html.dark .admin-login-shell .admin-inline-error,
+html.dark .admin-shell .admin-text-danger,
+html.dark .admin-login-shell .admin-text-danger {
+  color: var(--admin-danger);
+}
+html.dark .admin-shell .admin-form-alert,
+html.dark .admin-shell .admin-error-state,
+html.dark .admin-shell .admin-error-state-block,
+html.dark .admin-login-shell .admin-form-alert,
+html.dark .admin-login-shell .admin-error-state,
+html.dark .admin-login-shell .admin-error-state-block {
+  border-color: var(--admin-danger-line);
+  color: var(--admin-danger);
+  background: var(--admin-danger-soft);
+}
+html.dark .admin-shell .admin-error-state-icon,
+html.dark .admin-login-shell .admin-error-state-icon {
+  color: var(--admin-danger);
+  background: color-mix(in srgb, var(--admin-danger-soft) 82%, var(--admin-surface));
+}
+html.dark .admin-shell .admin-danger-button,
+html.dark .admin-login-shell .admin-danger-button {
+  border-color: var(--admin-danger-line);
+  color: var(--admin-danger);
+  background: var(--admin-danger-soft);
+}
+html.dark .admin-shell .admin-danger-button:hover,
+html.dark .admin-login-shell .admin-danger-button:hover {
+  border-color: var(--admin-danger);
+  background: color-mix(in srgb, var(--admin-danger-soft) 82%, var(--primary));
+}
+html.dark .admin-shell .admin-queue-icon,
+html.dark .admin-login-shell .admin-queue-icon {
+  border-color: var(--admin-warning-line);
+  color: var(--admin-warning);
+  background: var(--admin-warning-soft);
+}
+html.dark .admin-shell .admin-queue-copy .admin-overline,
+html.dark .admin-login-shell .admin-queue-copy .admin-overline {
+  color: var(--admin-warning);
+}
+html.dark .admin-shell .admin-resolution-dialog {
+  border-color: var(--admin-line);
+  color: var(--admin-ink);
+  background: var(--admin-surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 44%);
+}
+html.dark .admin-shell .admin-icon-link {
+  border-color: var(--admin-line);
+  color: var(--admin-ink);
+  background: var(--muted);
+}
+html.dark .admin-shell .admin-icon-link:hover {
+  border-color: var(--ring);
+  background: var(--accent);
+}
+html.dark .admin-shell .admin-field select,
+html.dark .admin-shell .admin-filter-select select,
+html.dark .admin-shell .admin-select,
+html.dark .admin-login-shell .admin-field select {
+  color-scheme: dark;
+}
+html.dark .admin-shell .admin-metric-context {
+  background: var(--admin-surface);
+}
+html.dark .admin-login-shell .admin-login-brand-panel {
+  color: var(--foreground);
+  background:
+    radial-gradient(ellipse at 20% 82%, rgb(237 104 112 / 10%), transparent 42%),
+    linear-gradient(150deg, #282126 0%, #30272b 100%);
+}
+html.dark .admin-login-shell .admin-login-brand small,
+html.dark .admin-login-shell .admin-login-brand-message .admin-overline,
+html.dark .admin-login-shell .admin-login-card > .admin-overline {
+  color: #eaa0a2;
+}
+html.dark .admin-login-shell .admin-login-brand-message h1 {
+  color: var(--foreground);
+}
+html.dark .admin-login-shell .admin-login-brand-message > p:last-child,
+html.dark .admin-login-shell .admin-login-brand-foot {
+  color: var(--admin-muted);
+}
+html.dark .admin-login-shell .admin-field input,
+html.dark .admin-login-shell .admin-field select,
+html.dark .admin-login-shell .admin-field textarea,
+html.dark .admin-login-shell .admin-input-wrap {
+  border-color: var(--admin-line);
+  color: var(--admin-ink);
+  background-color: var(--admin-surface);
+}
+html.dark .admin-login-shell .admin-field input,
+html.dark .admin-login-shell .admin-field select,
+html.dark .admin-login-shell .admin-field textarea {
+  color-scheme: dark;
 }
 @media (max-width: 420px) {
   .admin-metric-grid {
