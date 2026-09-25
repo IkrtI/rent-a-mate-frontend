@@ -24,6 +24,5 @@ export const messagePageSchema = z.object({
 export type MessagePage = z.infer<typeof messagePageSchema>;
 
 export const sendMessageSchema = z.object({
-  clientMessageId: z.string().uuid(),
   content: z.string().trim().min(1).max(2000),
 });

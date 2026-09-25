@@ -88,13 +88,7 @@ test("lists conversations and sends a REST message", async ({ page }) => {
   ];
   await page.route("**/api/bookings/42/messages*", async (route) => {
     if (route.request().method() === "POST") {
-      const input = (await route.request().postDataJSON()) as {
-        clientMessageId: string;
-        content: string;
-      };
-      expect(input.clientMessageId).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-      );
+      const input = (await route.request().postDataJSON()) as { content: string };
       const message = {
         id: 2,
         bookingId: 42,

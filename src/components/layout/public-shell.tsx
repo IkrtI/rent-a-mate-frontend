@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
+import { PublicHeaderActions } from "./public-header-actions";
+
 const mainLinks = [
   { href: "/mates", label: "Find a Mate" },
   { href: "/how-it-works", label: "How it works" },
@@ -31,27 +33,7 @@ export function PublicHeader() {
           ))}
         </nav>
         <div className="header-actions">
-          <Link className="login-link" href="/login">
-            Log in
-          </Link>
-          <Link className="button button-small" href="/signup">
-            Sign up
-          </Link>
-          <details className="mobile-menu">
-            <summary aria-label="Open navigation menu">
-              <span />
-              <span />
-            </summary>
-            <nav aria-label="Mobile navigation">
-              {mainLinks.map((link) => (
-                <Link href={link.href} key={link.href}>
-                  {link.label}
-                </Link>
-              ))}
-              <Link href="/login">Log in</Link>
-              <Link href="/signup">Sign up</Link>
-            </nav>
-          </details>
+          <PublicHeaderActions links={mainLinks} />
         </div>
       </div>
     </header>
@@ -101,7 +83,9 @@ export function PageHero({
   description: string;
 }) {
   return (
-    <section className={`page-hero${eyebrow ? "" : "page-hero-no-eyebrow"}`}>
+    <section
+      className={["page-hero", !eyebrow && "page-hero-no-eyebrow"].filter(Boolean).join(" ")}
+    >
       <div className="page-hero-inner">
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>

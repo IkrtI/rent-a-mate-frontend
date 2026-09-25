@@ -25,10 +25,14 @@ const schema = z
   });
 type Values = z.infer<typeof schema>;
 
-export function SignupForm() {
+export function SignupForm({
+  initialRole = "renter",
+}: {
+  initialRole?: "renter" | "mate";
+} = {}) {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2>(1);
-  const [role, setRole] = useState<"renter" | "mate">("renter");
+  const [role, setRole] = useState<"renter" | "mate">(initialRole);
   const [message, setMessage] = useState<string | null>(null);
   const {
     register: registerField,
@@ -76,7 +80,7 @@ export function SignupForm() {
   if (step === 1) {
     return (
       <div className="w-full">
-        <p className="font-sans text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
+        <p className="font-sans text-[11px] tracking-[0.12em] text-[var(--primary-text-accent)] uppercase">
           Step 1 of 2
         </p>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
@@ -96,7 +100,7 @@ export function SignupForm() {
               aria-pressed={role === value}
               className={`flex min-h-24 items-start gap-3 rounded-md border p-4 text-left transition-colors ${
                 role === value
-                  ? "border-[#ff5c67] bg-[#fff0f1]"
+                  ? "border-[#ff5c67] bg-[#fff0f1] dark:border-[#f17a81] dark:bg-[#382a2c]"
                   : "border-neutral-300 bg-white hover:border-neutral-500"
               }`}
               key={value}
@@ -122,7 +126,10 @@ export function SignupForm() {
         </button>
         <p className="mt-6 text-center text-sm text-neutral-600">
           Already have an account?{" "}
-          <Link className="font-bold text-[#e34b58] hover:underline" href="/login">
+          <Link
+            className="font-bold text-[var(--primary-text-accent)] hover:underline"
+            href="/login"
+          >
             Sign in
           </Link>
         </p>
@@ -139,7 +146,7 @@ export function SignupForm() {
       >
         <ArrowLeft aria-hidden size={16} /> Back
       </button>
-      <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
+      <p className="font-mono text-[11px] tracking-[0.12em] text-[var(--primary-text-accent)] uppercase">
         Step 2 of 2
       </p>
       <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
@@ -216,7 +223,7 @@ export function SignupForm() {
             <span id="signup-policies-label">
               I agree to the{" "}
               <Link
-                className="font-semibold text-[#e34b58] underline"
+                className="font-semibold text-[var(--primary-text-accent)] underline"
                 href="/terms"
                 rel="noopener noreferrer"
                 target="_blank"
@@ -225,7 +232,7 @@ export function SignupForm() {
               </Link>{" "}
               and{" "}
               <Link
-                className="font-semibold text-[#e34b58] underline"
+                className="font-semibold text-[var(--primary-text-accent)] underline"
                 href="/privacy"
                 rel="noopener noreferrer"
                 target="_blank"

@@ -2,6 +2,11 @@ import { z } from "zod";
 
 import { BackendClientError, requestBackend } from "@/modules/backend-client/client";
 import { lookupSchema } from "@/modules/mate-profile/schemas";
+import {
+  englishActivityName,
+  englishInterestName,
+  englishPlaceName,
+} from "@/lib/i18n/english-labels";
 
 const mateSchema = z.object({
   id: z.number(),
@@ -101,9 +106,9 @@ export async function getDiscoveryLookups(): Promise<DiscoveryLookups> {
     }),
   );
   return {
-    activities: results[0].items,
-    interests: results[1].items,
-    provinces: results[2].items,
+    activities: results[0].items.map((item) => ({ ...item, name: englishActivityName(item.name) })),
+    interests: results[1].items.map((item) => ({ ...item, name: englishInterestName(item.name) })),
+    provinces: results[2].items.map((item) => ({ ...item, name: englishPlaceName(item.name) })),
     error: results.some((result) => result.error),
   };
 }
@@ -201,7 +206,12 @@ export async function getPublicMates(search: SearchInput): Promise<DirectoryResu
   try {
     const result = await requestBackend({ path: `mates?${params}`, responseSchema: pageSchema });
     return {
-      items: result.items,
+      items: result.items.map((item) => ({
+        ...item,
+        province: englishPlaceName(item.province),
+        district: englishPlaceName(item.district),
+        activities: item.activities.map(englishActivityName),
+      })),
       page: result.meta.page,
       total: result.meta.total,
       totalPages: result.meta.totalPages,
@@ -221,7 +231,28 @@ export async function getPublicMate(
       path: `mates/${id}`,
       responseSchema: detailResponseSchema,
     });
-    return { mate: response.mate, error: false };
+    return {
+      mate: {
+        ...response.mate,
+        province: {
+          ...response.mate.province,
+          name: englishPlaceName(response.mate.province.name),
+        },
+        district: {
+          ...response.mate.district,
+          name: englishPlaceName(response.mate.district.name),
+        },
+        activities: response.mate.activities.map((item) => ({
+          ...item,
+          name: englishActivityName(item.name),
+        })),
+        interests: response.mate.interests.map((item) => ({
+          ...item,
+          name: englishInterestName(item.name),
+        })),
+      },
+      error: false,
+    };
   } catch (error) {
     if (error instanceof BackendClientError && error.details.status === 404)
       return { mate: null, error: false };

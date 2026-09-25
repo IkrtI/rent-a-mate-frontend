@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,6 +20,7 @@ type Values = z.infer<typeof schema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState<string | null>(
     searchParams.get("reason") === "forbidden"
@@ -40,6 +42,7 @@ export function LoginForm() {
     setMessage(null);
     try {
       const { user } = await login(values);
+      queryClient.setQueryData(["session"], { user });
       const requestedDestination = searchParams.get("returnTo");
       router.replace(
         requestedDestination
@@ -60,7 +63,9 @@ export function LoginForm() {
 
   return (
     <div className="w-full">
-      <p className="font-sans text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">Sign in</p>
+      <p className="font-sans text-[11px] tracking-[0.12em] text-[var(--primary-text-accent)] uppercase">
+        Sign in
+      </p>
       <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
         Pick up where you left off.
       </h2>
@@ -111,7 +116,10 @@ export function LoginForm() {
       </form>
       <p className="mt-6 text-center text-sm text-neutral-600">
         New here?{" "}
-        <Link className="font-bold text-[#e34b58] hover:underline" href="/signup">
+        <Link
+          className="font-bold text-[var(--primary-text-accent)] hover:underline"
+          href="/signup"
+        >
           Create an account
         </Link>
       </p>

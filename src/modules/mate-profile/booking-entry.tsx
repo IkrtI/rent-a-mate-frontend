@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CalendarDays, Clock3 } from "lucide-react";
+import { englishActivityName } from "@/lib/i18n/english-labels";
 
 type Activity = { id: number; name: string };
 type Slot = { start: string; end: string };
@@ -179,7 +180,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
           >
             {activities.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.name}
+                {englishActivityName(item.name)}
               </option>
             ))}
           </select>

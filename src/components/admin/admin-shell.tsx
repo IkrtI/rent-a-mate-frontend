@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { logout as endSession } from "@/modules/session/client";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 type AdminIdentity = { id: number; name: string; email: string; role: "admin" };
 
@@ -109,6 +110,7 @@ export function AdminShell({ user, children }: { user: AdminIdentity; children: 
             <h1>{currentPage.label}</h1>
           </div>
           <div className="admin-topbar-actions">
+            <ThemeToggle />
             <div className="admin-live-indicator">
               <span /> Admin session
             </div>

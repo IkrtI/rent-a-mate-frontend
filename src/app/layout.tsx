@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { DM_Mono, Fraunces, Manrope } from "next/font/google";
 
 import "./globals.css";
+import { OfflineSupport } from "@/components/shared/offline-support";
 import { AppProviders } from "@/providers/app-providers";
 
 const manrope = Manrope({ display: "swap", subsets: ["latin"], variable: "--font-sans" });
@@ -27,9 +29,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${manrope.variable} ${fraunces.variable} ${dmMono.variable}`}>
-        <AppProviders>{children}</AppProviders>
+        <Script id="theme-preference" strategy="beforeInteractive">
+          {`try { const cookie = document.cookie.split("; ").find((item) => item.startsWith("matefor-theme="))?.split("=")[1]; let saved = cookie; try { saved = localStorage.getItem("matefor-theme") || cookie; } catch {} const dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); document.documentElement.style.colorScheme = dark ? "dark" : "light"; } catch {}`}
+        </Script>
+        <AppProviders>
+          <OfflineSupport />
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

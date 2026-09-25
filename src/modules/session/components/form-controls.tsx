@@ -38,6 +38,6 @@ export const inputClassName = cn(
 );
 
 export const primaryButtonClassName = cn(
-  "inline-flex h-11 w-full items-center justify-center rounded-md bg-[#ff5c67] px-4 text-sm font-bold text-white",
+  "inline-flex h-11 w-full items-center justify-center rounded-md bg-[#ff5c67] px-4 text-sm font-bold text-[#20212a] dark:text-[#17171b]",
   "transition-colors hover:bg-[#ea4c58] focus:outline-none focus:ring-2 focus:ring-[#ff5c67] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
 );

@@ -8,7 +8,7 @@ import type { Message } from "./schemas";
 
 type RealtimeStatus = "connecting" | "connected" | "unavailable";
 
-type ChatAck = { ok: true } | { ok: false; error: string };
+type ChatAck<T = undefined> = { ok: true; data?: T } | { ok: false; error: string };
 type TypingBroadcast = { bookingId: number; userId: number; isTyping: boolean };
 type MessagesReadBroadcast = { bookingId: number; readerId: number; updatedCount: number };
 
@@ -132,5 +132,35 @@ export function useBookingRealtime(
     socketRef.current.emit("mark_read", { bookingId }, () => undefined);
   }, [bookingId]);
 
-  return { status, isOtherTyping, setTyping, markRead };
+  const sendMessage = useCallback(
+    (content: string) =>
+      new Promise<Message>((resolve, reject) => {
+        const socket = socketRef.current;
+        if (!bookingId || !socket?.connected) {
+          reject(new Error("Live messaging is unavailable."));
+          return;
+        }
+
+        socket
+          .timeout(5_000)
+          .emit(
+            "send_message",
+            { bookingId, content },
+            (timeoutError: Error | null, ack: ChatAck<Message>) => {
+              if (timeoutError) {
+                reject(new Error("The message could not be sent. Please try again."));
+              } else if (!ack.ok) {
+                reject(new Error(ack.error));
+              } else if (!ack.data) {
+                reject(new Error("The server did not confirm the message."));
+              } else {
+                resolve(ack.data);
+              }
+            },
+          );
+      }),
+    [bookingId],
+  );
+
+  return { status, isOtherTyping, setTyping, markRead, sendMessage };
 }
