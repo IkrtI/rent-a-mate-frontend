@@ -2918,3 +2918,16 @@ html.dark .mobile-menu nav a:hover,
 html.dark .mobile-menu nav button:hover {
   background: var(--accent);
 }
+
+@media (max-width: 760px) {
+  .mobile-menu summary {
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--foreground);
+  }
+
+  .mobile-menu summary span {
+    background: var(--foreground);
+  }
+}
