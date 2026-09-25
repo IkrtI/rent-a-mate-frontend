@@ -2953,3 +2953,14 @@ html.dark .safety-item,
 html.dark .editorial-article {
   background-color: transparent;
 }
+
+.directory-intro-note {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+html.dark .directory-intro-note {
+  background: transparent;
+  border-color: transparent;
+}
