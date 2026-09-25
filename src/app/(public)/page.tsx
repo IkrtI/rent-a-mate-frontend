@@ -130,7 +130,7 @@ export default async function HomePage() {
         <div className="section">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">GOOD PEOPLE, GREAT REVIEWS</p>
+              <p className="eyebrow">PEOPLE FOR YOUR NEXT PLAN</p>
               <h2>
                 Meet a few <em>mates.</em>
               </h2>
@@ -170,9 +170,13 @@ export default async function HomePage() {
                           {mate.district}, {mate.province}
                         </p>
                       </div>
-                      <span className="mate-rating">
-                        ★ {mate.avgRating?.toFixed(1) ?? "New"} <small>({mate.reviewCount})</small>
-                      </span>
+                      {mate.reviewCount > 0 && mate.avgRating ? (
+                        <span className="mate-rating">
+                          ★ {mate.avgRating.toFixed(1)} <small>({mate.reviewCount})</small>
+                        </span>
+                      ) : (
+                        <span className="mate-new-label">New profile</span>
+                      )}
                     </div>
                     <p className="mate-interests">{mate.activities.slice(0, 3).join(" · ")}</p>
                     <p className="mate-rate">
