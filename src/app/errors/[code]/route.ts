@@ -47,7 +47,7 @@ const pages: Record<number, { title: string; description: string }> = {
   },
 };
 
-export async function GET(_request: Request, context: RouteContext<"/errors/[code]">) {
+export async function GET(_request: Request, context: { params: Promise<{ code: string }> }) {
   const { code: rawCode } = await context.params;
   const status = Number(rawCode);
   const page = pages[status];
