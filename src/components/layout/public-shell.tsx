@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
+import { BrandLink } from "./brand-link";
 import { PublicHeaderActions } from "./public-header-actions";
 
 const mainLinks = [
@@ -9,22 +10,11 @@ const mainLinks = [
   { href: "/safety", label: "Safety" },
 ];
 
-export function Brand() {
-  return (
-    <Link aria-label="mateflow. home" className="brand" href="/">
-      <span aria-hidden="true" className="brand-mark">
-        m
-      </span>
-      <span>mateflow.</span>
-    </Link>
-  );
-}
-
 export function PublicHeader() {
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <Brand />
+        <BrandLink />
         <nav aria-label="Main navigation" className="desktop-nav">
           {mainLinks.map((link) => (
             <Link href={link.href} key={link.href}>
@@ -45,7 +35,7 @@ export function PublicFooter() {
     <footer className="site-footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <Brand />
+          <BrandLink />
           <p>Good company, thoughtfully connected.</p>
         </div>
         <nav aria-label="Footer navigation" className="footer-nav">

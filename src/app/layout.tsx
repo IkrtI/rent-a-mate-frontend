@@ -17,14 +17,11 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001"),
-  title: {
-    default: "mateflow. — Good company, thoughtfully connected",
-    template: "%s | mateflow.",
-  },
+  title: { default: "mateflow", template: "%s | mateflow" },
   description:
     "Find a local mate for coffee, games, study, and the little plans that are better together.",
   openGraph: {
-    title: "mateflow. — Good company, thoughtfully connected",
+    title: "mateflow",
     description: "Find a local mate for your next plan.",
     type: "website",
   },

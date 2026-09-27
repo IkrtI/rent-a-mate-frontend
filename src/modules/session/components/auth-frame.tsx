@@ -1,15 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { BrandLink } from "@/components/layout/brand-link";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function AuthFrame({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <main className="auth-frame grid min-h-screen lg:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)]">
       <section className="auth-frame-aside hidden min-h-screen px-12 py-10 lg:flex lg:flex-col">
-        <Link className="text-sm font-bold tracking-tight" href="/">
-          <span className="mr-2 inline-block size-2 rounded-full bg-[#ff5c67]" />
-          mateflow.
-        </Link>
+        <BrandLink />
         <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center pt-8">
           <Image
             alt="Two people meeting"
@@ -33,10 +31,7 @@ export function AuthFrame({ children }: Readonly<{ children: React.ReactNode }>)
       </section>
       <section className="auth-frame-form flex min-h-screen flex-col px-6 py-6 sm:px-10 lg:px-14">
         <div className="flex items-center justify-between gap-4 lg:justify-end">
-          <Link className="text-sm font-bold tracking-tight lg:hidden" href="/">
-            <span className="mr-2 inline-block size-3 rounded-full bg-[#ff5c67]" />
-            mateflow.
-          </Link>
+          <BrandLink className="lg:hidden" />
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <Link className="auth-back-link text-sm" href="/">

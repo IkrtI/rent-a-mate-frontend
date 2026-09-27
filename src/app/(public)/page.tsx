@@ -6,11 +6,11 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { getPublicMates } from "@/modules/mate-discovery/public-data";
 
 export const metadata: Metadata = {
-  title: "Find your kind of company",
+  title: { absolute: "mateflow" },
   description: "Meet local mates for coffee, gaming, study, the gym, and city plans.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Find your kind of company",
+    title: "mateflow",
     description: "Meet local mates for coffee, gaming, study, the gym, and city plans.",
     url: "/",
     type: "website",
@@ -29,7 +29,7 @@ const activities = [
 export default async function HomePage() {
   const featured = await getPublicMates({ sort: "-rating", page: "1" });
   return (
-    <main>
+    <main className="home-page">
       <section className="home-hero">
         <div className="hero-copy">
           <h1>
