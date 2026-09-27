@@ -66,15 +66,15 @@ export function LoginForm() {
       <p className="font-sans text-[11px] tracking-[0.12em] text-[var(--primary-text-accent)] uppercase">
         Sign in
       </p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
+      <h2 className="text-foreground mt-3 text-3xl font-semibold tracking-tight">
         Pick up where you left off.
       </h2>
-      <p className="mt-3 text-sm leading-6 text-neutral-600">
+      <p className="text-muted-foreground mt-3 text-sm leading-6">
         Your bookings, messages, and account are all here.
       </p>
       {searchParams.get("registered") === "1" ? (
         <p
-          className="mt-5 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+          className="mt-5 rounded-md bg-emerald-100 px-3 py-2 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
           role="status"
         >
           Account created. Sign in to continue.
@@ -106,7 +106,7 @@ export function LoginForm() {
           />
         </Field>
         {message ? (
-          <p className="text-sm text-red-600" role="alert">
+          <p className="text-destructive text-sm" role="alert">
             {message}
           </p>
         ) : null}
@@ -114,7 +114,7 @@ export function LoginForm() {
           {isSubmitting ? "Signing in..." : "Sign in"}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-neutral-600">
+      <p className="text-muted-foreground mt-6 text-center text-sm">
         New here?{" "}
         <Link
           className="font-bold text-[var(--primary-text-accent)] hover:underline"

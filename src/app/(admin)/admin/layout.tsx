@@ -6,7 +6,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { requireAdminPage } from "@/modules/admin/server";
 
 export const metadata: Metadata = {
-  title: { default: "Admin Console", template: "%s | matefor Admin" },
+  title: { default: "Admin Console", template: "%s | mateflow Admin" },
   robots: { index: false, follow: false },
 };
 

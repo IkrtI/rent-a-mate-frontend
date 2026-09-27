@@ -14,16 +14,16 @@ export function Field({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="grid gap-2 text-sm font-semibold text-neutral-800">
+    <div className="text-foreground grid gap-2 text-sm font-semibold">
       <label htmlFor={id}>{label}</label>
       {children}
       {error ? (
-        <span className="text-xs font-medium text-red-600" id={`${id}-error`} role="alert">
+        <span className="text-destructive text-xs font-medium" id={`${id}-error`} role="alert">
           {error}
         </span>
       ) : null}
       {hint && !error ? (
-        <span className="text-xs font-normal text-neutral-600" id={`${id}-hint`}>
+        <span className="text-muted-foreground text-xs font-normal" id={`${id}-hint`}>
           {hint}
         </span>
       ) : null}
@@ -32,9 +32,9 @@ export function Field({
 }
 
 export const inputClassName = cn(
-  "h-11 w-full rounded-md border border-neutral-300 bg-white px-3 text-sm outline-none",
-  "placeholder:text-neutral-400 focus:border-[#ff5c67] focus:ring-2 focus:ring-[#ff5c67]/20",
-  "aria-invalid:border-red-500 aria-invalid:focus:border-red-500 aria-invalid:focus:ring-red-500/20",
+  "h-11 w-full rounded-md border border-input bg-card px-3 text-sm text-card-foreground outline-none",
+  "placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20",
+  "aria-invalid:border-destructive aria-invalid:focus:border-destructive aria-invalid:focus:ring-destructive/20",
 );
 
 export const primaryButtonClassName = cn(

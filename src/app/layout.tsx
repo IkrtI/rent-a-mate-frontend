@@ -17,11 +17,14 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001"),
-  title: { default: "matefor. — Good company, thoughtfully connected", template: "%s | matefor." },
+  title: {
+    default: "mateflow. — Good company, thoughtfully connected",
+    template: "%s | mateflow.",
+  },
   description:
     "Find a local mate for coffee, games, study, and the little plans that are better together.",
   openGraph: {
-    title: "matefor. — Good company, thoughtfully connected",
+    title: "mateflow. — Good company, thoughtfully connected",
     description: "Find a local mate for your next plan.",
     type: "website",
   },
@@ -32,7 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" suppressHydrationWarning>
       <body className={`${manrope.variable} ${fraunces.variable} ${dmMono.variable}`}>
         <Script id="theme-preference" strategy="beforeInteractive">
-          {`try { const cookie = document.cookie.split("; ").find((item) => item.startsWith("matefor-theme="))?.split("=")[1]; let saved = cookie; try { saved = localStorage.getItem("matefor-theme") || cookie; } catch {} const dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); document.documentElement.style.colorScheme = dark ? "dark" : "light"; } catch {}`}
+          {`try { const cookie = document.cookie.split("; ").find((item) => item.startsWith("mateflow-theme="))?.split("=")[1]; let saved = cookie; try { saved = localStorage.getItem("mateflow-theme") || cookie; } catch {} const dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); document.documentElement.style.colorScheme = dark ? "dark" : "light"; } catch {}`}
         </Script>
         <AppProviders>
           <OfflineSupport />

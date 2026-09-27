@@ -22,7 +22,7 @@ export default function GlobalError({
       >
         <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
           <section style={{ width: "min(100%, 560px)" }}>
-            <p style={{ color: "#ed6870", fontWeight: 700 }}>matefor. · 500</p>
+            <p style={{ color: "#ed6870", fontWeight: 700 }}>mateflow. · 500</p>
             <h1 style={{ fontSize: "clamp(2rem, 6vw, 3.5rem)", lineHeight: 1.05 }}>
               We couldn’t load the app.
             </h1>

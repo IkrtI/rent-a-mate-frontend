@@ -50,7 +50,7 @@ export function EditorialPage({
             <h2>Contact</h2>
             <p>
               Questions? We’re happy to help.{" "}
-              <Link href="mailto:hello@matefor.example">
+              <Link href="mailto:hello@mateflow.example">
                 Get in touch <ArrowUpRight aria-hidden="true" size={14} />
               </Link>
             </p>

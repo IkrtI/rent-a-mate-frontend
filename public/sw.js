@@ -1,4 +1,4 @@
-const CACHE_NAME = "matefor-offline-v3";
+const CACHE_NAME = "mateflow-offline-v3";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {
@@ -17,7 +17,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("matefor-offline-") && key !== CACHE_NAME)
+            .filter((key) => key.startsWith("mateflow-offline-") && key !== CACHE_NAME)
             .map((key) => caches.delete(key)),
         ),
       )

@@ -83,10 +83,10 @@ export function SignupForm({
         <p className="font-sans text-[11px] tracking-[0.12em] text-[var(--primary-text-accent)] uppercase">
           Step 1 of 2
         </p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
+        <h2 className="text-foreground mt-3 text-3xl font-semibold tracking-tight">
           What brings you here?
         </h2>
-        <p className="mt-3 text-sm leading-6 text-neutral-600">
+        <p className="text-muted-foreground mt-3 text-sm leading-6">
           Choose how you would like to use mateflow.
         </p>
         <div className="mt-7 grid gap-3">
@@ -100,8 +100,8 @@ export function SignupForm({
               aria-pressed={role === value}
               className={`flex min-h-24 items-start gap-3 rounded-md border p-4 text-left transition-colors ${
                 role === value
-                  ? "border-[#ff5c67] bg-[#fff0f1] dark:border-[#f17a81] dark:bg-[#382a2c]"
-                  : "border-neutral-300 bg-white hover:border-neutral-500"
+                  ? "border-primary bg-accent"
+                  : "border-border bg-card hover:border-primary"
               }`}
               key={value}
               onClick={() => setRole(value)}
@@ -111,8 +111,10 @@ export function SignupForm({
                 {role === value ? <Check aria-hidden size={13} /> : null}
               </span>
               <span>
-                <span className="block text-sm font-bold text-neutral-950">{title}</span>
-                <span className="mt-1 block text-xs leading-5 text-neutral-600">{description}</span>
+                <span className="text-foreground block text-sm font-bold">{title}</span>
+                <span className="text-muted-foreground mt-1 block text-xs leading-5">
+                  {description}
+                </span>
               </span>
             </button>
           ))}
@@ -124,7 +126,7 @@ export function SignupForm({
         >
           Continue
         </button>
-        <p className="mt-6 text-center text-sm text-neutral-600">
+        <p className="text-muted-foreground mt-6 text-center text-sm">
           Already have an account?{" "}
           <Link
             className="font-bold text-[var(--primary-text-accent)] hover:underline"
@@ -140,7 +142,7 @@ export function SignupForm({
   return (
     <div className="w-full">
       <button
-        className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 hover:text-neutral-950"
+        className="text-muted-foreground hover:text-foreground mb-5 inline-flex items-center gap-2 text-sm font-semibold"
         onClick={() => setStep(1)}
         type="button"
       >
@@ -149,7 +151,7 @@ export function SignupForm({
       <p className="font-mono text-[11px] tracking-[0.12em] text-[var(--primary-text-accent)] uppercase">
         Step 2 of 2
       </p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
+      <h2 className="text-foreground mt-3 text-3xl font-semibold tracking-tight">
         Create your account.
       </h2>
       <form className="mt-7 grid gap-4" onSubmit={onSubmit} noValidate>
@@ -210,7 +212,7 @@ export function SignupForm({
           />
         </Field>
         <div className="grid gap-2">
-          <div className="flex items-start gap-3 text-sm leading-5 text-neutral-700">
+          <div className="text-muted-foreground flex items-start gap-3 text-sm leading-5">
             <input
               aria-describedby={errors.acceptPolicies ? "signup-policies-error" : undefined}
               aria-invalid={Boolean(errors.acceptPolicies)}
@@ -244,7 +246,7 @@ export function SignupForm({
           </div>
           {errors.acceptPolicies ? (
             <span
-              className="text-xs font-medium text-red-600"
+              className="text-destructive text-xs font-medium"
               id="signup-policies-error"
               role="alert"
             >
@@ -253,7 +255,7 @@ export function SignupForm({
           ) : null}
         </div>
         {message ? (
-          <p className="text-sm text-red-600" role="alert">
+          <p className="text-destructive text-sm" role="alert">
             {message}
           </p>
         ) : null}

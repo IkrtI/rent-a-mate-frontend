@@ -11,11 +11,11 @@ const mainLinks = [
 
 export function Brand() {
   return (
-    <Link aria-label="matefor. home" className="brand" href="/">
+    <Link aria-label="mateflow. home" className="brand" href="/">
       <span aria-hidden="true" className="brand-mark">
         m
       </span>
-      <span>matefor.</span>
+      <span>mateflow.</span>
     </Link>
   );
 }
@@ -57,7 +57,7 @@ export function PublicFooter() {
             Become a Mate <ArrowUpRight aria-hidden="true" size={14} />
           </Link>
         </nav>
-        <p className="copyright">© 2026 matefor. Made for better plans.</p>
+        <p className="copyright">© 2026 mateflow. Made for better plans.</p>
       </div>
     </footer>
   );

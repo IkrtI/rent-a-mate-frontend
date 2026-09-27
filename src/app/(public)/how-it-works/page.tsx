@@ -6,11 +6,11 @@ import { PageHero } from "@/components/layout/public-shell";
 
 export const metadata: Metadata = {
   title: "How it works",
-  description: "From first search to a good plan, see how matefor works.",
+  description: "From first search to a good plan, see how mateflow works.",
   alternates: { canonical: "/how-it-works" },
   openGraph: {
     title: "How it works",
-    description: "From first search to a good plan, see how matefor works.",
+    description: "From first search to a good plan, see how mateflow works.",
     url: "/how-it-works",
     type: "website",
   },

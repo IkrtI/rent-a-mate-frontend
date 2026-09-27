@@ -4,11 +4,11 @@ import { EditorialPage } from "@/components/shared/editorial-page";
 
 export const metadata: Metadata = {
   title: "Terms of service",
-  description: "The essential rules for using matefor as a renter or Mate.",
+  description: "The essential rules for using mateflow as a renter or Mate.",
   alternates: { canonical: "/terms" },
   openGraph: {
     title: "Terms of service",
-    description: "The essential rules for using matefor as a renter or Mate.",
+    description: "The essential rules for using mateflow as a renter or Mate.",
     url: "/terms",
     type: "website",
   },
@@ -20,12 +20,12 @@ export default function TermsPage() {
     <EditorialPage
       eyebrow="TERMS OF SERVICE"
       title="Terms for a better kind of plan."
-      description="The essential rules for using matefor as a renter or Mate."
+      description="The essential rules for using mateflow as a renter or Mate."
       updated="18 Sep 2026"
-      intro="These terms explain how the matefor service works and what we ask from the people who use it. By creating an account or making a booking, you agree to follow them."
+      intro="These terms explain how the mateflow service works and what we ask from the people who use it. By creating an account or making a booking, you agree to follow them."
       sections={[
         {
-          heading: "1. Using matefor",
+          heading: "1. Using mateflow",
           paragraphs: [
             "You must be at least the age required in your location to use the service. Keep your account information accurate, protect your sign-in details, and use the platform lawfully.",
             "A Mate offers social company for an agreed activity. The service does not promise a particular outcome or relationship.",
@@ -41,7 +41,7 @@ export default function TermsPage() {
         {
           heading: "3. Mock payment",
           paragraphs: [
-            "matefor uses simulated payment in this release. No real payment is collected through the current booking flow. Do not send payment details through messages or to another user.",
+            "mateflow uses simulated payment in this release. No real payment is collected through the current booking flow. Do not send payment details through messages or to another user.",
           ],
         },
         {

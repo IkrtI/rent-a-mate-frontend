@@ -44,7 +44,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   if (session.isPending) {
     return (
       <main className="account-loading grid min-h-screen place-items-center" aria-busy="true">
-        <p className="text-sm text-neutral-600">Loading your account...</p>
+        <p className="text-muted-foreground text-sm">Loading your account...</p>
       </main>
     );
   }
@@ -52,7 +52,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   if (session.isError) {
     return (
       <main className="account-loading grid min-h-screen place-items-center">
-        <p className="text-sm text-neutral-600">Taking you to sign in...</p>
+        <p className="text-muted-foreground text-sm">Taking you to sign in...</p>
       </main>
     );
   }

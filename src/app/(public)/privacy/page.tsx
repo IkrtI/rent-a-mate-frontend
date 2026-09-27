@@ -4,11 +4,11 @@ import { EditorialPage } from "@/components/shared/editorial-page";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description: "A clear overview of the information that supports your matefor experience.",
+  description: "A clear overview of the information that supports your mateflow experience.",
   alternates: { canonical: "/privacy" },
   openGraph: {
     title: "Privacy",
-    description: "A clear overview of the information that supports your matefor experience.",
+    description: "A clear overview of the information that supports your mateflow experience.",
     url: "/privacy",
     type: "website",
   },
@@ -20,7 +20,7 @@ export default function PrivacyPage() {
     <EditorialPage
       eyebrow="PRIVACY POLICY"
       title="Privacy, in plain language."
-      description="A clear overview of the information that supports your matefor experience."
+      description="A clear overview of the information that supports your mateflow experience."
       updated="18 Sep 2026"
       intro="This page reflects the current product specification and explains the account and booking information used to run the service."
       sections={[
