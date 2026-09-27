@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendarClock, Images } from "lucide-react";
 
 import { ProfileEditor } from "@/modules/mate-profile/management-panels";
 import { getMateEditorData } from "@/modules/mate-profile/server-data";
@@ -20,9 +21,22 @@ export default async function MateProfilePage() {
             Keep your public profile and activity details up to date.
           </p>
         </div>
-        <nav aria-label="Mate profile sections" className="flex gap-3 text-sm font-semibold">
-          <Link href="/mate/photos">Photos</Link>
-          <Link href="/mate/availability">Availability</Link>
+        <nav
+          aria-label="Mate profile sections"
+          className="flex flex-wrap gap-3 text-sm font-semibold"
+        >
+          <Link
+            className="border-border bg-card text-card-foreground hover:border-primary hover:bg-accent inline-flex h-10 items-center gap-2 rounded-md border px-4 shadow-sm transition-colors"
+            href="/mate/photos"
+          >
+            <Images aria-hidden size={17} /> Photos
+          </Link>
+          <Link
+            className="border-border bg-card text-card-foreground hover:border-primary hover:bg-accent inline-flex h-10 items-center gap-2 rounded-md border px-4 shadow-sm transition-colors"
+            href="/mate/availability"
+          >
+            <CalendarClock aria-hidden size={17} /> Availability
+          </Link>
         </nav>
       </header>
       {data.loadError ? (
