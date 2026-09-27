@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   CalendarDays,
+  ChevronDown,
   CreditCard,
   LayoutDashboard,
   LogOut,
@@ -26,6 +27,12 @@ const navigation = [
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
   { href: "/payments", label: "Payments", icon: CreditCard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
+];
+
+const mateNavigation = [
+  { href: "/mate/profile", label: "Mate profile", icon: UserRound },
+  { href: "/mate/photos", label: "Photos", icon: UserRound },
+  { href: "/mate/availability", label: "Availability", icon: Clock3 },
 ];
 
 export function AuthenticatedShell({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -58,15 +65,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   }
 
   const user = session.data.user;
-  const visibleNavigation =
-    user.role === "mate"
-      ? [
-          ...navigation,
-          { href: "/mate/profile", label: "Mate profile", icon: UserRound },
-          { href: "/mate/photos", label: "Photos", icon: UserRound },
-          { href: "/mate/availability", label: "Availability", icon: Clock3 },
-        ]
-      : navigation;
+  const visibleNavigation = user.role === "mate" ? [...navigation, ...mateNavigation] : navigation;
   const handleLogout = async () => {
     try {
       await logout();
@@ -80,13 +79,19 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   return (
     <div className="authenticated-shell min-h-screen">
       <header className="authenticated-header sticky top-0 z-30 border-b backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-5 px-4 sm:px-6">
-          <Link className="mr-auto text-sm font-extrabold" href="/dashboard">
+        <div className="mx-auto flex h-16 max-w-[90rem] items-center gap-4 px-4 sm:px-6 xl:px-8">
+          <Link className="mr-auto shrink-0 text-sm font-extrabold" href="/dashboard">
             <span className="mr-2 inline-block size-3 rounded-full bg-[#ff5c67]" />
             mateflow.
           </Link>
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Private navigation">
-            {visibleNavigation.map(({ href, label, icon: Icon }) => (
+          <nav
+            className={cn(
+              "hidden items-center gap-2",
+              user.role === "mate" ? "xl:flex" : "md:flex",
+            )}
+            aria-label="Private navigation"
+          >
+            {navigation.map(({ href, label, icon: Icon }) => (
               <Link
                 className={cn(
                   "authenticated-nav-link inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold",
@@ -98,40 +103,81 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
                 <Icon aria-hidden size={16} /> {label}
               </Link>
             ))}
+            {user.role === "mate" ? (
+              <details className="group relative">
+                <summary
+                  className={cn(
+                    "authenticated-nav-link inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-md px-3 text-sm font-semibold [&::-webkit-details-marker]:hidden",
+                    pathname.startsWith("/mate/") && "is-active",
+                  )}
+                >
+                  <UserRound aria-hidden size={16} />
+                  Mate tools
+                  <ChevronDown
+                    aria-hidden
+                    className="transition-transform group-open:rotate-180"
+                    size={14}
+                  />
+                </summary>
+                <div className="border-border bg-card text-card-foreground absolute top-[calc(100%+0.5rem)] right-0 grid w-52 gap-1 rounded-lg border p-2 shadow-lg">
+                  {mateNavigation.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      className={cn(
+                        "authenticated-nav-link inline-flex h-10 items-center gap-3 rounded-md px-3 text-sm font-semibold",
+                        pathname.startsWith(href) && "is-active",
+                      )}
+                      href={href}
+                      key={href}
+                    >
+                      <Icon aria-hidden size={16} /> {label}
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            ) : null}
           </nav>
-          <button
-            className="account-icon-button grid size-9 place-items-center rounded-full"
-            onClick={() => setNotificationsOpen(true)}
-            title="Notifications"
-            type="button"
-          >
-            <Bell aria-hidden size={18} />
-          </button>
-          <ThemeToggle />
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="grid size-8 place-items-center rounded-full bg-[#23212b] text-white">
-              <UserRound aria-hidden size={16} />
-            </span>
-            <span className="max-w-32 truncate text-sm font-semibold">{user.name}</span>
+          <div className="account-actions flex shrink-0 items-center gap-2 sm:gap-3">
+            <button
+              className="account-icon-button grid size-9 place-items-center rounded-full"
+              onClick={() => setNotificationsOpen(true)}
+              title="Notifications"
+              type="button"
+            >
+              <Bell aria-hidden size={18} />
+            </button>
+            <ThemeToggle />
+            <div className="hidden items-center gap-2 sm:flex">
+              <span className="grid size-8 place-items-center rounded-full bg-[#23212b] text-white">
+                <UserRound aria-hidden size={16} />
+              </span>
+              <span className="max-w-32 truncate text-sm font-semibold">{user.name}</span>
+            </div>
+            <button
+              className="account-icon-button grid size-9 place-items-center rounded-full"
+              onClick={handleLogout}
+              title="Sign out"
+              type="button"
+            >
+              <LogOut aria-hidden size={17} />
+            </button>
           </div>
-          <button
-            className="account-icon-button grid size-9 place-items-center rounded-full"
-            onClick={handleLogout}
-            title="Sign out"
-            type="button"
-          >
-            <LogOut aria-hidden size={17} />
-          </button>
         </div>
       </header>
       <div className="account-page mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</div>
       <nav
-        className={`account-mobile-nav fixed inset-x-0 bottom-0 z-30 grid ${user.role === "mate" ? "grid-cols-6" : "grid-cols-3"} border-t md:hidden`}
+        className={cn(
+          "account-mobile-nav fixed inset-x-0 bottom-0 z-30 border-t",
+          user.role === "mate" ? "flex overflow-x-auto xl:hidden" : "grid grid-cols-4 md:hidden",
+        )}
         aria-label="Mobile navigation"
       >
         {visibleNavigation.map(({ href, label, icon: Icon }) => (
           <Link
-            className={`account-mobile-link grid min-h-16 place-items-center gap-1 py-2 text-xs font-semibold ${pathname.startsWith(href) ? "is-active" : ""}`}
+            className={cn(
+              "account-mobile-link grid min-h-16 place-items-center gap-1 py-2 text-xs font-semibold",
+              user.role === "mate" && "min-w-20 flex-1",
+              pathname.startsWith(href) && "is-active",
+            )}
             href={href}
             key={href}
           >

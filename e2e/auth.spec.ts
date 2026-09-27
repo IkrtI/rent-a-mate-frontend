@@ -176,3 +176,39 @@ test("renders the private shell for an authenticated user", async ({ page }) => 
   await expect(page.getByText("Mew", { exact: true })).toBeVisible();
   await expect(page.getByText("No upcoming bookings yet.")).toBeVisible();
 });
+
+test("groups mate tools without crowding the desktop navigation", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.route("**/api/auth/session", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ user: { id: 8, name: "Mew Mate", role: "mate" } }),
+    }),
+  );
+  await page.route("**/api/bookings?**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        items: [],
+        meta: { page: 1, limit: 100, total: 0, totalPages: 0 },
+      }),
+    }),
+  );
+
+  await page.goto("/dashboard");
+  const navigation = page.getByRole("navigation", { name: "Private navigation" });
+  const accountActions = page.locator(".account-actions");
+  const navigationBox = await navigation.boundingBox();
+  const accountActionsBox = await accountActions.boundingBox();
+
+  expect(navigationBox).not.toBeNull();
+  expect(accountActionsBox).not.toBeNull();
+  expect(navigationBox!.x + navigationBox!.width).toBeLessThan(accountActionsBox!.x);
+
+  await page.getByText("Mate tools", { exact: true }).click();
+  await expect(page.getByRole("link", { name: "Mate profile" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Photos" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Availability" })).toBeVisible();
+});
