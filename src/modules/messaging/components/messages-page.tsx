@@ -273,6 +273,13 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                     publishTyping(true);
                     typingStopTimerRef.current = setTimeout(() => publishTyping(false), 1_500);
                   }}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
+                      return;
+                    }
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                  }}
                   placeholder="Write a message..."
                   rows={1}
                   value={content}
