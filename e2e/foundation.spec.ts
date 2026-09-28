@@ -10,3 +10,22 @@ test("serves the UI-free foundation without accessibility violations", async ({ 
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
+
+test("keeps the public footer visible in dark theme", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("mateflow-theme", "light"));
+  await page.goto("/");
+
+  await page.locator(".desktop-theme-toggle").click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
+
+  const footer = page.locator(".site-footer");
+  const copyright = footer.locator(".copyright");
+
+  await expect(footer).toHaveCSS("background-color", "rgb(32, 33, 42)");
+  await expect(footer).toHaveCSS("border-top-color", "rgba(255, 255, 255, 0.22)");
+  await expect(footer.locator(".brand")).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(footer.locator(".footer-brand p")).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(footer.locator(".footer-nav a").first()).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(copyright).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(copyright).toHaveCSS("border-top-color", "rgba(255, 255, 255, 0.22)");
+});

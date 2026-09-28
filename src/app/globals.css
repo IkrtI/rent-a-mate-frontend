@@ -586,6 +586,20 @@ html.dark body {
   color: #bcb7b5;
   font-size: 12px;
 }
+html.dark .site-footer {
+  border-top: 1px solid #ffffff38;
+  color: #fff;
+  background: #20212a;
+}
+html.dark .site-footer .brand,
+html.dark .site-footer .footer-brand p,
+html.dark .site-footer .footer-nav a,
+html.dark .site-footer .copyright {
+  color: #fff;
+}
+html.dark .site-footer .copyright {
+  border-top-color: #ffffff38;
+}
 .eyebrow {
   margin: 0;
   color: #a3484e;
