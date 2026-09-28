@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { z } from "zod";
 
@@ -289,6 +290,7 @@ export function ProfileEditor({
 }
 
 export function PhotosEditor({ mate }: { mate: MateProfile }) {
+  const queryClient = useQueryClient();
   const [photos, setPhotos] = useState(mate.photos);
   const [busy, setBusy] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -325,6 +327,7 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
         setUploadProgress,
       );
       setPhotos((current) => [...current, result.photo].sort((a, b) => a.sortOrder - b.sortOrder));
+      await queryClient.invalidateQueries({ queryKey: ["mate-profile"] });
       formElement.reset();
       setMessage("Photo added.");
     } catch (cause) {
@@ -341,6 +344,7 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
     try {
       await requestSameOrigin(`/api/mates/me/photos/${id}`, z.unknown(), { method: "DELETE" });
       setPhotos((current) => current.filter((photo) => photo.id !== id));
+      await queryClient.invalidateQueries({ queryKey: ["mate-profile"] });
       setMessage("Photo removed.");
     } catch (cause) {
       setError(errorText(cause));

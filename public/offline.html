@@ -4,14 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#fcf8f6" />
-    <title>You’re offline · matefor.</title>
+    <title>You’re offline · mateflow.</title>
     <script>
       try {
         const cookieTheme = document.cookie
           .split("; ")
-          .find((item) => item.startsWith("matefor-theme="))
+          .find((item) => item.startsWith("mateflow-theme="))
           ?.split("=")[1];
-        const savedTheme = localStorage.getItem("matefor-theme") || cookieTheme;
+        const savedTheme = localStorage.getItem("mateflow-theme") || cookieTheme;
         const theme =
           savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
         document.documentElement.classList.toggle("dark", theme === "dark");
@@ -125,7 +125,7 @@
   </head>
   <body>
     <main class="wrap">
-      <div class="brand"><span class="mark">m</span> matefor.</div>
+      <div class="brand"><span class="mark">m</span> mateflow.</div>
       <div class="icon" aria-hidden="true">⌁</div>
       <p class="eyebrow">No connection</p>
       <h1>You’re offline.</h1>

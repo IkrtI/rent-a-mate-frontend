@@ -43,14 +43,17 @@ export function useBookingRealtime(
     }
 
     let stopped = false;
+    let reconnectBlocked = false;
+    let retryDelay = 1_500;
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
     let activeSocket: Socket | null = null;
     const scheduleReconnect = () => {
-      if (stopped || reconnectTimer) return;
+      if (stopped || reconnectBlocked || reconnectTimer) return;
       reconnectTimer = setTimeout(() => {
         reconnectTimer = undefined;
         void connect();
-      }, 1_500);
+      }, retryDelay);
+      retryDelay = Math.min(retryDelay * 2, 30_000);
     };
     const connect = async () => {
       try {
@@ -79,18 +82,27 @@ export function useBookingRealtime(
         });
         socket.on("connect", () => {
           socket.emit("join_booking", { bookingId }, (ack: ChatAck) => {
-            if (ack.ok) {
+            if (ack?.ok) {
+              retryDelay = 1_500;
               setStatus("connected");
               onJoinedRef.current();
               return;
             }
+            // A non-participant cannot join this room; retrying with fresh
+            // one-time tickets would only create an endless reconnect loop.
+            reconnectBlocked = true;
+            console.warn("Chat room join rejected:", ack?.error ?? "No acknowledgement");
             setStatus("unavailable");
             socket.disconnect();
-            scheduleReconnect();
           });
         });
-        socket.on("connect_error", () => {
+        socket.on("connect_error", (error: Error & { data?: { code?: string } }) => {
           setStatus("unavailable");
+          if (error.data?.code === "SOCKET_AUTH_REJECTED") {
+            reconnectBlocked = true;
+            console.warn("Chat socket authentication rejected:", error.message);
+            return;
+          }
           scheduleReconnect();
         });
         socket.on("disconnect", () => {
@@ -132,35 +144,5 @@ export function useBookingRealtime(
     socketRef.current.emit("mark_read", { bookingId }, () => undefined);
   }, [bookingId]);
 
-  const sendMessage = useCallback(
-    (content: string) =>
-      new Promise<Message>((resolve, reject) => {
-        const socket = socketRef.current;
-        if (!bookingId || !socket?.connected) {
-          reject(new Error("Live messaging is unavailable."));
-          return;
-        }
-
-        socket
-          .timeout(5_000)
-          .emit(
-            "send_message",
-            { bookingId, content },
-            (timeoutError: Error | null, ack: ChatAck<Message>) => {
-              if (timeoutError) {
-                reject(new Error("The message could not be sent. Please try again."));
-              } else if (!ack.ok) {
-                reject(new Error(ack.error));
-              } else if (!ack.data) {
-                reject(new Error("The server did not confirm the message."));
-              } else {
-                resolve(ack.data);
-              }
-            },
-          );
-      }),
-    [bookingId],
-  );
-
-  return { status, isOtherTyping, setTyping, markRead, sendMessage };
+  return { status, isOtherTyping, setTyping, markRead };
 }

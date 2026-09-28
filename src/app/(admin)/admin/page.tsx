@@ -68,7 +68,7 @@ export default async function AdminOverviewPage({ searchParams }: Props) {
         }
         description="Marketplace health, booking activity, and trust operations in one workspace."
         eyebrow="ADMIN CONTROL CENTER"
-        title="Good morning. Here’s the pulse of matefor."
+        title="Good morning. Here’s the pulse of mateflow."
       />
 
       {!analytics && (

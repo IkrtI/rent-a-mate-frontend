@@ -49,10 +49,10 @@ export function AdminShell({ user, children }: { user: AdminIdentity; children: 
         aria-label="Admin navigation"
         className={menuOpen ? "admin-sidebar is-open" : "admin-sidebar"}
       >
-        <Link aria-label="matefor admin overview" className="admin-brand" href="/admin">
+        <Link aria-label="mateflow admin overview" className="admin-brand" href="/admin">
           <span className="admin-brand-mark">m</span>
           <span className="admin-brand-copy">
-            <strong>matefor</strong>
+            <strong>mateflow</strong>
             <small>ADMIN CONSOLE</small>
           </span>
         </Link>
@@ -137,7 +137,7 @@ export function AdminShell({ user, children }: { user: AdminIdentity; children: 
           {children}
         </main>
         <footer className="admin-footer">
-          <span>matefor operations</span>
+          <span>mateflow operations</span>
           <span>
             <ChartNoAxesCombined aria-hidden="true" size={13} /> Data from the admin API
           </span>

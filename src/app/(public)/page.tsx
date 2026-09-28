@@ -4,13 +4,14 @@ import type { Metadata } from "next";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { getPublicMates } from "@/modules/mate-discovery/public-data";
+import { HomeJourney } from "@/components/layout/home-journey";
 
 export const metadata: Metadata = {
-  title: "Find your kind of company",
+  title: { absolute: "mateflow" },
   description: "Meet local mates for coffee, gaming, study, the gym, and city plans.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Find your kind of company",
+    title: "mateflow",
     description: "Meet local mates for coffee, gaming, study, the gym, and city plans.",
     url: "/",
     type: "website",
@@ -29,7 +30,7 @@ const activities = [
 export default async function HomePage() {
   const featured = await getPublicMates({ sort: "-rating", page: "1" });
   return (
-    <main>
+    <main className="home-page">
       <section className="home-hero">
         <div className="hero-copy">
           <h1>
@@ -203,49 +204,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section steps-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">HOW IT WORKS</p>
-            <h2>
-              Good company is
-              <br />
-              <em>three taps away.</em>
-            </h2>
-          </div>
-          <Link className="text-link" href="/how-it-works">
-            See how it works <ArrowUpRight size={17} />
-          </Link>
-        </div>
-        <div className="steps-grid">
-          <article>
-            <span>01</span>
-            <h3>Find your person</h3>
-            <p>Tell us the plan, place and time.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Send a booking</h3>
-            <p>Pick a Mate who matches your vibe.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Meet &amp; enjoy</h3>
-            <p>Chat, confirm and make it a good day.</p>
-          </article>
-        </div>
-      </section>
-      <section className="home-cta">
-        <p className="eyebrow">YOUR NEXT PLAN IS OUT THERE</p>
-        <h2>
-          Good company
-          <br />
-          <em>looks good on you.</em>
-        </h2>
-        <Link className="button" href="/mates">
-          Find your Mate <ArrowRight size={17} />
-        </Link>
-      </section>
+      <HomeJourney />
     </main>
   );
 }

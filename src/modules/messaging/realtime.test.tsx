@@ -13,7 +13,7 @@ vi.mock("socket.io-client", () => ({ io: mocks.io }));
 
 type Handler = (payload?: unknown) => void;
 
-function createSocket() {
+function createSocket(joinAck: { ok: boolean; error?: string } = { ok: true }) {
   const handlers = new Map<string, Handler>();
   const socket = {
     connected: false,
@@ -26,20 +26,10 @@ function createSocket() {
     }),
     emit: vi.fn(
       (event: string, _payload: unknown, acknowledgement?: (...args: never[]) => void) => {
-        if (event === "join_booking") acknowledgement?.({ ok: true } as never);
-        if (event === "send_message") {
-          acknowledgement?.(
-            null as never,
-            {
-              ok: true,
-              data: { id: 55, senderId: 3, content: "hello", createdAt: "2026-09-25T00:00:00Z" },
-            } as never,
-          );
-        }
+        if (event === "join_booking") acknowledgement?.(joinAck as never);
         return socket;
       },
     ),
-    timeout: vi.fn(() => socket),
     on: vi.fn((event: string, handler: Handler) => {
       handlers.set(event, handler);
       return socket;
@@ -51,17 +41,79 @@ function createSocket() {
 describe("useBookingRealtime", () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SOCKET_URL = "http://socket.test";
+    mocks.createSocketTicket.mockReset();
     mocks.createSocketTicket.mockResolvedValue({ ticket: "one-time-ticket" });
     mocks.io.mockReset();
   });
 
+  it("stops retrying when the booking room rejects the user", async () => {
+    vi.useFakeTimers();
+    const { socket } = createSocket({ ok: false, error: "Booking not found" });
+    mocks.io.mockReturnValue(socket);
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    try {
+      const { result, unmount } = renderHook(() =>
+        useBookingRealtime(42, vi.fn(), vi.fn(), vi.fn()),
+      );
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(result.current.status).toBe("unavailable");
+      expect(socket.disconnect).toHaveBeenCalledOnce();
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30_000);
+      });
+      expect(mocks.createSocketTicket).toHaveBeenCalledTimes(1);
+      unmount();
+    } finally {
+      warning.mockRestore();
+      vi.useRealTimers();
+    }
+  });
+
+  it("stops retrying when the socket ticket is rejected", async () => {
+    vi.useFakeTimers();
+    const { handlers, socket } = createSocket();
+    socket.connect.mockImplementationOnce(() => {
+      handlers.get("connect_error")?.(
+        Object.assign(new Error("Invalid socket ticket"), {
+          data: { code: "SOCKET_AUTH_REJECTED" },
+        }),
+      );
+    });
+    mocks.io.mockReturnValue(socket);
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    try {
+      const { result, unmount } = renderHook(() =>
+        useBookingRealtime(42, vi.fn(), vi.fn(), vi.fn()),
+      );
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(result.current.status).toBe("unavailable");
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30_000);
+      });
+      expect(mocks.createSocketTicket).toHaveBeenCalledTimes(1);
+      unmount();
+    } finally {
+      warning.mockRestore();
+      vi.useRealTimers();
+    }
+  });
+
   it("exposes typing and read events after joining the booking room", async () => {
     const { handlers, socket } = createSocket();
+    const onMessage = vi.fn();
     const onMessagesRead = vi.fn();
     mocks.io.mockReturnValue(socket);
 
     const { result, unmount } = renderHook(() =>
-      useBookingRealtime(42, vi.fn(), vi.fn(), onMessagesRead),
+      useBookingRealtime(42, onMessage, vi.fn(), onMessagesRead),
     );
 
     await waitFor(() => expect(result.current.status).toBe("connected"));
@@ -90,17 +142,13 @@ describe("useBookingRealtime", () => {
       readerId: 11,
       updatedCount: 2,
     });
-
-    await act(async () => {
-      await expect(result.current.sendMessage("hello")).resolves.toMatchObject({
-        id: 55,
-        content: "hello",
-      });
-    });
-    expect(socket.emit).toHaveBeenCalledWith(
+    const message = { id: 55, bookingId: 42, senderId: 3, content: "hello" };
+    act(() => handlers.get("new_message")?.(message));
+    expect(onMessage).toHaveBeenCalledWith(message);
+    expect(socket.emit).not.toHaveBeenCalledWith(
       "send_message",
-      { bookingId: 42, content: "hello" },
-      expect.any(Function),
+      expect.anything(),
+      expect.anything(),
     );
 
     unmount();

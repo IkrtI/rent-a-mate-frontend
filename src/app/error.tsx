@@ -14,8 +14,8 @@ export default function Error({
   return (
     <main className="status-page">
       <div className="status-page__content">
-        <Link className="status-page__brand" href="/" aria-label="matefor home">
-          <span className="status-page__mark">m</span> matefor.
+        <Link className="status-page__brand" href="/" aria-label="mateflow home">
+          <span className="status-page__mark">m</span> mateflow.
         </Link>
         <p className="status-page__code">500</p>
         <p className="status-page__eyebrow">A temporary hiccup</p>

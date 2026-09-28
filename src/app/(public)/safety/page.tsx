@@ -6,11 +6,11 @@ import { PageHero } from "@/components/layout/public-shell";
 
 export const metadata: Metadata = {
   title: "Safety",
-  description: "Practical guidance for comfortable, respectful meetups with matefor.",
+  description: "Practical guidance for comfortable, respectful meetups with mateflow.",
   alternates: { canonical: "/safety" },
   openGraph: {
     title: "Safety",
-    description: "Practical guidance for comfortable, respectful meetups with matefor.",
+    description: "Practical guidance for comfortable, respectful meetups with mateflow.",
     url: "/safety",
     type: "website",
   },
@@ -74,7 +74,7 @@ export default function SafetyPage() {
         <p>
           If something feels wrong or a plan changes, end the meetup and contact local emergency
           services if you’re in immediate danger. For product support,{" "}
-          <Link href="mailto:hello@matefor.example">get in touch</Link>.
+          <Link href="mailto:hello@mateflow.example">get in touch</Link>.
         </p>
         <Link className="button button-outline" href="/mates">
           Browse mates <ArrowRight size={17} />

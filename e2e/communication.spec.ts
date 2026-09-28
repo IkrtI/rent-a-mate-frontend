@@ -26,39 +26,73 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("opens notifications and marks an item read", async ({ page }) => {
+  let notifications = [
+    {
+      id: 3,
+      userId: 7,
+      type: "booking_confirmed",
+      message: "Your booking request has been confirmed",
+      bookingId: null,
+      isRead: false,
+      createdAt: "2026-09-23T03:00:00.000Z",
+    },
+    {
+      id: 4,
+      userId: 7,
+      type: "message_received",
+      message: "You have a new message",
+      bookingId: 42,
+      isRead: false,
+      createdAt: "2026-09-23T04:00:00.000Z",
+    },
+    {
+      id: 5,
+      userId: 7,
+      type: "booking_confirmed",
+      message: "An older booking update",
+      bookingId: null,
+      isRead: true,
+      createdAt: "2026-09-22T03:00:00.000Z",
+    },
+  ];
   await page.route("**/api/notifications", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({
-        notifications: [
-          {
-            id: 3,
-            userId: 7,
-            type: "booking_confirmed",
-            message: "Your booking request has been confirmed",
-            bookingId: 42,
-            isRead: false,
-            createdAt: "2026-09-23T03:00:00.000Z",
-          },
-        ],
-      }),
+      body: JSON.stringify({ notifications }),
     }),
   );
-  await page.route("**/api/notifications/3/read", (route) =>
-    route.fulfill({
+  await page.route("**/api/notifications/3/read", (route) => {
+    notifications = notifications.map((item) => (item.id === 3 ? { ...item, isRead: true } : item));
+    return route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ notification: { id: 3 } }),
-    }),
-  );
+      body: JSON.stringify({ notification: notifications[0] }),
+    });
+  });
+  await page.route("**/api/notifications/read-all", (route) => {
+    notifications = notifications.map((item) => ({ ...item, isRead: true }));
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ updated: 1 }),
+    });
+  });
 
   await page.goto("/dashboard");
-  await page.getByTitle("Notifications").click();
+  const notificationButton = page.locator('button[title="Notifications"]');
+  await expect(notificationButton).toHaveAttribute("aria-label", "Notifications, 2 unread");
+  await expect(notificationButton.getByText("2")).toBeVisible();
+  await notificationButton.click();
   await expect(page.getByText("Your booking request has been confirmed")).toBeVisible();
+  await page.getByText("Your booking request has been confirmed").click();
+  await expect(notificationButton).toHaveAttribute("aria-label", "Notifications, 1 unread");
+  await page.getByRole("button", { name: "Mark all read" }).click();
+  await expect(notificationButton).toHaveAttribute("aria-label", "Notifications, none unread");
+  await expect(notificationButton.locator("span")).toHaveCount(0);
 });
 
-test("lists conversations and sends a REST message", async ({ page }) => {
+test("retries a REST message with the same idempotency key", async ({ page }) => {
   await page.route("**/api/bookings?**", (route) =>
     route.fulfill({
       status: 200,
@@ -86,9 +120,17 @@ test("lists conversations and sends a REST message", async ({ page }) => {
       createdAt: "2026-09-23T03:00:00.000Z",
     },
   ];
+  const attempts: string[] = [];
   await page.route("**/api/bookings/42/messages*", async (route) => {
     if (route.request().method() === "POST") {
-      const input = (await route.request().postDataJSON()) as { content: string };
+      const input = (await route.request().postDataJSON()) as {
+        clientMessageId: string;
+        content: string;
+      };
+      attempts.push(input.clientMessageId);
+      expect(input.clientMessageId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
       const message = {
         id: 2,
         bookingId: 42,
@@ -97,7 +139,22 @@ test("lists conversations and sends a REST message", async ({ page }) => {
         readAt: null,
         createdAt: "2026-09-23T03:05:00.000Z",
       };
-      messages = [...messages, message];
+      if (attempts.length === 1) {
+        messages = [...messages, message];
+        await route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({
+            error: {
+              status: 503,
+              code: "NETWORK_ERROR",
+              message: "Response lost",
+              retryable: true,
+            },
+          }),
+        });
+        return;
+      }
       await route.fulfill({
         status: 201,
         contentType: "application/json",
@@ -120,5 +177,10 @@ test("lists conversations and sends a REST message", async ({ page }) => {
   await expect(page.getByText(/· Read$/)).toBeVisible();
   await page.getByLabel("Message").fill("On my way");
   await page.getByTitle("Send message").click();
+  await expect(page.getByText("Response lost")).toBeVisible();
+  await page.getByTitle("Send message").click();
+  await expect.poll(() => attempts.length).toBe(2);
   await expect(page.getByText("On my way")).toBeVisible();
+  expect(attempts[1]).toBe(attempts[0]);
+  expect(messages).toHaveLength(2);
 });

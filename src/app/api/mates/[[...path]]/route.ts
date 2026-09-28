@@ -178,7 +178,7 @@ export async function DELETE(request: Request, { params }: Context) {
     ) {
       return NextResponse.json(
         await requestAuthenticatedBackend({
-          path: apiPath(path),
+          path: `/mates${apiPath(path)}`,
           method: "DELETE",
           responseSchema: unknownResponse,
         }),

@@ -24,11 +24,11 @@ function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle("dark", theme === "dark");
   document.documentElement.style.colorScheme = theme;
   try {
-    localStorage.setItem("matefor-theme", theme);
+    localStorage.setItem("mateflow-theme", theme);
   } catch {
     // Theme changes still work when browser storage is disabled.
   }
-  document.cookie = `matefor-theme=${theme}; path=/; max-age=31536000; samesite=lax`;
+  document.cookie = `mateflow-theme=${theme}; path=/; max-age=31536000; samesite=lax`;
   subscribers.forEach((subscriber) => subscriber());
 }
 

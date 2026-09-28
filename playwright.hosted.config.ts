@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.MATEFOR_BASE_URL;
-if (!baseURL) throw new Error("Set MATEFOR_BASE_URL to the test deployment URL.");
+const baseURL = process.env.MATEFLOW_BASE_URL;
+if (!baseURL) throw new Error("Set MATEFLOW_BASE_URL to the test deployment URL.");
 
 export default defineConfig({
   testDir: "./hosted-e2e",
