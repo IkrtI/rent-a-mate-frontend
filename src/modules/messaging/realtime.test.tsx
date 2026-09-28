@@ -27,19 +27,9 @@ function createSocket() {
     emit: vi.fn(
       (event: string, _payload: unknown, acknowledgement?: (...args: never[]) => void) => {
         if (event === "join_booking") acknowledgement?.({ ok: true } as never);
-        if (event === "send_message") {
-          acknowledgement?.(
-            null as never,
-            {
-              ok: true,
-              data: { id: 55, senderId: 3, content: "hello", createdAt: "2026-09-25T00:00:00Z" },
-            } as never,
-          );
-        }
         return socket;
       },
     ),
-    timeout: vi.fn(() => socket),
     on: vi.fn((event: string, handler: Handler) => {
       handlers.set(event, handler);
       return socket;
@@ -57,11 +47,12 @@ describe("useBookingRealtime", () => {
 
   it("exposes typing and read events after joining the booking room", async () => {
     const { handlers, socket } = createSocket();
+    const onMessage = vi.fn();
     const onMessagesRead = vi.fn();
     mocks.io.mockReturnValue(socket);
 
     const { result, unmount } = renderHook(() =>
-      useBookingRealtime(42, vi.fn(), vi.fn(), onMessagesRead),
+      useBookingRealtime(42, onMessage, vi.fn(), onMessagesRead),
     );
 
     await waitFor(() => expect(result.current.status).toBe("connected"));
@@ -90,17 +81,13 @@ describe("useBookingRealtime", () => {
       readerId: 11,
       updatedCount: 2,
     });
-
-    await act(async () => {
-      await expect(result.current.sendMessage("hello")).resolves.toMatchObject({
-        id: 55,
-        content: "hello",
-      });
-    });
-    expect(socket.emit).toHaveBeenCalledWith(
+    const message = { id: 55, bookingId: 42, senderId: 3, content: "hello" };
+    act(() => handlers.get("new_message")?.(message));
+    expect(onMessage).toHaveBeenCalledWith(message);
+    expect(socket.emit).not.toHaveBeenCalledWith(
       "send_message",
-      { bookingId: 42, content: "hello" },
-      expect.any(Function),
+      expect.anything(),
+      expect.anything(),
     );
 
     unmount();

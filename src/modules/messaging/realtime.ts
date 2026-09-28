@@ -132,35 +132,5 @@ export function useBookingRealtime(
     socketRef.current.emit("mark_read", { bookingId }, () => undefined);
   }, [bookingId]);
 
-  const sendMessage = useCallback(
-    (content: string) =>
-      new Promise<Message>((resolve, reject) => {
-        const socket = socketRef.current;
-        if (!bookingId || !socket?.connected) {
-          reject(new Error("Live messaging is unavailable."));
-          return;
-        }
-
-        socket
-          .timeout(5_000)
-          .emit(
-            "send_message",
-            { bookingId, content },
-            (timeoutError: Error | null, ack: ChatAck<Message>) => {
-              if (timeoutError) {
-                reject(new Error("The message could not be sent. Please try again."));
-              } else if (!ack.ok) {
-                reject(new Error(ack.error));
-              } else if (!ack.data) {
-                reject(new Error("The server did not confirm the message."));
-              } else {
-                resolve(ack.data);
-              }
-            },
-          );
-      }),
-    [bookingId],
-  );
-
-  return { status, isOtherTyping, setTyping, markRead, sendMessage };
+  return { status, isOtherTyping, setTyping, markRead };
 }

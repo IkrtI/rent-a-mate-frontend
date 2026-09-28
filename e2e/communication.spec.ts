@@ -58,7 +58,7 @@ test("opens notifications and marks an item read", async ({ page }) => {
   await expect(page.getByText("Your booking request has been confirmed")).toBeVisible();
 });
 
-test("lists conversations and sends a REST message", async ({ page }) => {
+test("retries a REST message with the same idempotency key", async ({ page }) => {
   await page.route("**/api/bookings?**", (route) =>
     route.fulfill({
       status: 200,
@@ -86,9 +86,17 @@ test("lists conversations and sends a REST message", async ({ page }) => {
       createdAt: "2026-09-23T03:00:00.000Z",
     },
   ];
+  const attempts: string[] = [];
   await page.route("**/api/bookings/42/messages*", async (route) => {
     if (route.request().method() === "POST") {
-      const input = (await route.request().postDataJSON()) as { content: string };
+      const input = (await route.request().postDataJSON()) as {
+        clientMessageId: string;
+        content: string;
+      };
+      attempts.push(input.clientMessageId);
+      expect(input.clientMessageId).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      );
       const message = {
         id: 2,
         bookingId: 42,
@@ -97,7 +105,22 @@ test("lists conversations and sends a REST message", async ({ page }) => {
         readAt: null,
         createdAt: "2026-09-23T03:05:00.000Z",
       };
-      messages = [...messages, message];
+      if (attempts.length === 1) {
+        messages = [...messages, message];
+        await route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({
+            error: {
+              status: 503,
+              code: "NETWORK_ERROR",
+              message: "Response lost",
+              retryable: true,
+            },
+          }),
+        });
+        return;
+      }
       await route.fulfill({
         status: 201,
         contentType: "application/json",
@@ -120,5 +143,10 @@ test("lists conversations and sends a REST message", async ({ page }) => {
   await expect(page.getByText(/· Read$/)).toBeVisible();
   await page.getByLabel("Message").fill("On my way");
   await page.getByTitle("Send message").click();
+  await expect(page.getByText("Response lost")).toBeVisible();
+  await page.getByTitle("Send message").click();
+  await expect.poll(() => attempts.length).toBe(2);
   await expect(page.getByText("On my way")).toBeVisible();
+  expect(attempts[1]).toBe(attempts[0]);
+  expect(messages).toHaveLength(2);
 });
