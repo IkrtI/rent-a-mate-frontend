@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { requestSameOrigin } from "@/modules/backend-client/browser";
 import { mateResultSchema } from "@/modules/mate-profile/schemas";
+import { listNotifications } from "@/modules/notification/client";
 import { NotificationPanel } from "@/modules/notification/components/notification-panel";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
@@ -44,6 +45,13 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   const queryClient = useQueryClient();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
+  const notifications = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => listNotifications(),
+    enabled: session.isSuccess,
+    refetchInterval: 30_000,
+    retry: false,
+  });
   const mateProfile = useQuery({
     queryKey: ["mate-profile"],
     queryFn: () => requestSameOrigin("/api/mates/me", mateResultSchema),
@@ -74,6 +82,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   }
 
   const user = session.data.user;
+  const unreadCount = notifications.data?.notifications.filter((item) => !item.isRead).length ?? 0;
   const avatarUrl = mateProfile.data?.mate.photos[0]?.url;
   const visibleNavigation = user.role === "mate" ? [...navigation, ...mateNavigation] : navigation;
   const handleLogout = async () => {
@@ -148,12 +157,25 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
           </nav>
           <div className="account-actions flex shrink-0 items-center gap-2 sm:gap-3">
             <button
-              className="account-icon-button grid size-9 place-items-center rounded-full"
+              aria-label={
+                unreadCount > 0
+                  ? `Notifications, ${unreadCount} unread`
+                  : "Notifications, none unread"
+              }
+              className="account-icon-button relative grid size-9 place-items-center rounded-full"
               onClick={() => setNotificationsOpen(true)}
               title="Notifications"
               type="button"
             >
               <Bell aria-hidden size={18} />
+              {unreadCount > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-1 -right-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-[#a83b43] px-1 text-[10px] leading-none font-bold text-white"
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              ) : null}
             </button>
             <ThemeToggle />
             <div className="hidden items-center gap-2 sm:flex">
