@@ -1,0 +1,290 @@
+.journey {
+  background: var(--background);
+}
+.inner {
+  width: min(1180px, calc(100% - 64px));
+  margin: auto;
+  padding: 88px 0 64px;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+.eyebrow {
+  margin: 0 0 18px;
+  color: var(--primary-text-accent);
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+.heading h2 {
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 600;
+  letter-spacing: -0.055em;
+  line-height: 1.06;
+}
+.heading h2 em,
+.invitation h2 em {
+  color: var(--primary-text-accent);
+  font-weight: inherit;
+}
+.intro {
+  margin: 0 0 4px;
+  color: var(--muted-foreground);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 30px;
+  border: 1px solid var(--edge);
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--ink);
+}
+.coral {
+  --surface: #702333;
+  --ink: #fff0e7;
+  --edge: #873446;
+  --object: #ffa493;
+  --object-dark: #d25763;
+}
+.plum {
+  --surface: #2c2334;
+  --ink: #f3c4ed;
+  --edge: #47324c;
+  --object: #b9b6ff;
+  --object-dark: #7575c7;
+}
+.cream {
+  --surface: #f4eadb;
+  --ink: #343e33;
+  --edge: #dfd2bf;
+  --object: #a8c79b;
+  --object-dark: #568467;
+}
+.cardLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.cardLabel > span:last-child {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.card h3 {
+  margin: 24px 0 0;
+  min-height: 120px;
+  color: inherit;
+  font-size: clamp(30px, 3.1vw, 42px);
+  line-height: 1.08;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+.art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 240px;
+  margin: 8px -12px 24px;
+}
+.orbit {
+  position: absolute;
+  width: 230px;
+  height: 160px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.2;
+  transform: rotate(-30deg);
+}
+.sculpture {
+  display: grid;
+  place-items: center;
+  width: 170px;
+  height: 170px;
+  border-radius: 44px;
+  background: linear-gradient(140deg, #ffffffb3, var(--object) 32%, var(--object-dark));
+  box-shadow:
+    inset 3px 3px 5px #ffffff80,
+    inset -4px -5px 8px #00000025,
+    12px 24px 30px #00000025;
+  transform: rotate(-12deg);
+  color: var(--surface);
+}
+.sculpture > svg {
+  width: 108px;
+  height: 108px;
+  filter: drop-shadow(1px 2px 0 #ffffff50);
+}
+.plum .sculpture {
+  transform: rotate(12deg);
+  border-radius: 50%;
+}
+.cream .sculpture {
+  transform: rotate(-8deg);
+  border-radius: 50% 50% 38px 38px;
+}
+.sparkle {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  top: 18px;
+  right: 12px;
+}
+.card > p {
+  margin: auto 0 22px;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.cardLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.cardLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.cardLink:focus-visible,
+.cta:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 6px;
+}
+.invitation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding-top: 48px;
+  margin-top: 48px;
+  border-top: 1px solid var(--border);
+}
+.invitation .eyebrow {
+  margin-bottom: 12px;
+}
+.invitation h2 {
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 20px;
+  padding: 18px 26px;
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--background);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.cta:hover {
+  opacity: 0.85;
+}
+@media (max-width: 960px) {
+  .card {
+    padding: 22px;
+  }
+  .cards {
+    gap: 14px;
+  }
+  .art {
+    height: 205px;
+  }
+  .sculpture {
+    width: 140px;
+    height: 140px;
+  }
+  .orbit {
+    width: 180px;
+    height: 130px;
+  }
+  .sculpture > svg {
+    width: 90px;
+    height: 90px;
+  }
+}
+@media (max-width: 700px) {
+  .inner {
+    width: calc(100% - 40px);
+    padding: 56px 0 40px;
+  }
+  .heading {
+    display: block;
+    margin-bottom: 28px;
+  }
+  .intro {
+    margin-top: 22px;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .card {
+    padding: 28px;
+  }
+  .card h3 {
+    min-height: 0;
+    max-width: 280px;
+    font-size: 40px;
+  }
+  .art {
+    height: 230px;
+    margin-top: 20px;
+  }
+  .sculpture {
+    width: 170px;
+    height: 170px;
+  }
+  .sculpture > svg {
+    width: 108px;
+    height: 108px;
+  }
+  .orbit {
+    width: 240px;
+    height: 160px;
+  }
+  .invitation {
+    flex-direction: column;
+    align-items: start;
+    margin-top: 32px;
+    padding-top: 32px;
+    gap: 24px;
+  }
+}
