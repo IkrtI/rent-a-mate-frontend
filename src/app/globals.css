@@ -960,7 +960,7 @@ h2 {
   font-weight: 700;
   text-decoration: none;
 }
-.steps-section {
+.steps-section .section {
   padding-top: 100px;
   padding-bottom: 104px;
 }

@@ -20,6 +20,15 @@ test("keeps the public footer visible in dark theme", async ({ page }) => {
 
   const footer = page.locator(".site-footer");
   const copyright = footer.locator(".copyright");
+  const steps = page.locator(".steps-section");
+
+  await expect(steps).toHaveCSS("background-color", "rgb(30, 29, 34)");
+  await expect
+    .poll(async () => {
+      const box = await steps.boundingBox();
+      return box && { x: box.x, width: box.width };
+    })
+    .toEqual({ x: 0, width: 1280 });
 
   await expect(footer).toHaveCSS("background-color", "rgb(32, 33, 42)");
   await expect(footer).toHaveCSS("border-top-color", "rgba(255, 255, 255, 0.22)");

@@ -203,36 +203,38 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section steps-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">HOW IT WORKS</p>
-            <h2>
-              Good company is
-              <br />
-              <em>three taps away.</em>
-            </h2>
+      <section className="steps-section">
+        <div className="section">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">HOW IT WORKS</p>
+              <h2>
+                Good company is
+                <br />
+                <em>three taps away.</em>
+              </h2>
+            </div>
+            <Link className="text-link" href="/how-it-works">
+              See how it works <ArrowUpRight size={17} />
+            </Link>
           </div>
-          <Link className="text-link" href="/how-it-works">
-            See how it works <ArrowUpRight size={17} />
-          </Link>
-        </div>
-        <div className="steps-grid">
-          <article>
-            <span>01</span>
-            <h3>Find your person</h3>
-            <p>Tell us the plan, place and time.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Send a booking</h3>
-            <p>Pick a Mate who matches your vibe.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Meet &amp; enjoy</h3>
-            <p>Chat, confirm and make it a good day.</p>
-          </article>
+          <div className="steps-grid">
+            <article>
+              <span>01</span>
+              <h3>Find your person</h3>
+              <p>Tell us the plan, place and time.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Send a booking</h3>
+              <p>Pick a Mate who matches your vibe.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Meet &amp; enjoy</h3>
+              <p>Chat, confirm and make it a good day.</p>
+            </article>
+          </div>
         </div>
       </section>
       <section className="home-cta">
