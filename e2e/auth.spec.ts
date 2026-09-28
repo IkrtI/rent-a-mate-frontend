@@ -196,8 +196,40 @@ test("groups mate tools without crowding the desktop navigation", async ({ page 
       }),
     }),
   );
+  await page.route("**/api/mates/me", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        mate: {
+          id: 4,
+          user: { id: 8, name: "Mew Mate" },
+          age: 24,
+          bio: null,
+          hourlyRate: 350,
+          isActive: true,
+          deactivatedAt: null,
+          province: { id: 10, name: "Bangkok" },
+          district: { id: 1001, name: "Phra Nakhon" },
+          activities: [],
+          interests: [],
+          photos: [
+            {
+              id: 1,
+              mateId: 4,
+              url: "/pictures/auth-companions.png",
+              storageKey: null,
+              sortOrder: 0,
+            },
+          ],
+          availability: [],
+        },
+      }),
+    }),
+  );
 
   await page.goto("/dashboard");
+  await expect(page.getByAltText("Mew Mate's profile photo")).toBeVisible();
   const navigation = page.getByRole("navigation", { name: "Private navigation" });
   const accountActions = page.locator(".account-actions");
   const navigationBox = await navigation.boundingBox();

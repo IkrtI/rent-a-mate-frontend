@@ -12,11 +12,14 @@ import {
   Clock3,
   UserRound,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { requestSameOrigin } from "@/modules/backend-client/browser";
+import { mateResultSchema } from "@/modules/mate-profile/schemas";
 import { NotificationPanel } from "@/modules/notification/components/notification-panel";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
@@ -41,6 +44,12 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   const queryClient = useQueryClient();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
+  const mateProfile = useQuery({
+    queryKey: ["mate-profile"],
+    queryFn: () => requestSameOrigin("/api/mates/me", mateResultSchema),
+    enabled: session.data?.user.role === "mate",
+    retry: false,
+  });
 
   useEffect(() => {
     if (session.isError) {
@@ -65,6 +74,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   }
 
   const user = session.data.user;
+  const avatarUrl = mateProfile.data?.mate.photos[0]?.url;
   const visibleNavigation = user.role === "mate" ? [...navigation, ...mateNavigation] : navigation;
   const handleLogout = async () => {
     try {
@@ -147,8 +157,19 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
             </button>
             <ThemeToggle />
             <div className="hidden items-center gap-2 sm:flex">
-              <span className="grid size-8 place-items-center rounded-full bg-[#23212b] text-white">
-                <UserRound aria-hidden size={16} />
+              <span className="bg-foreground text-background relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full">
+                {avatarUrl ? (
+                  <Image
+                    alt={`${user.name}'s profile photo`}
+                    className="object-cover"
+                    fill
+                    sizes="32px"
+                    src={avatarUrl}
+                    unoptimized
+                  />
+                ) : (
+                  <UserRound aria-hidden size={16} />
+                )}
               </span>
               <span className="max-w-32 truncate text-sm font-semibold">{user.name}</span>
             </div>

@@ -5,6 +5,7 @@ test("serves the UI-free foundation without accessibility violations", async ({ 
   const response = await page.goto("/");
 
   expect(response?.ok()).toBe(true);
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute("href", /\/icon\.svg/);
 
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
