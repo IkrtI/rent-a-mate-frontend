@@ -43,14 +43,17 @@ export function useBookingRealtime(
     }
 
     let stopped = false;
+    let reconnectBlocked = false;
+    let retryDelay = 1_500;
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
     let activeSocket: Socket | null = null;
     const scheduleReconnect = () => {
-      if (stopped || reconnectTimer) return;
+      if (stopped || reconnectBlocked || reconnectTimer) return;
       reconnectTimer = setTimeout(() => {
         reconnectTimer = undefined;
         void connect();
-      }, 1_500);
+      }, retryDelay);
+      retryDelay = Math.min(retryDelay * 2, 30_000);
     };
     const connect = async () => {
       try {
@@ -79,18 +82,27 @@ export function useBookingRealtime(
         });
         socket.on("connect", () => {
           socket.emit("join_booking", { bookingId }, (ack: ChatAck) => {
-            if (ack.ok) {
+            if (ack?.ok) {
+              retryDelay = 1_500;
               setStatus("connected");
               onJoinedRef.current();
               return;
             }
+            // A non-participant cannot join this room; retrying with fresh
+            // one-time tickets would only create an endless reconnect loop.
+            reconnectBlocked = true;
+            console.warn("Chat room join rejected:", ack?.error ?? "No acknowledgement");
             setStatus("unavailable");
             socket.disconnect();
-            scheduleReconnect();
           });
         });
-        socket.on("connect_error", () => {
+        socket.on("connect_error", (error: Error & { data?: { code?: string } }) => {
           setStatus("unavailable");
+          if (error.data?.code === "SOCKET_AUTH_REJECTED") {
+            reconnectBlocked = true;
+            console.warn("Chat socket authentication rejected:", error.message);
+            return;
+          }
           scheduleReconnect();
         });
         socket.on("disconnect", () => {
