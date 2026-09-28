@@ -57,11 +57,6 @@ export function HomeJourney() {
               Find your Mate
               <ArrowUpRight size={20} aria-hidden="true" />
             </Link>
-            <p className={styles.intro}>
-              A little company can change your whole day.
-              <br />
-              Here’s how to find yours.
-            </p>
           </div>
         </div>
         <div className={styles.cards}>

@@ -35,15 +35,8 @@
 }
 .headingAction {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 22px;
-}
-.intro {
-  margin: 0;
-  color: var(--muted-foreground);
-  font-size: 15px;
-  line-height: 1.7;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 .cards {
   display: grid;
@@ -236,6 +229,8 @@
     margin-bottom: 28px;
   }
   .headingAction {
+    justify-content: flex-start;
+    margin-left: 0;
     margin-top: 24px;
   }
   .cards {
