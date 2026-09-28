@@ -4,7 +4,7 @@
 .inner {
   width: min(1180px, calc(100% - 64px));
   margin: auto;
-  padding: 88px 0 64px;
+  padding: 88px 0;
 }
 .heading {
   display: flex;
@@ -29,13 +29,18 @@
   letter-spacing: -0.055em;
   line-height: 1.06;
 }
-.heading h2 em,
-.invitation h2 em {
+.heading h2 em {
   color: var(--primary-text-accent);
   font-weight: inherit;
 }
+.headingAction {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
+}
 .intro {
-  margin: 0 0 4px;
+  margin: 0;
   color: var(--muted-foreground);
   font-size: 15px;
   line-height: 1.7;
@@ -181,25 +186,6 @@
   outline: 3px solid currentColor;
   outline-offset: 6px;
 }
-.invitation {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
-  padding-top: 48px;
-  margin-top: 48px;
-  border-top: 1px solid var(--border);
-}
-.invitation .eyebrow {
-  margin-bottom: 12px;
-}
-.invitation h2 {
-  margin: 0;
-  color: var(--foreground);
-  font-size: clamp(26px, 3vw, 38px);
-  font-weight: 500;
-  letter-spacing: -0.045em;
-}
 .cta {
   display: inline-flex;
   align-items: center;
@@ -249,8 +235,8 @@
     display: block;
     margin-bottom: 28px;
   }
-  .intro {
-    margin-top: 22px;
+  .headingAction {
+    margin-top: 24px;
   }
   .cards {
     grid-template-columns: 1fr;
@@ -279,12 +265,5 @@
   .orbit {
     width: 240px;
     height: 160px;
-  }
-  .invitation {
-    flex-direction: column;
-    align-items: start;
-    margin-top: 32px;
-    padding-top: 32px;
-    gap: 24px;
   }
 }

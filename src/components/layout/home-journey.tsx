@@ -52,11 +52,17 @@ export function HomeJourney() {
               <em>Better together.</em>
             </h2>
           </div>
-          <p className={styles.intro}>
-            A little company can change your whole day.
-            <br />
-            Here’s how to find yours.
-          </p>
+          <div className={styles.headingAction}>
+            <Link href="/mates" className={styles.cta}>
+              Find your Mate
+              <ArrowUpRight size={20} aria-hidden="true" />
+            </Link>
+            <p className={styles.intro}>
+              A little company can change your whole day.
+              <br />
+              Here’s how to find yours.
+            </p>
+          </div>
         </div>
         <div className={styles.cards}>
           {steps.map(({ number, label, title, description, href, action, Icon, tone }) => (
@@ -80,18 +86,6 @@ export function HomeJourney() {
               </Link>
             </article>
           ))}
-        </div>
-        <div className={styles.invitation}>
-          <div>
-            <p className={styles.eyebrow}>YOUR NEXT PLAN IS OUT THERE</p>
-            <h2>
-              Make room for <em>good company.</em>
-            </h2>
-          </div>
-          <Link href="/mates" className={styles.cta}>
-            Find your Mate
-            <ArrowUpRight size={20} aria-hidden="true" />
-          </Link>
         </div>
       </div>
     </section>
