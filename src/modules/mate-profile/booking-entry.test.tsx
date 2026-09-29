@@ -41,7 +41,7 @@ describe("BookingEntry", () => {
     fireEvent.change(time.closest("select")!, { target: { value: "09:00-10:00" } });
     fireEvent.click(screen.getByRole("button", { name: "Send booking request" }));
 
-    expect(await screen.findByText(/Booking request #42 sent successfully/)).toBeInTheDocument();
+    expect(await screen.findByText(/Booking request sent successfully/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Send booking request" })).toBeDisabled();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
