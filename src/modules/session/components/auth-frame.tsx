@@ -30,8 +30,7 @@ export function AuthFrame({ children }: Readonly<{ children: React.ReactNode }>)
         </div>
       </section>
       <section className="auth-frame-form flex min-h-screen flex-col px-6 py-6 sm:px-10 lg:px-14">
-        <div className="flex items-center justify-between gap-4 lg:justify-end">
-          <BrandLink className="lg:hidden" />
+        <div className="flex items-center justify-end gap-4">
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <Link className="auth-back-link text-sm" href="/">

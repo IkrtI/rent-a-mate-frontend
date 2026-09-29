@@ -48,12 +48,14 @@ export function BookingsPage() {
             Track requests and confirmed plans in one place.
           </p>
         </div>
-        <Link
-          className="rounded-md bg-[#23212b] px-4 py-2.5 text-sm font-bold text-white"
-          href="/mates"
-        >
-          Find a mate
-        </Link>
+        {session.data?.user.role === "renter" ? (
+          <Link
+            className="rounded-md bg-[#23212b] px-4 py-2.5 text-sm font-bold text-white"
+            href="/mates"
+          >
+            Find a mate
+          </Link>
+        ) : null}
       </div>
       <div className="mt-8 flex gap-2 overflow-x-auto pb-2" aria-label="Booking status filter">
         {filters.map((filter) => (
@@ -82,7 +84,9 @@ export function BookingsPage() {
           <CalendarDays className="mx-auto text-neutral-400" aria-hidden />
           <h2 className="mt-4 text-lg font-bold">No bookings here yet</h2>
           <p className="mt-2 text-sm text-neutral-600">
-            Try another status or discover someone new.
+            {session.data?.user.role === "mate"
+              ? "Try another status or check back for new requests."
+              : "Try another status or discover someone new."}
           </p>
         </div>
       ) : null}

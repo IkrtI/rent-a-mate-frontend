@@ -496,21 +496,21 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
     }
   }
   return (
-    <section className="mx-auto max-w-3xl rounded-2xl border border-rose-100 bg-white p-6 shadow-sm sm:p-8">
-      <p className="mb-5 text-sm text-neutral-600">
+    <section className="border-border bg-card text-card-foreground mx-auto max-w-3xl rounded-2xl border p-6 shadow-sm sm:p-8">
+      <p className="text-muted-foreground mb-5 text-sm">
         Set recurring weekly hours in Bangkok local time. The booking calendar will show open slots
         after existing requests are accounted for.
       </p>
       <form className="grid gap-4" onSubmit={save}>
         {slots.map((slot, index) => (
           <div
-            className="grid gap-3 rounded-xl bg-rose-50 p-3 sm:grid-cols-[1fr_1fr_1fr_auto]"
+            className="bg-accent grid gap-3 rounded-xl p-3 sm:grid-cols-[1fr_1fr_1fr_auto]"
             key={`${index}-${slot.dayOfWeek}-${slot.startTime}`}
           >
             <label className="grid gap-1 text-xs font-semibold">
               Day
               <select
-                className="rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm"
+                className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
                 onChange={(event) => update(index, "dayOfWeek", event.target.value)}
                 value={slot.dayOfWeek}
               >
@@ -524,7 +524,7 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
             <label className="grid gap-1 text-xs font-semibold">
               From
               <input
-                className="rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm"
+                className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
                 onChange={(event) => update(index, "startTime", event.target.value)}
                 required
                 type="time"
@@ -534,7 +534,7 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
             <label className="grid gap-1 text-xs font-semibold">
               Until
               <input
-                className="rounded-lg border border-neutral-300 bg-white px-2 py-2 text-sm"
+                className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
                 onChange={(event) => update(index, "endTime", event.target.value)}
                 required
                 type="time"
@@ -542,7 +542,7 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
               />
             </label>
             <button
-              className="self-end rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              className="border-border self-end rounded-lg border px-3 py-2 text-sm"
               onClick={() =>
                 setSlots((current) => current.filter((_, position) => position !== index))
               }
@@ -553,7 +553,7 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
           </div>
         ))}
         <button
-          className="justify-self-start rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold"
+          className="border-border justify-self-start rounded-lg border px-4 py-2 text-sm font-semibold"
           onClick={() =>
             setSlots((current) => [
               ...current,

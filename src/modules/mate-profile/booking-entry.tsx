@@ -110,7 +110,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
         );
         return;
       }
-      const data = isRecord(payload) && isRecord(payload.data) ? payload.data : null;
+      const data = isRecord(payload) ? (isRecord(payload.data) ? payload.data : payload) : null;
       if (!data || typeof data.id !== "number") {
         setError("We couldn’t confirm your request. Please try again.");
         return;
@@ -196,7 +196,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       )}
       {successId !== null && (
         <p className="booking-success" role="status">
-          Request #{successId} sent. It will be confirmed when the Mate accepts.{" "}
+          Booking request #{successId} sent successfully. The Mate will confirm it soon.{" "}
           <Link href={`/bookings/${successId}`}>View booking</Link>
         </p>
       )}
@@ -216,7 +216,11 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       <button
         className="button booking-button"
         disabled={
-          pending || availability !== "ready" || slots.length === 0 || activities.length === 0
+          pending ||
+          successId !== null ||
+          availability !== "ready" ||
+          slots.length === 0 ||
+          activities.length === 0
         }
         type="submit"
       >
