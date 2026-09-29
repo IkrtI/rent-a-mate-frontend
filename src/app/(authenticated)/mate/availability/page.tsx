@@ -13,14 +13,16 @@ export default async function MateAvailabilityPage() {
   return (
     <main className="grid gap-6">
       <header>
-        <p className="text-sm font-semibold tracking-wide text-rose-600 uppercase">Mate tools</p>
+        <p className="text-sm font-semibold tracking-wide text-rose-600 uppercase dark:text-rose-400">
+          Mate tools
+        </p>
         <h1 className="text-3xl font-bold">Weekly availability</h1>
         <Link className="mt-3 inline-block text-sm font-semibold underline" href="/mate/profile">
           Back to profile
         </Link>
       </header>
       {loadError ? (
-        <section className="rounded-2xl bg-white p-6" role="alert">
+        <section className="bg-card text-card-foreground rounded-2xl p-6" role="alert">
           <h2 className="text-xl font-semibold">We couldn’t load your Mate profile.</h2>
           <Link className="mt-3 inline-block underline" href="/mate/availability">
             Retry
@@ -29,7 +31,7 @@ export default async function MateAvailabilityPage() {
       ) : mate ? (
         <AvailabilityEditor mate={mate} />
       ) : (
-        <section className="rounded-2xl bg-white p-6">
+        <section className="bg-card text-card-foreground rounded-2xl p-6">
           <h2 className="text-xl font-semibold">Create your Mate profile first</h2>
           <Link className="mt-3 inline-block underline" href="/mate/profile">
             Set up profile

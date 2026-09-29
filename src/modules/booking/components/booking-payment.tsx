@@ -23,33 +23,52 @@ const statusCopy = {
   refunded: "Payment has been refunded.",
 } as const;
 
-function CardForm({ onComplete }: { onComplete: () => void }) {
+export function StripePaymentForm({
+  bookingId,
+  onComplete,
+}: {
+  bookingId: number;
+  onComplete: () => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [ready, setReady] = useState(false);
 
   return (
     <form
       className="mt-4 grid gap-4 border-t border-neutral-200 pt-4"
       onSubmit={async (event) => {
         event.preventDefault();
-        if (!stripe || !elements) return;
+        if (!stripe || !elements || !ready || submitting) return;
         setSubmitting(true);
         setError(null);
-        const result = await stripe.confirmPayment({ elements, redirect: "if_required" });
-        setSubmitting(false);
-        if (result.error) {
-          setError(result.error.message ?? "Payment confirmation failed.");
-          return;
+        try {
+          const result = await stripe.confirmPayment({
+            elements,
+            confirmParams: { return_url: `${window.location.origin}/bookings/${bookingId}` },
+            redirect: "if_required",
+          });
+          if (result.error) {
+            setError(result.error.message ?? "Payment confirmation failed.");
+            return;
+          }
+          onComplete();
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : "Payment confirmation failed.");
+        } finally {
+          setSubmitting(false);
         }
-        onComplete();
       }}
     >
-      <PaymentElement options={{ layout: "tabs" }} />
+      <p className="text-sm text-neutral-600">
+        Pay with PromptPay. Stripe will show a QR code to scan with your banking app.
+      </p>
+      <PaymentElement onReady={() => setReady(true)} />
       <button
         className="h-10 rounded-md bg-[#23212b] text-sm font-bold text-white disabled:opacity-50"
-        disabled={!stripe || submitting}
+        disabled={!stripe || !ready || submitting}
         type="submit"
       >
         {submitting ? "Processing payment…" : "Confirm payment"}
@@ -126,7 +145,7 @@ export function BookingPayment({ bookingId, canPay }: { bookingId: number; canPa
       ) : null}
       {clientSecret && localMock ? (
         <div className="mt-4 grid gap-3 border-t border-neutral-200 pt-4">
-          <p className="text-sm text-neutral-600">Local test payment. No card will be charged.</p>
+          <p className="text-sm text-neutral-600">Local test payment. No charge will be made.</p>
           {!final ? (
             <button
               className="h-10 rounded-md bg-[#23212b] text-sm font-bold text-white disabled:opacity-50"
@@ -144,12 +163,13 @@ export function BookingPayment({ bookingId, canPay }: { bookingId: number; canPa
           ) : null}
         </div>
       ) : null}
-      {clientSecret && !localMock && stripePromise ? (
+      {clientSecret && !localMock && !final && stripePromise ? (
         <Elements
           options={{ clientSecret, appearance: { theme: "stripe" } }}
           stripe={stripePromise}
         >
-          <CardForm
+          <StripePaymentForm
+            bookingId={bookingId}
             onComplete={() => {
               void Promise.all([
                 queryClient.invalidateQueries({ queryKey: ["payment", bookingId] }),

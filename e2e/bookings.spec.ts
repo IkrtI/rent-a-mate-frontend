@@ -47,3 +47,27 @@ test("lists bookings and opens booking details", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Cafe hopping with Nan" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Cancel booking" })).toBeVisible();
 });
+
+test("hides discovery action from Mate bookings", async ({ page }) => {
+  await page.route("**/api/auth/session", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ user: { id: 11, name: "Nan", role: "mate" } }),
+    }),
+  );
+  await page.route("**/api/bookings?**", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        items: [],
+        meta: { page: 1, limit: 10, total: 0, totalPages: 0 },
+      }),
+    }),
+  );
+
+  await page.goto("/bookings");
+  await expect(page.getByRole("link", { name: "Find a mate" })).toHaveCount(0);
+  await expect(page.getByText("Try another status or check back for new requests.")).toBeVisible();
+});

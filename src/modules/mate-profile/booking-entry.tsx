@@ -103,14 +103,17 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       }
       const payload: unknown = await response.json().catch(() => null);
       if (!response.ok) {
+        const apiError = isRecord(payload) && isRecord(payload.error) ? payload.error : null;
         setError(
           response.status === 404
             ? "Booking requests are not available yet. Please try again later."
-            : "We couldn’t send your request. Please try again.",
+            : typeof apiError?.message === "string"
+              ? apiError.message
+              : "We couldn’t send your request. Please try again.",
         );
         return;
       }
-      const data = isRecord(payload) && isRecord(payload.data) ? payload.data : null;
+      const data = isRecord(payload) ? (isRecord(payload.data) ? payload.data : payload) : null;
       if (!data || typeof data.id !== "number") {
         setError("We couldn’t confirm your request. Please try again.");
         return;
@@ -196,7 +199,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       )}
       {successId !== null && (
         <p className="booking-success" role="status">
-          Request #{successId} sent. It will be confirmed when the Mate accepts.{" "}
+          Booking request sent successfully. The Mate will confirm it soon.{" "}
           <Link href={`/bookings/${successId}`}>View booking</Link>
         </p>
       )}
@@ -216,7 +219,11 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       <button
         className="button booking-button"
         disabled={
-          pending || availability !== "ready" || slots.length === 0 || activities.length === 0
+          pending ||
+          successId !== null ||
+          availability !== "ready" ||
+          slots.length === 0 ||
+          activities.length === 0
         }
         type="submit"
       >
