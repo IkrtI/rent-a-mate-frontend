@@ -382,9 +382,6 @@ html.dark body {
 .dark .auth-frame [class*="border-neutral-"] {
   border-color: var(--border) !important;
 }
-.dark .auth-frame-aside img {
-  mix-blend-mode: normal;
-}
 .dark :where(input, select, textarea) {
   color-scheme: dark;
 }
