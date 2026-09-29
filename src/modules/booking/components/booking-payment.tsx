@@ -23,7 +23,13 @@ const statusCopy = {
   refunded: "Payment has been refunded.",
 } as const;
 
-function CardForm({ onComplete }: { onComplete: () => void }) {
+export function StripePaymentForm({
+  bookingId,
+  onComplete,
+}: {
+  bookingId: number;
+  onComplete: () => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +43,11 @@ function CardForm({ onComplete }: { onComplete: () => void }) {
         if (!stripe || !elements) return;
         setSubmitting(true);
         setError(null);
-        const result = await stripe.confirmPayment({ elements, redirect: "if_required" });
+        const result = await stripe.confirmPayment({
+          elements,
+          confirmParams: { return_url: `${window.location.origin}/bookings/${bookingId}` },
+          redirect: "if_required",
+        });
         setSubmitting(false);
         if (result.error) {
           setError(result.error.message ?? "Payment confirmation failed.");
@@ -46,6 +56,9 @@ function CardForm({ onComplete }: { onComplete: () => void }) {
         onComplete();
       }}
     >
+      <p className="text-sm text-neutral-600">
+        Choose PromptPay to scan a QR code with your banking app, or pay by card.
+      </p>
       <PaymentElement options={{ layout: "tabs" }} />
       <button
         className="h-10 rounded-md bg-[#23212b] text-sm font-bold text-white disabled:opacity-50"
@@ -149,7 +162,8 @@ export function BookingPayment({ bookingId, canPay }: { bookingId: number; canPa
           options={{ clientSecret, appearance: { theme: "stripe" } }}
           stripe={stripePromise}
         >
-          <CardForm
+          <StripePaymentForm
+            bookingId={bookingId}
             onComplete={() => {
               void Promise.all([
                 queryClient.invalidateQueries({ queryKey: ["payment", bookingId] }),
