@@ -103,10 +103,13 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       }
       const payload: unknown = await response.json().catch(() => null);
       if (!response.ok) {
+        const apiError = isRecord(payload) && isRecord(payload.error) ? payload.error : null;
         setError(
           response.status === 404
             ? "Booking requests are not available yet. Please try again later."
-            : "We couldn’t send your request. Please try again.",
+            : typeof apiError?.message === "string"
+              ? apiError.message
+              : "We couldn’t send your request. Please try again.",
         );
         return;
       }
