@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useEffect } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { StripePaymentForm } from "./booking-payment";
@@ -6,7 +7,13 @@ import { StripePaymentForm } from "./booking-payment";
 const confirmPayment = vi.fn().mockResolvedValue({ paymentIntent: { status: "processing" } });
 
 vi.mock("@stripe/react-stripe-js", () => ({
-  PaymentElement: () => <div>Stripe payment methods</div>,
+  PaymentElement: ({ onReady }: { onReady: () => void }) => {
+    function Element() {
+      useEffect(onReady, []);
+      return <div>Stripe payment methods</div>;
+    }
+    return <Element />;
+  },
   useElements: () => ({}),
   useStripe: () => ({ confirmPayment }),
 }));
@@ -22,7 +29,10 @@ describe("StripePaymentForm", () => {
     render(<StripePaymentForm bookingId={12} onComplete={onComplete} />);
 
     expect(screen.getByText("Stripe payment methods")).toBeInTheDocument();
-    expect(screen.getByText(/Choose PromptPay to scan a QR code/)).toBeInTheDocument();
+    expect(screen.getByText(/Pay with PromptPay/)).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Confirm payment" })).toBeEnabled(),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Confirm payment" }));
 
     await waitFor(() =>
@@ -33,5 +43,18 @@ describe("StripePaymentForm", () => {
       }),
     );
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+  });
+
+  it("shows Stripe integration errors without crashing the page", async () => {
+    confirmPayment.mockRejectedValueOnce(new Error("Payment Element is unavailable"));
+    render(<StripePaymentForm bookingId={12} onComplete={vi.fn()} />);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Confirm payment" })).toBeEnabled(),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirm payment" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Payment Element is unavailable");
+    expect(screen.getByRole("button", { name: "Confirm payment" })).toBeEnabled();
   });
 });

@@ -72,7 +72,7 @@ test("completes a local test payment without Stripe credentials", async ({ page 
 
   await page.goto("/bookings/42");
   await page.getByRole("button", { name: "Pay now" }).click();
-  await expect(page.getByText("Local test payment. No card will be charged.")).toBeVisible();
+  await expect(page.getByText("Local test payment. No charge will be made.")).toBeVisible();
   await page.getByRole("button", { name: "Complete test payment" }).click();
   await expect(page.getByText("Payment successful.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Complete test payment" })).toHaveCount(0);
