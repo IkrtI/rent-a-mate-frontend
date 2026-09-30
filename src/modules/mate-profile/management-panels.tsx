@@ -546,7 +546,7 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
                 </button>
               </header>
               <div className="photo-editor-workspace">
-                <div className={`photo-editor-stage${dragging ? "is-dragging" : ""}`}>
+                <div className={dragging ? "photo-editor-stage is-dragging" : "photo-editor-stage"}>
                   <div className="photo-crop-frame">
                     <canvas
                       aria-label="Photo crop. Drag to reposition, use arrow keys to move, or scroll to zoom."

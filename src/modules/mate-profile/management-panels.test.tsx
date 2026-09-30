@@ -1,7 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AvailabilityEditor, ProfileEditor } from "./management-panels";
+import { AvailabilityEditor, PhotosEditor, ProfileEditor } from "./management-panels";
 import type { MateProfile } from "./schemas";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
@@ -21,10 +22,13 @@ const mate: MateProfile = {
   photos: [],
   availability: [],
 };
+let restorePointerCapture: (() => void) | undefined;
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  restorePointerCapture?.();
+  restorePointerCapture = undefined;
 });
 
 describe("ProfileEditor", () => {
@@ -106,6 +110,78 @@ describe("ProfileEditor", () => {
     await screen.findByRole("option", { name: "District A" });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+});
+
+it("keeps the photo crop stage styled while dragging", async () => {
+  vi.stubGlobal("URL", {
+    createObjectURL: vi.fn(() => "blob:photo"),
+    revokeObjectURL: vi.fn(),
+  });
+  vi.stubGlobal(
+    "Image",
+    class {
+      naturalWidth = 1200;
+      naturalHeight = 800;
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+
+      set src(_value: string) {
+        this.onload?.();
+      }
+    },
+  );
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    clearRect: vi.fn(),
+    drawImage: vi.fn(),
+  } as unknown as CanvasRenderingContext2D);
+  vi.spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect").mockReturnValue({
+    x: 0,
+    y: 0,
+    width: 480,
+    height: 480,
+    top: 0,
+    right: 480,
+    bottom: 480,
+    left: 0,
+    toJSON: () => ({}),
+  });
+  const pointerCaptureDescriptor = Object.getOwnPropertyDescriptor(
+    HTMLCanvasElement.prototype,
+    "setPointerCapture",
+  );
+  Object.defineProperty(HTMLCanvasElement.prototype, "setPointerCapture", {
+    configurable: true,
+    value: vi.fn(),
+  });
+  restorePointerCapture = () => {
+    if (pointerCaptureDescriptor) {
+      Object.defineProperty(
+        HTMLCanvasElement.prototype,
+        "setPointerCapture",
+        pointerCaptureDescriptor,
+      );
+    } else {
+      Reflect.deleteProperty(HTMLCanvasElement.prototype, "setPointerCapture");
+    }
+  };
+  const queryClient = new QueryClient();
+  render(
+    <QueryClientProvider client={queryClient}>
+      <PhotosEditor mate={mate} />
+    </QueryClientProvider>,
+  );
+
+  fireEvent.change(screen.getByLabelText(/Choose a photo/), {
+    target: { files: [new File(["photo"], "photo.png", { type: "image/png" })] },
+  });
+  const canvas = await screen.findByRole("application", { name: /Photo crop/ });
+  await waitFor(() => expect(canvas).toHaveAttribute("aria-disabled", "false"));
+  const stage = document.querySelector(".photo-editor-stage")!;
+
+  fireEvent.pointerDown(canvas, { clientX: 100, clientY: 100 });
+
+  expect(stage).toHaveClass("photo-editor-stage");
+  expect(stage).toHaveClass("is-dragging");
 });
 
 it("drags two separate weekly blocks and saves both", async () => {
