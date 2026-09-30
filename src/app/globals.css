@@ -335,6 +335,12 @@ html.dark body {
     color 150ms ease,
     background-color 150ms ease;
 }
+.authenticated-nav-link {
+  color: #625b58;
+}
+.dark .authenticated-nav-link {
+  color: var(--muted-foreground);
+}
 .authenticated-nav-link:hover,
 .authenticated-nav-link.is-active,
 .account-icon-button:hover,
