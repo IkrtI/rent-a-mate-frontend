@@ -4,13 +4,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   CalendarDays,
-  ChevronDown,
   CreditCard,
   LayoutDashboard,
   LogOut,
   MessageCircle,
   Clock3,
   UserRound,
+  Search,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,13 +31,10 @@ const navigation = [
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
   { href: "/payments", label: "Payments", icon: CreditCard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
+  { href: "/profile", label: "Profile", icon: UserRound },
 ];
-
-const mateNavigation = [
-  { href: "/mate/profile", label: "Mate profile", icon: UserRound },
-  { href: "/mate/photos", label: "Photos", icon: UserRound },
-  { href: "/mate/availability", label: "Availability", icon: Clock3 },
-];
+const mateHours = { href: "/mate/availability", label: "Weekly hours", icon: Clock3 };
+const findMate = { href: "/mates", label: "Find a Mate", icon: Search };
 
 export function AuthenticatedShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
@@ -84,7 +81,10 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   const user = session.data.user;
   const unreadCount = notifications.data?.notifications.filter((item) => !item.isRead).length ?? 0;
   const avatarUrl = mateProfile.data?.mate.photos[0]?.url;
-  const visibleNavigation = user.role === "mate" ? [...navigation, ...mateNavigation] : navigation;
+  const visibleNavigation =
+    user.role === "mate"
+      ? [navigation[0], navigation[1], navigation[4], mateHours, navigation[2], navigation[3]]
+      : [findMate, ...navigation];
   const handleLogout = async () => {
     try {
       await logout();
@@ -106,11 +106,11 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
           <nav
             className={cn(
               "hidden items-center gap-2",
-              user.role === "mate" ? "xl:flex" : "md:flex",
+              user.role === "mate" ? "xl:flex" : "lg:flex",
             )}
             aria-label="Private navigation"
           >
-            {navigation.map(({ href, label, icon: Icon }) => (
+            {visibleNavigation.map(({ href, label, icon: Icon }) => (
               <Link
                 className={cn(
                   "authenticated-nav-link inline-flex h-9 items-center gap-2 rounded-md px-3 text-sm font-semibold",
@@ -122,38 +122,6 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
                 <Icon aria-hidden size={16} /> {label}
               </Link>
             ))}
-            {user.role === "mate" ? (
-              <details className="group relative">
-                <summary
-                  className={cn(
-                    "authenticated-nav-link inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-md px-3 text-sm font-semibold [&::-webkit-details-marker]:hidden",
-                    pathname.startsWith("/mate/") && "is-active",
-                  )}
-                >
-                  <UserRound aria-hidden size={16} />
-                  Mate tools
-                  <ChevronDown
-                    aria-hidden
-                    className="transition-transform group-open:rotate-180"
-                    size={14}
-                  />
-                </summary>
-                <div className="border-border bg-card text-card-foreground absolute top-[calc(100%+0.5rem)] right-0 grid w-52 gap-1 rounded-lg border p-2 shadow-lg">
-                  {mateNavigation.map(({ href, label, icon: Icon }) => (
-                    <Link
-                      className={cn(
-                        "authenticated-nav-link inline-flex h-10 items-center gap-3 rounded-md px-3 text-sm font-semibold",
-                        pathname.startsWith(href) && "is-active",
-                      )}
-                      href={href}
-                      key={href}
-                    >
-                      <Icon aria-hidden size={16} /> {label}
-                    </Link>
-                  ))}
-                </div>
-              </details>
-            ) : null}
           </nav>
           <div className="account-actions flex shrink-0 items-center gap-2 sm:gap-3">
             <button
@@ -178,7 +146,11 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
               ) : null}
             </button>
             <ThemeToggle />
-            <div className="hidden items-center gap-2 sm:flex">
+            <Link
+              className="hidden items-center gap-2 sm:flex"
+              href="/profile"
+              title="Edit profile"
+            >
               <span className="bg-foreground text-background relative grid size-8 shrink-0 place-items-center overflow-hidden rounded-full">
                 {avatarUrl ? (
                   <Image
@@ -194,7 +166,7 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
                 )}
               </span>
               <span className="max-w-32 truncate text-sm font-semibold">{user.name}</span>
-            </div>
+            </Link>
             <button
               className="account-icon-button grid size-9 place-items-center rounded-full"
               onClick={handleLogout}
@@ -210,7 +182,9 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
       <nav
         className={cn(
           "account-mobile-nav fixed inset-x-0 bottom-0 z-30 border-t",
-          user.role === "mate" ? "flex overflow-x-auto xl:hidden" : "grid grid-cols-4 md:hidden",
+          user.role === "mate"
+            ? "flex overflow-x-auto xl:hidden"
+            : "flex overflow-x-auto lg:hidden",
         )}
         aria-label="Mobile navigation"
       >
@@ -218,9 +192,10 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
           <Link
             className={cn(
               "account-mobile-link grid min-h-16 place-items-center gap-1 py-2 text-xs font-semibold",
-              user.role === "mate" && "min-w-20 flex-1",
+              "min-w-20 flex-1 text-center",
               pathname.startsWith(href) && "is-active",
             )}
+            aria-current={pathname.startsWith(href) ? "page" : undefined}
             href={href}
             key={href}
           >

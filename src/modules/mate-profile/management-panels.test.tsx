@@ -1,8 +1,10 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ProfileEditor } from "./management-panels";
+import { AvailabilityEditor, ProfileEditor } from "./management-panels";
 import type { MateProfile } from "./schemas";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const mate: MateProfile = {
   id: 7,
@@ -104,4 +106,47 @@ describe("ProfileEditor", () => {
     await screen.findByRole("option", { name: "District A" });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+});
+
+it("drags two separate weekly blocks and saves both", async () => {
+  const saved = [
+    { dayOfWeek: 1, startTime: "09:00", endTime: "12:00" },
+    { dayOfWeek: 1, startTime: "13:00", endTime: "16:00" },
+  ];
+  const fetchMock = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        slots: saved.map((slot, index) => ({ ...slot, id: index + 1, mateId: mate.id })),
+      }),
+      { status: 200 },
+    ),
+  );
+  vi.stubGlobal("fetch", fetchMock);
+  render(<AvailabilityEditor mate={mate} />);
+  const cell = (start: string, end: string) =>
+    document.querySelector<HTMLButtonElement>(
+      `.availability-grid button[aria-label="Mon ${start} to ${end}"]`,
+    )!;
+
+  for (const [start, end] of [
+    ["09:00", "12:00"],
+    ["13:00", "16:00"],
+  ]) {
+    const first = cell(start, start === "09:00" ? "09:30" : "13:30");
+    const last = cell(end, end === "12:00" ? "12:30" : "16:30");
+    fireEvent.pointerDown(first, { pointerType: "mouse" });
+    fireEvent.pointerEnter(last);
+    fireEvent.pointerUp(last);
+  }
+  expect(screen.getAllByLabelText("From")).toHaveLength(2);
+  fireEvent.click(screen.getByRole("button", { name: "Save weekly availability" }));
+  await waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/mates/me/availability",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ slots: saved }),
+      }),
+    ),
+  );
 });

@@ -13,11 +13,8 @@ export default async function MateAvailabilityPage() {
   return (
     <main className="grid gap-6">
       <header>
-        <p className="text-sm font-semibold tracking-wide text-rose-600 uppercase dark:text-rose-400">
-          Mate tools
-        </p>
         <h1 className="text-3xl font-bold">Weekly availability</h1>
-        <Link className="mt-3 inline-block text-sm font-semibold underline" href="/mate/profile">
+        <Link className="mt-3 inline-block text-sm font-semibold underline" href="/profile#mate">
           Back to profile
         </Link>
       </header>
@@ -33,7 +30,7 @@ export default async function MateAvailabilityPage() {
       ) : (
         <section className="bg-card text-card-foreground rounded-2xl p-6">
           <h2 className="text-xl font-semibold">Create your Mate profile first</h2>
-          <Link className="mt-3 inline-block underline" href="/mate/profile">
+          <Link className="mt-3 inline-block underline" href="/profile#mate">
             Set up profile
           </Link>
         </section>

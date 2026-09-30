@@ -3,8 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CalendarDays, Clock3 } from "lucide-react";
 import { englishActivityName } from "@/lib/i18n/english-labels";
+import { BookingCalendar } from "./booking-calendar";
+import {
+  availableStarts,
+  bangkokNowMinutes,
+  bangkokToday,
+  clockTime,
+  minutes,
+} from "./time-selection";
 
 type Activity = { id: number; name: string };
 type Slot = { start: string; end: string };
@@ -15,27 +22,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function getBangkokDate() {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Bangkok",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date());
-  return `${parts.find((part) => part.type === "year")?.value}-${parts.find((part) => part.type === "month")?.value}-${parts.find((part) => part.type === "day")?.value}`;
-}
-
 export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Props) {
   const router = useRouter();
-  const [date, setDate] = useState(initialDate);
+  const today = bangkokToday();
+  const [date, setDate] = useState(initialDate < today ? today : initialDate);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [availability, setAvailability] = useState<AvailabilityState>("loading");
-  const [slot, setSlot] = useState("");
+  const [duration, setDuration] = useState(2);
+  const [startTime, setStartTime] = useState("");
   const [activityId, setActivityId] = useState(activities[0]?.id ? String(activities[0].id) : "");
   const [error, setError] = useState("");
   const [successId, setSuccessId] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const [retry, setRetry] = useState(0);
+  const starts =
+    availability === "ready"
+      ? availableStarts(slots, duration * 60, date === today ? bangkokNowMinutes() : 0)
+      : [];
 
   useEffect(() => {
     const controller = new AbortController();
@@ -71,13 +74,8 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
     event.preventDefault();
     setError("");
     setSuccessId(null);
-    if (!activityId || !slot) {
-      setError("Choose an activity and an available time to continue.");
-      return;
-    }
-    const selected = slots.find((item) => `${item.start}-${item.end}` === slot);
-    if (!selected || selected.end <= selected.start) {
-      setError("That time is no longer available. Choose another time.");
+    if (!activityId || !startTime || !starts.includes(startTime)) {
+      setError("Choose an activity and an available start time to continue.");
       return;
     }
     setPending(true);
@@ -89,8 +87,8 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
           mateId,
           activityId: Number(activityId),
           date,
-          startTime: selected.start,
-          endTime: selected.end,
+          startTime,
+          endTime: clockTime(minutes(startTime) + duration * 60),
         }),
       });
       if (response.status === 401) {
@@ -99,6 +97,9 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       }
       if (response.status === 409) {
         setError("That time was just taken. Choose another available time.");
+        setStartTime("");
+        setAvailability("loading");
+        setRetry((current) => current + 1);
         return;
       }
       const payload: unknown = await response.json().catch(() => null);
@@ -128,51 +129,63 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
 
   return (
     <form className="booking-form" onSubmit={submit}>
-      <label className="booking-field">
-        <span>
-          <CalendarDays aria-hidden="true" size={15} /> Select a date
-        </span>
-        <input
-          min={getBangkokDate()}
-          onChange={(event) => {
-            setDate(event.target.value);
+      <div>
+        <p className="booking-step">1. Choose a day</p>
+        <BookingCalendar
+          onChange={(value) => {
+            setDate(value);
             setAvailability("loading");
             setSlots([]);
-            setSlot("");
+            setStartTime("");
             setError("");
             setSuccessId(null);
           }}
-          required
-          type="date"
+          today={today}
           value={date}
         />
-      </label>
+      </div>
       <label className="booking-field">
-        <span>
-          <Clock3 aria-hidden="true" size={15} /> Available time
-        </span>
+        <span>2. How long do you need your Mate?</span>
         <select
-          disabled={availability !== "ready" || slots.length === 0}
-          onChange={(event) => setSlot(event.target.value)}
-          required
-          value={slot}
+          onChange={(event) => {
+            setDuration(Number(event.target.value));
+            setStartTime("");
+          }}
+          value={duration}
         >
-          <option value="">
-            {availability === "loading"
-              ? "Loading times…"
-              : availability === "error"
-                ? "Could not load times"
-                : slots.length
-                  ? "Choose an available time"
-                  : "No times available"}
-          </option>
-          {slots.map((item) => (
-            <option key={`${item.start}-${item.end}`} value={`${item.start}-${item.end}`}>
-              {item.start} – {item.end}
+          {Array.from({ length: 15 }, (_, index) => (index + 2) / 2).map((hours) => (
+            <option key={hours} value={hours}>
+              {hours} {hours === 1 ? "hour" : "hours"}
             </option>
           ))}
         </select>
       </label>
+      <fieldset className="booking-times">
+        <legend className="booking-step">3. Choose a start time</legend>
+        {availability === "loading" && <p role="status">Loading times for {date}…</p>}
+        {availability === "ready" && starts.length === 0 && (
+          <p>
+            No {duration}-hour times are open on this day. Try another day or a shorter duration.
+          </p>
+        )}
+        {starts.length > 0 && (
+          <div className="booking-time-grid">
+            {starts.map((start) => (
+              <button
+                aria-pressed={startTime === start}
+                key={start}
+                onClick={() => {
+                  setStartTime(start);
+                  setError("");
+                }}
+                type="button"
+              >
+                {start}
+              </button>
+            ))}
+          </div>
+        )}
+      </fieldset>
       {activities.length > 0 && (
         <label className="booking-field">
           <span>Activity</span>
@@ -189,8 +202,13 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
           </select>
         </label>
       )}
+      {startTime && starts.includes(startTime) && (
+        <p className="booking-selection" role="status">
+          {date} · {startTime}–{clockTime(minutes(startTime) + duration * 60)}
+        </p>
+      )}
       <p className="booking-cost">
-        Rate <strong>฿{hourlyRate.toLocaleString("en-US")} / hour</strong>
+        Estimated total <strong>฿{(hourlyRate * duration).toLocaleString("en-US")}</strong>
       </p>
       {error && (
         <p className="booking-error" role="alert">
@@ -219,11 +237,7 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
       <button
         className="button booking-button"
         disabled={
-          pending ||
-          successId !== null ||
-          availability !== "ready" ||
-          slots.length === 0 ||
-          activities.length === 0
+          pending || successId !== null || !starts.includes(startTime) || activities.length === 0
         }
         type="submit"
       >
