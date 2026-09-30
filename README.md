@@ -12,7 +12,7 @@ mateflow helps people discover Mates, plan shared activities, and manage booking
 - Chat with realtime updates, typing indicators, and read receipts.
 - Receive notifications and review completed bookings.
 - Manage Mate profiles, photos, and availability.
-- Responsive layouts with light and dark themes.
+- Responsive layouts with a consistent light theme.
 
 ## Tech Stack
 

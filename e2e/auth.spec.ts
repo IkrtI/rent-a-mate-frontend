@@ -13,9 +13,10 @@ test("shows login validation and the two-step signup flow", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Create your account." })).toBeVisible();
 });
 
-test("applies dark theme text colors across auth and dashboard pages", async ({ page }) => {
-  const darkForeground = "rgb(246, 240, 237)";
+test("keeps the light theme when an old dark preference is saved", async ({ page }) => {
   const user = { id: 7, name: "Mew", role: "renter" };
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.addInitScript(() => localStorage.setItem("mateflow-theme", "dark"));
 
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user }) }),
@@ -32,24 +33,17 @@ test("applies dark theme text colors across auth and dashboard pages", async ({ 
   );
 
   await page.goto("/login");
-  await page.getByRole("button", { name: "Switch to dark theme" }).click();
-  await expect(page.locator("html")).toHaveClass(/dark/);
-  await expect(page.getByRole("heading", { name: "Pick up where you left off." })).toHaveCSS(
-    "color",
-    darkForeground,
-  );
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+  await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
+  await expect(page.getByRole("button", { name: /Switch to .* theme/ })).toHaveCount(0);
 
   await page.goto("/signup");
-  await expect(page.getByRole("heading", { name: "What brings you here?" })).toHaveCSS(
-    "color",
-    darkForeground,
-  );
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
 
   await page.goto("/dashboard");
-  await expect(page.getByRole("heading", { name: "Good morning, Mew." })).toHaveCSS(
-    "color",
-    darkForeground,
-  );
+  await expect(page.getByRole("heading", { name: "Good morning, Mew." })).toBeVisible();
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+  await expect(page.getByRole("button", { name: /Switch to .* theme/ })).toHaveCount(0);
 });
 
 test("uses the requested role for mate sign-up and submits only backend fields", async ({

@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
 @plugin "daisyui" {
   themes: false;
   prefix: "d-";
@@ -81,45 +80,7 @@
   --sidebar-ring: #d63d47;
 }
 
-.dark {
-  color-scheme: dark;
-  --background: #17171b;
-  --foreground: #f6f0ed;
-  --card: #222126;
-  --card-foreground: #f6f0ed;
-  --popover: #26242a;
-  --popover-foreground: #f6f0ed;
-  --primary: #ed6870;
-  --primary-text-accent: #fa9293;
-  --primary-foreground: #17171b;
-  --destructive-foreground: #17171b;
-  --secondary: #382a2c;
-  --secondary-foreground: #f6f0ed;
-  --muted: #252429;
-  --muted-foreground: #b8aeab;
-  --accent: #382a2c;
-  --accent-foreground: #f6f0ed;
-  --destructive: #fb7880;
-  --border: #403b3d;
-  --input: #4a4142;
-  --ring: #f17a81;
-  --chart-1: oklch(0.823 0.12 346.018);
-  --chart-2: oklch(0.656 0.241 354.308);
-  --chart-3: oklch(0.592 0.249 0.584);
-  --chart-4: oklch(0.525 0.223 3.958);
-  --chart-5: oklch(0.459 0.187 3.815);
-  --sidebar: #222126;
-  --sidebar-foreground: #f6f0ed;
-  --sidebar-primary: #ed6870;
-  --sidebar-primary-foreground: #17171b;
-  --sidebar-accent: #382a2c;
-  --sidebar-accent-foreground: #f6f0ed;
-  --sidebar-border: #403b3d;
-  --sidebar-ring: #f17a81;
-}
-
-:root,
-.dark {
+:root {
   --color-base-100: var(--background);
   --color-base-200: var(--muted);
   --color-base-300: var(--border);
@@ -157,165 +118,6 @@ body {
   color: #20212a;
 }
 
-html.dark body {
-  background: var(--background);
-  color: var(--foreground);
-}
-
-.theme-toggle {
-  display: inline-flex;
-  min-width: 40px;
-  min-height: 40px;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0 12px;
-  color: var(--foreground);
-  background: var(--card);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
-}
-.theme-toggle-label {
-  color: inherit;
-}
-.theme-toggle:hover {
-  border-color: var(--primary);
-  background: var(--accent);
-}
-.theme-toggle:focus-visible {
-  outline: 3px solid var(--ring);
-  outline-offset: 2px;
-}
-
-.dark .site-header,
-.dark .site-footer,
-.dark .home-hero,
-.dark .steps-section,
-.dark .page-hero,
-.dark .directory-page,
-.dark .profile-page,
-.dark .editorial-layout {
-  color: var(--foreground);
-  background-color: var(--background);
-}
-.dark .featured-section,
-.dark .how-steps,
-.dark .directory-intro,
-.dark .filter-bar,
-.dark .editorial-aside {
-  color: var(--foreground);
-  background-color: var(--muted);
-}
-.dark .brand,
-.dark .desktop-nav a,
-.dark .login-link,
-.dark .footer-nav a,
-.dark .profile-copy > h1,
-.dark .profile-section h2,
-.dark .booking-price,
-.dark .booking-cost strong,
-.dark .activity-card-bottom,
-.dark .mate-name-row h2,
-.dark .mate-name-row h3,
-.dark .directory-intro h1,
-.dark .home-hero h1,
-.dark .section-heading h2,
-.dark .how-step h2,
-.dark .how-note h2,
-.dark .safety-lead h2,
-.dark .editorial-article h2 {
-  color: var(--foreground);
-}
-.dark .home-hero :where(p),
-.dark .section-heading :where(p),
-.dark .mate-name-row p,
-.dark .mate-interests,
-.dark .profile-location,
-.dark .profile-section > p,
-.dark .booking-price span,
-.dark .booking-description,
-.dark .booking-note,
-.dark .booking-field,
-.dark .booking-cost,
-.dark .directory-intro-copy > p:last-child,
-.dark .directory-results-head,
-.dark .editorial-article p,
-.dark .footer-brand p,
-.dark .copyright,
-.dark .how-step p,
-.dark .safety-item p {
-  color: var(--muted-foreground);
-}
-.dark .activity-card,
-.dark .mate-card,
-.dark .steps-grid article,
-.dark .how-step,
-.dark .safety-item,
-.dark .editorial-article,
-.dark .filter-options-group,
-.dark .filter-select select,
-.dark .filter-number input,
-.dark .directory-search,
-.dark .directory-search input,
-.dark .filter-option,
-.dark .state-card,
-.dark .pill,
-.dark .review-card,
-.dark .booking-card,
-.dark .booking-field input,
-.dark .booking-field select {
-  border-color: var(--border);
-  color: var(--foreground);
-  background-color: var(--card);
-}
-.dark .activity-card:nth-child(n),
-.dark .activity-image,
-.dark .mate-photo,
-.dark .directory-grid .mate-card:hover,
-.dark .filter-select select:disabled {
-  background-color: var(--muted);
-}
-.dark .directory-search input::placeholder,
-.dark .booking-field select:disabled {
-  color: var(--muted-foreground);
-}
-.dark .filter-option:hover,
-.dark .filter-option,
-.dark .filter-option:has(input:checked),
-.dark .directory-filter-disclosure > summary:hover,
-.dark .directory-filter-disclosure[open] > summary,
-.dark .button-outline {
-  border-color: var(--border);
-  color: var(--foreground);
-  background: var(--accent);
-}
-.dark .booking-error {
-  color: #ffc4c4;
-  background: #48292c;
-}
-.dark .booking-success {
-  color: #c7f0d5;
-  background: #203a2d;
-}
-.dark .profile-section,
-.dark .profile-top-link,
-.dark .footer-inner {
-  border-color: var(--border);
-}
-.dark .profile-top-link a,
-.dark .pagination,
-.dark .profile-link {
-  color: #f28a8e;
-}
-
 .authenticated-shell {
   color: var(--foreground);
   background: var(--background);
@@ -337,9 +139,6 @@ html.dark body {
 }
 .authenticated-nav-link {
   color: #625b58;
-}
-.dark .authenticated-nav-link {
-  color: var(--muted-foreground);
 }
 .authenticated-nav-link:hover,
 .authenticated-nav-link.is-active,
@@ -436,22 +235,6 @@ html.dark body {
 }
 .auth-frame-form {
   background: var(--background);
-}
-.dark .authenticated-shell [class*="bg-white"],
-.dark .auth-frame-form [class*="bg-white"],
-.dark .account-page [class*="bg-white"] {
-  background-color: var(--card) !important;
-}
-.dark .authenticated-shell [class*="text-neutral-"],
-.dark .auth-frame [class*="text-neutral-"] {
-  color: var(--foreground) !important;
-}
-.dark .authenticated-shell [class*="border-neutral-"],
-.dark .auth-frame [class*="border-neutral-"] {
-  border-color: var(--border) !important;
-}
-.dark :where(input, select, textarea) {
-  color-scheme: dark;
 }
 :focus-visible {
   outline: 3px solid #d63d47;
@@ -601,13 +384,6 @@ html.dark body {
   font-size: 14px;
   text-decoration: none;
 }
-.desktop-theme-toggle {
-  display: inline-flex;
-}
-.mobile-menu-theme,
-.mobile-theme-toggle {
-  display: none;
-}
 .site-footer {
   background: #20212a;
   color: #fff;
@@ -650,20 +426,6 @@ html.dark body {
   padding-top: 16px;
   color: #bcb7b5;
   font-size: 12px;
-}
-html.dark .site-footer {
-  border-top: 1px solid #ffffff38;
-  color: #fff;
-  background: #20212a;
-}
-html.dark .site-footer .brand,
-html.dark .site-footer .footer-brand p,
-html.dark .site-footer .footer-nav a,
-html.dark .site-footer .copyright {
-  color: #fff;
-}
-html.dark .site-footer .copyright {
-  border-top-color: #ffffff38;
 }
 .eyebrow {
   margin: 0;
@@ -2802,28 +2564,6 @@ h2 {
   .header-actions {
     gap: 12px;
   }
-  .desktop-theme-toggle {
-    display: none;
-  }
-  .mobile-menu-theme {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin: 8px 4px 2px;
-    padding: 11px 8px 0;
-    border-top: 1px solid var(--border);
-    color: var(--muted-foreground);
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .mobile-theme-toggle {
-    display: inline-flex;
-    min-width: 40px;
-    min-height: 36px;
-    flex: none;
-    padding: 0 10px;
-  }
   .header-actions > .button {
     min-height: 38px;
     padding: 0 16px;
@@ -3510,216 +3250,6 @@ h2 {
   }
 }
 
-/* Dark palette adjustments for the full public experience. */
-html.dark .home-hero {
-  color: var(--foreground);
-  background:
-    radial-gradient(ellipse at 78% 48%, #57373a 0, #57373a82 24%, transparent 50%),
-    linear-gradient(112deg, #211e22 0%, #1a191e 58%, #292025 100%);
-}
-html.dark .home-hero h1,
-html.dark .page-hero h1,
-html.dark .directory-intro h1 {
-  color: var(--foreground);
-}
-html.dark .home-hero h1 em,
-html.dark .page-hero h1 em,
-html.dark .directory-intro h1 em,
-html.dark .section-heading h2 em,
-html.dark .how-note h2 em,
-html.dark .safety-lead h2 em,
-html.dark .home-cta h2 em {
-  color: #fa9293;
-}
-html.dark .hero-description,
-html.dark .hero-bottom,
-html.dark .page-hero-copy,
-html.dark .how-step p:last-child,
-html.dark .how-note > p:not(.eyebrow),
-html.dark .safety-lead > p:last-child,
-html.dark .safety-item p,
-html.dark .editorial-article p,
-html.dark .editorial-aside p,
-html.dark .directory-intro-copy > p:last-child,
-html.dark .directory-intro-note p {
-  color: var(--muted-foreground);
-}
-html.dark .hero-search,
-html.dark .hero-search input {
-  border-color: var(--border);
-  color: var(--foreground);
-  background: var(--card);
-}
-html.dark .hero-search input::placeholder {
-  color: var(--muted-foreground);
-}
-html.dark .home-cta {
-  color: var(--foreground);
-  background: #283c36;
-}
-html.dark .home-cta h2 {
-  color: var(--foreground);
-}
-html.dark .home-cta .eyebrow,
-html.dark .home-cta h2 em {
-  color: #f1b6a8;
-}
-html.dark .page-hero {
-  border-color: var(--border);
-  background:
-    radial-gradient(ellipse at 82% 42%, #55383a 0, #55383a75 20%, transparent 44%),
-    linear-gradient(112deg, #211e22 0%, #1a191e 60%, #292025 100%);
-}
-html.dark .how-steps,
-html.dark .how-note,
-html.dark .steps-section,
-html.dark .directory-intro,
-html.dark .filter-bar {
-  background: #1e1d22;
-}
-html.dark .how-step,
-html.dark .safety-help,
-html.dark .editorial-aside,
-html.dark .directory-intro-note,
-html.dark .filter-options-group,
-html.dark .filter-option,
-html.dark .directory-search,
-html.dark .directory-search input,
-html.dark .filter-select select,
-html.dark .filter-number input {
-  border-color: var(--border);
-  color: var(--foreground);
-  background: var(--card);
-}
-html.dark .filter-option-list {
-  border-color: var(--border);
-  background: #1e1d22;
-}
-html.dark .filter-select > span,
-html.dark .filter-options-group legend,
-html.dark .filter-options-group legend small,
-html.dark .directory-kicker,
-html.dark .directory-intro-note strong {
-  color: var(--muted-foreground);
-}
-html.dark .filter-option {
-  color: var(--foreground) !important;
-  background-color: var(--card) !important;
-}
-html.dark .filter-select > span,
-html.dark .filter-number > span,
-html.dark .filter-options-group legend,
-html.dark .filter-options-group legend small {
-  color: var(--muted-foreground) !important;
-}
-html.dark .filter-submit,
-html.dark .button-outline:hover {
-  color: var(--foreground);
-  background: var(--accent);
-}
-html.dark .theme-toggle-label {
-  color: var(--foreground) !important;
-}
-html.dark .how-step-mark,
-html.dark .safety-item > span {
-  color: #ffb2b2;
-  background: #382a2c;
-}
-html.dark .activity-card,
-html.dark .mate-card,
-html.dark .steps-grid article,
-html.dark .review-card,
-html.dark .booking-card,
-html.dark .pill,
-html.dark .state-card {
-  border-color: var(--border);
-  color: var(--foreground);
-  background: var(--card);
-}
-html.dark .activity-card-bottom,
-html.dark .mate-name-row h2,
-html.dark .mate-name-row h3,
-html.dark .profile-section h2,
-html.dark .editorial-article h2,
-html.dark .how-step h2,
-html.dark .safety-item h3,
-html.dark .directory-results-head p,
-html.dark .state-card h1,
-html.dark .state-card h2 {
-  color: var(--foreground);
-}
-html.dark .mate-name-row p,
-html.dark .mate-interests,
-html.dark .profile-location,
-html.dark .profile-section > p,
-html.dark .review-card p,
-html.dark .booking-description,
-html.dark .booking-note,
-html.dark .booking-field,
-html.dark .booking-cost,
-html.dark .directory-intro-note .directory-note-label,
-html.dark .directory-results-head,
-html.dark .editorial-aside,
-html.dark .editorial-article,
-html.dark .footer-brand p,
-html.dark .copyright {
-  color: var(--muted-foreground);
-}
-html.dark .directory-search input::placeholder,
-html.dark .filter-select select:disabled,
-html.dark .booking-field select:disabled {
-  color: var(--muted-foreground);
-}
-html.dark .booking-field select:disabled {
-  background: var(--muted);
-}
-html.dark .button-outline,
-html.dark .directory-filter-disclosure > summary,
-html.dark .directory-filter-disclosure > summary:hover,
-html.dark .directory-filter-disclosure[open] > summary,
-html.dark .filter-option:hover,
-html.dark .filter-option:has(input:checked) {
-  border-color: var(--border);
-  color: var(--foreground);
-  background: var(--accent);
-}
-html.dark .profile-cover {
-  background: linear-gradient(135deg, #3c3030, #28252a);
-}
-html.dark .profile-section {
-  border-color: var(--border);
-}
-html.dark .booking-price,
-html.dark .booking-cost strong {
-  color: var(--foreground);
-}
-html.dark .profile-top-link a,
-html.dark .text-link,
-html.dark .profile-link,
-html.dark .editorial-aside a,
-html.dark .editorial-contact a {
-  color: #f28a8e;
-}
-html.dark .mate-rate {
-  color: var(--muted-foreground);
-}
-html.dark .mate-rate strong {
-  color: var(--foreground);
-}
-html.dark .mobile-menu nav {
-  border-color: var(--border);
-  background: var(--card);
-  box-shadow: 0 16px 40px #0006;
-}
-html.dark .mobile-menu nav a,
-html.dark .mobile-menu nav button {
-  color: var(--foreground);
-}
-html.dark .mobile-menu nav a:hover,
-html.dark .mobile-menu nav button:hover {
-  background: var(--accent);
-}
-
 @media (max-width: 760px) {
   .mobile-menu summary {
     background: var(--muted);
@@ -3733,37 +3263,10 @@ html.dark .mobile-menu nav button:hover {
   }
 }
 
-html.dark .eyebrow {
-  color: var(--ring);
-}
-
-html.dark .steps-grid p,
-html.dark .safety-help p {
-  color: var(--muted-foreground);
-}
-
-html.dark .safety-help h2 {
-  color: var(--foreground);
-}
-
-html.dark .safety-help p a {
-  color: var(--ring);
-}
-
-html.dark .safety-item,
-html.dark .editorial-article {
-  background-color: transparent;
-}
-
 .directory-intro-note {
   background: transparent;
   border: 0;
   padding: 0;
-}
-
-html.dark .directory-intro-note {
-  background: transparent;
-  border-color: transparent;
 }
 
 .status-page {

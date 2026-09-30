@@ -21,7 +21,6 @@ import { requestSameOrigin } from "@/modules/backend-client/browser";
 import { mateResultSchema } from "@/modules/mate-profile/schemas";
 import { listNotifications } from "@/modules/notification/client";
 import { NotificationPanel } from "@/modules/notification/components/notification-panel";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 import { getSession, logout } from "../client";
 
@@ -144,7 +143,6 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
                 </span>
               ) : null}
             </button>
-            <ThemeToggle />
             <Link
               className="hidden items-center gap-2 sm:flex"
               href="/profile"
