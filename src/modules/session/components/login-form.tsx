@@ -74,12 +74,20 @@ export function LoginForm() {
       </p>
       {searchParams.get("registered") === "1" ? (
         <p
-          className="mt-5 rounded-md bg-emerald-100 px-3 py-2 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
+          className="mt-5 rounded-md bg-emerald-100 px-3 py-2 text-sm text-emerald-900"
           role="status"
         >
           Account created. Sign in to continue.
         </p>
       ) : null}
+      {searchParams.get("passwordChanged") === "1" && (
+        <p
+          className="mt-5 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+          role="status"
+        >
+          Password updated. Sign in with your new password.
+        </p>
+      )}
       <form className="mt-7 grid gap-5" onSubmit={onSubmit} noValidate>
         <Field id="login-email" label="Email address" error={errors.email?.message}>
           <input

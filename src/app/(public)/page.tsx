@@ -90,9 +90,6 @@ export default async function HomePage() {
             ♥
           </span>
         </div>
-        <div className="hero-bottom">
-          <span>Bangkok, Thailand</span>
-        </div>
       </section>
 
       <section className="section activity-section">

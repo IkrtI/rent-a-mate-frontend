@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { DM_Mono, Fraunces, Manrope } from "next/font/google";
 
 import "./globals.css";
@@ -16,7 +15,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://mateflow.ikrt.dev"),
   title: { default: "mateflow", template: "%s | mateflow" },
   description:
     "Find a local mate for coffee, games, study, and the little plans that are better together.",
@@ -29,11 +28,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" style={{ colorScheme: "light" }}>
       <body className={`${manrope.variable} ${fraunces.variable} ${dmMono.variable}`}>
-        <Script id="theme-preference" strategy="beforeInteractive">
-          {`try { const cookie = document.cookie.split("; ").find((item) => item.startsWith("mateflow-theme="))?.split("=")[1]; let saved = cookie; try { saved = localStorage.getItem("mateflow-theme") || cookie; } catch {} const dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches; document.documentElement.classList.toggle("dark", dark); document.documentElement.style.colorScheme = dark ? "dark" : "light"; } catch {}`}
-        </Script>
         <AppProviders>
           <OfflineSupport />
           {children}

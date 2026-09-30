@@ -1,8 +1,11 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ProfileEditor } from "./management-panels";
+import { AvailabilityEditor, PhotosEditor, ProfileEditor } from "./management-panels";
 import type { MateProfile } from "./schemas";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 const mate: MateProfile = {
   id: 7,
@@ -19,10 +22,13 @@ const mate: MateProfile = {
   photos: [],
   availability: [],
 };
+let restorePointerCapture: (() => void) | undefined;
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  restorePointerCapture?.();
+  restorePointerCapture = undefined;
 });
 
 describe("ProfileEditor", () => {
@@ -104,4 +110,154 @@ describe("ProfileEditor", () => {
     await screen.findByRole("option", { name: "District A" });
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+});
+
+it("keeps the photo crop stage styled while dragging", async () => {
+  vi.stubGlobal("URL", {
+    createObjectURL: vi.fn(() => "blob:photo"),
+    revokeObjectURL: vi.fn(),
+  });
+  vi.stubGlobal(
+    "Image",
+    class {
+      naturalWidth = 1200;
+      naturalHeight = 800;
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+
+      set src(_value: string) {
+        this.onload?.();
+      }
+    },
+  );
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    clearRect: vi.fn(),
+    drawImage: vi.fn(),
+  } as unknown as CanvasRenderingContext2D);
+  vi.spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect").mockReturnValue({
+    x: 0,
+    y: 0,
+    width: 480,
+    height: 480,
+    top: 0,
+    right: 480,
+    bottom: 480,
+    left: 0,
+    toJSON: () => ({}),
+  });
+  const pointerCaptureDescriptor = Object.getOwnPropertyDescriptor(
+    HTMLCanvasElement.prototype,
+    "setPointerCapture",
+  );
+  Object.defineProperty(HTMLCanvasElement.prototype, "setPointerCapture", {
+    configurable: true,
+    value: vi.fn(),
+  });
+  restorePointerCapture = () => {
+    if (pointerCaptureDescriptor) {
+      Object.defineProperty(
+        HTMLCanvasElement.prototype,
+        "setPointerCapture",
+        pointerCaptureDescriptor,
+      );
+    } else {
+      Reflect.deleteProperty(HTMLCanvasElement.prototype, "setPointerCapture");
+    }
+  };
+  const queryClient = new QueryClient();
+  render(
+    <QueryClientProvider client={queryClient}>
+      <PhotosEditor mate={mate} />
+    </QueryClientProvider>,
+  );
+
+  fireEvent.change(screen.getByLabelText(/Choose a photo/), {
+    target: { files: [new File(["photo"], "photo.png", { type: "image/png" })] },
+  });
+  const canvas = await screen.findByRole("application", { name: /Photo crop/ });
+  await waitFor(() => expect(canvas).toHaveAttribute("aria-disabled", "false"));
+  const stage = document.querySelector(".photo-editor-stage")!;
+
+  fireEvent.pointerDown(canvas, { clientX: 100, clientY: 100 });
+
+  expect(stage).toHaveClass("photo-editor-stage");
+  expect(stage).toHaveClass("is-dragging");
+});
+
+it("drags two separate weekly blocks and saves both", async () => {
+  const saved = [
+    { dayOfWeek: 1, startTime: "09:00", endTime: "12:00" },
+    { dayOfWeek: 1, startTime: "13:00", endTime: "16:00" },
+  ];
+  const fetchMock = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        slots: saved.map((slot, index) => ({ ...slot, id: index + 1, mateId: mate.id })),
+      }),
+      { status: 200 },
+    ),
+  );
+  vi.stubGlobal("fetch", fetchMock);
+  render(<AvailabilityEditor mate={mate} />);
+  const cell = (start: string, end: string) =>
+    document.querySelector<HTMLButtonElement>(
+      `.availability-grid button[aria-label="Mon ${start} to ${end}"]`,
+    )!;
+
+  for (const [start, end] of [
+    ["09:00", "12:00"],
+    ["13:00", "16:00"],
+  ]) {
+    const first = cell(start, start === "09:00" ? "09:30" : "13:30");
+    const last = cell(end, end === "12:00" ? "12:30" : "16:30");
+    fireEvent.pointerDown(first, { pointerType: "mouse" });
+    fireEvent.pointerEnter(last);
+    fireEvent.pointerUp(last);
+  }
+  expect(screen.getAllByLabelText("From")).toHaveLength(2);
+  fireEvent.click(screen.getByRole("button", { name: "Save weekly availability" }));
+  await waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/mates/me/availability",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ slots: saved }),
+      }),
+    ),
+  );
+});
+
+it("drags across selected time to remove it and preserves the rest of the block", () => {
+  const scheduledMate: MateProfile = {
+    ...mate,
+    availability: [
+      {
+        id: 3,
+        mateId: mate.id,
+        dayOfWeek: 1,
+        startTime: "18:00",
+        endTime: "20:00",
+      },
+    ],
+  };
+  render(<AvailabilityEditor mate={scheduledMate} />);
+  const cell = (start: string, end: string) =>
+    document.querySelector<HTMLButtonElement>(
+      `.availability-grid button[aria-label="Mon ${start} to ${end}"]`,
+    )!;
+  const first = cell("18:30", "19:00");
+  const last = cell("19:00", "19:30");
+
+  fireEvent.pointerDown(first, { pointerType: "mouse" });
+  fireEvent.pointerEnter(last);
+  expect(first).toHaveClass("is-removing");
+  expect(last).toHaveClass("is-selected");
+  expect(last).not.toHaveClass("is-removing");
+  fireEvent.pointerUp(last);
+
+  expect(
+    screen.getAllByLabelText("From").map((input) => (input as HTMLInputElement).value),
+  ).toEqual(["18:00", "19:00"]);
+  expect(first).not.toHaveClass("is-selected");
+  expect(last).toHaveClass("is-selected");
 });

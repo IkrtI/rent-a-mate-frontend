@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { bangkokToday } from "@/modules/mate-profile/time-selection";
+
 export const bookingStatusSchema = z.enum(["pending", "confirmed", "completed", "cancelled"]);
 export type BookingStatus = z.infer<typeof bookingStatusSchema>;
 
@@ -86,7 +88,10 @@ export const bookingPageSchema = z.object({
 export const createBookingInputSchema = z.object({
   mateId: z.number().int().positive(),
   activityId: z.number().int().positive(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .refine((date) => date >= bangkokToday(), "Choose today or a future date."),
   startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
   endTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
 });

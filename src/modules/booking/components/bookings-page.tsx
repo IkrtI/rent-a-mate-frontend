@@ -9,6 +9,7 @@ import { getSession } from "@/modules/session/client";
 import { listBookings } from "../client";
 import { formatBookingDate, formatBookingTime, formatPrice } from "../format";
 import { bookingStatusSchema, type BookingStatus } from "../schemas";
+import { PaymentsPage } from "./payments-page";
 import { StatusBadge } from "./status-badge";
 
 const filters: Array<{ label: string; value?: BookingStatus }> = [
@@ -22,12 +23,14 @@ const filters: Array<{ label: string; value?: BookingStatus }> = [
 export function BookingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isPaymentsView = searchParams.get("view") === "payments";
   const parsedStatus = bookingStatusSchema.safeParse(searchParams.get("status"));
   const status = parsedStatus.success ? parsedStatus.data : undefined;
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
   const query = useQuery({
     queryKey: ["bookings", { status, page }],
     queryFn: () => listBookings({ status, page }),
+    enabled: !isPaymentsView,
   });
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
 
@@ -40,12 +43,16 @@ export function BookingsPage() {
 
   return (
     <main className="pb-24">
-      <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">Your plans</p>
+      <p className="font-mono text-[11px] tracking-[0.12em] text-[#b43740] uppercase">Your plans</p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Bookings</h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            {isPaymentsView ? "Payments" : "Bookings"}
+          </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Track requests and confirmed plans in one place.
+            {isPaymentsView
+              ? "Review payments connected to your bookings."
+              : "Track requests and confirmed plans in one place."}
           </p>
         </div>
         {session.data?.user.role === "renter" ? (
@@ -57,29 +64,54 @@ export function BookingsPage() {
           </Link>
         ) : null}
       </div>
-      <div className="mt-8 flex gap-2 overflow-x-auto pb-2" aria-label="Booking status filter">
-        {filters.map((filter) => (
-          <button
-            className={`h-9 shrink-0 rounded-full px-4 text-sm font-semibold ${
-              filter.value === status
-                ? "bg-[#23212b] text-white"
-                : "border border-neutral-300 bg-white text-neutral-700"
-            }`}
-            key={filter.label}
-            onClick={() => navigate({ status: filter.value })}
-            type="button"
-          >
-            {filter.label}
-          </button>
-        ))}
-      </div>
-      {query.isPending ? (
+      <nav
+        className="mt-6 inline-flex rounded-full border border-neutral-200 bg-white p-1"
+        aria-label="Bookings and payments"
+      >
+        <Link
+          aria-current={!isPaymentsView ? "page" : undefined}
+          className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+            !isPaymentsView ? "bg-[#23212b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+          }`}
+          href="/bookings"
+        >
+          Bookings
+        </Link>
+        <Link
+          aria-current={isPaymentsView ? "page" : undefined}
+          className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+            isPaymentsView ? "bg-[#23212b] text-white" : "text-neutral-600 hover:bg-neutral-100"
+          }`}
+          href="/bookings?view=payments"
+        >
+          Payments
+        </Link>
+      </nav>
+      {isPaymentsView ? null : (
+        <div className="mt-8 flex gap-2 overflow-x-auto pb-2" aria-label="Booking status filter">
+          {filters.map((filter) => (
+            <button
+              className={`h-9 shrink-0 rounded-full px-4 text-sm font-semibold ${
+                filter.value === status
+                  ? "bg-[#23212b] text-white"
+                  : "border border-neutral-300 bg-white text-neutral-700"
+              }`}
+              key={filter.label}
+              onClick={() => navigate({ status: filter.value })}
+              type="button"
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      )}
+      {!isPaymentsView && query.isPending ? (
         <p className="mt-10 text-sm text-neutral-600">Loading bookings...</p>
       ) : null}
-      {query.isError ? (
+      {!isPaymentsView && query.isError ? (
         <p className="mt-10 text-sm text-red-600">Bookings could not be loaded.</p>
       ) : null}
-      {query.data?.items.length === 0 ? (
+      {!isPaymentsView && query.data?.items.length === 0 ? (
         <div className="mt-10 border-y border-neutral-200 py-14 text-center">
           <CalendarDays className="mx-auto text-neutral-400" aria-hidden />
           <h2 className="mt-4 text-lg font-bold">No bookings here yet</h2>
@@ -90,7 +122,9 @@ export function BookingsPage() {
           </p>
         </div>
       ) : null}
-      <div className="mt-8 divide-y divide-neutral-200 border-y border-neutral-200">
+      <div
+        className={`mt-8 divide-y divide-neutral-200 border-y border-neutral-200 ${isPaymentsView ? "hidden" : ""}`}
+      >
         {query.data?.items.map((booking) => (
           <Link
             className="grid gap-4 py-5 hover:bg-white/60 sm:grid-cols-[1fr_auto] sm:items-center sm:px-3"
@@ -114,7 +148,7 @@ export function BookingsPage() {
           </Link>
         ))}
       </div>
-      {query.data && query.data.meta.totalPages > 1 ? (
+      {!isPaymentsView && query.data && query.data.meta.totalPages > 1 ? (
         <div className="mt-6 flex items-center justify-end gap-3">
           <button
             aria-label="Previous page"
@@ -139,6 +173,7 @@ export function BookingsPage() {
           </button>
         </div>
       ) : null}
+      {isPaymentsView ? <PaymentsPage embedded /> : null}
     </main>
   );
 }

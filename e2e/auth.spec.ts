@@ -13,9 +13,10 @@ test("shows login validation and the two-step signup flow", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Create your account." })).toBeVisible();
 });
 
-test("applies dark theme text colors across auth and dashboard pages", async ({ page }) => {
-  const darkForeground = "rgb(246, 240, 237)";
+test("keeps the light theme when an old dark preference is saved", async ({ page }) => {
   const user = { id: 7, name: "Mew", role: "renter" };
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.addInitScript(() => localStorage.setItem("mateflow-theme", "dark"));
 
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ user }) }),
@@ -32,24 +33,17 @@ test("applies dark theme text colors across auth and dashboard pages", async ({ 
   );
 
   await page.goto("/login");
-  await page.getByRole("button", { name: "Switch to dark theme" }).click();
-  await expect(page.locator("html")).toHaveClass(/dark/);
-  await expect(page.getByRole("heading", { name: "Pick up where you left off." })).toHaveCSS(
-    "color",
-    darkForeground,
-  );
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+  await expect(page.locator("html")).toHaveCSS("color-scheme", "light");
+  await expect(page.getByRole("button", { name: /Switch to .* theme/ })).toHaveCount(0);
 
   await page.goto("/signup");
-  await expect(page.getByRole("heading", { name: "What brings you here?" })).toHaveCSS(
-    "color",
-    darkForeground,
-  );
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
 
   await page.goto("/dashboard");
-  await expect(page.getByRole("heading", { name: "Good morning, Mew." })).toHaveCSS(
-    "color",
-    darkForeground,
-  );
+  await expect(page.getByRole("heading", { name: "Good morning, Mew." })).toBeVisible();
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+  await expect(page.getByRole("button", { name: /Switch to .* theme/ })).toHaveCount(0);
 });
 
 test("uses the requested role for mate sign-up and submits only backend fields", async ({
@@ -139,6 +133,30 @@ test("keeps the logged-in account visible after returning home", async ({ page }
   await expect(page.getByRole("link", { name: "Sign up" })).toHaveCount(0);
 });
 
+test("uses dashboard navigation for signed-in mate discovery pages", async ({ page }) => {
+  await page.route("**/api/auth/session", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ user: { id: 7, name: "Mew", role: "renter" } }),
+    }),
+  );
+  await page.route("**/api/notifications", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ notifications: [] }),
+    }),
+  );
+
+  for (const path of ["/mates", "/mates/404"]) {
+    await page.goto(path);
+    await expect(page.getByRole("navigation", { name: "Private navigation" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+  }
+});
+
 test("redirects a guest from a private route to sign in", async ({ page }) => {
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({
@@ -175,9 +193,15 @@ test("renders the private shell for an authenticated user", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Good morning, Mew." })).toBeVisible();
   await expect(page.getByText("Mew", { exact: true })).toBeVisible();
   await expect(page.getByText("No upcoming bookings yet.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Find a Mate" }).first()).toHaveAttribute(
+    "href",
+    "/mates",
+  );
 });
 
-test("groups mate tools without crowding the desktop navigation", async ({ page }) => {
+test("shows Mate profile and weekly hours without crowding the desktop navigation", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({
@@ -239,8 +263,19 @@ test("groups mate tools without crowding the desktop navigation", async ({ page 
   expect(accountActionsBox).not.toBeNull();
   expect(navigationBox!.x + navigationBox!.width).toBeLessThan(accountActionsBox!.x);
 
-  await page.getByText("Mate tools", { exact: true }).click();
-  await expect(page.getByRole("link", { name: "Mate profile" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Photos" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Availability" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Profile" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Weekly hours" })).toBeVisible();
+  await expect(page.getByText("Mate tools", { exact: true })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileNavigation = page.getByRole("navigation", { name: "Mobile navigation" });
+  await expect(mobileNavigation).toBeVisible();
+  await expect(mobileNavigation.getByRole("link")).toHaveCount(5);
+  await expect(mobileNavigation.getByRole("link", { name: "Dashboard" })).toContainText("Home");
+  await expect(mobileNavigation.getByRole("link", { name: "Weekly hours" })).toContainText("Hours");
+  const mobileNavigationBox = await mobileNavigation.boundingBox();
+  expect(mobileNavigationBox).not.toBeNull();
+  expect(mobileNavigationBox!.x).toBeGreaterThanOrEqual(0);
+  expect(mobileNavigationBox!.x + mobileNavigationBox!.width).toBeLessThanOrEqual(390);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
