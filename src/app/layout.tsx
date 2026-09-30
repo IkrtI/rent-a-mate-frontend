@@ -16,7 +16,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://mateflow.ikrt.dev"),
   title: { default: "mateflow", template: "%s | mateflow" },
   description:
     "Find a local mate for coffee, games, study, and the little plans that are better together.",
