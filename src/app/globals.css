@@ -2141,19 +2141,307 @@ h2 {
   cursor: not-allowed;
   opacity: 0.5;
 }
-.photo-crop-layout {
-  display: grid;
-  gap: 20px;
-  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
-  align-items: start;
+.photo-library-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 18px;
 }
-.photo-crop-preview {
+.photo-library-heading p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+.photo-library-heading span {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-weight: 700;
+}
+.photo-file-picker {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 12px;
+  width: min(100%, 680px);
+}
+.photo-file-select {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 15px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+.photo-file-select:hover {
+  border-color: var(--primary-text-accent);
+  background: var(--accent);
+}
+.photo-file-select > span {
+  color: var(--primary-text-accent);
+  font-size: 18px;
+  line-height: 1;
+}
+.photo-file-picker:focus-within .photo-file-select {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+.photo-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.photo-file-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.photo-file-picker > p {
+  grid-column: 2;
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+.photo-editor {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+}
+.photo-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.photo-editor-toolbar h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 750;
+}
+.photo-editor-toolbar p {
+  margin: 3px 0 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.photo-editor-reset {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.photo-editor-reset:hover:not(:disabled) {
+  border-color: var(--primary-text-accent);
+  color: var(--primary-text-accent);
+}
+.photo-editor-reset:disabled,
+.photo-editor-zoom-row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.photo-editor-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  align-items: stretch;
+}
+.photo-editor-stage {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 420px;
+  place-items: center;
+  padding: 24px;
+  overflow: hidden;
+  background: #25232b;
+}
+.photo-crop-frame {
+  position: relative;
+  width: min(100%, 480px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #393640;
+  box-shadow: 0 16px 42px #0005;
+}
+.photo-crop-canvas {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  border-radius: 8px;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+.photo-crop-canvas:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -3px;
+}
+.photo-editor-stage.is-dragging .photo-crop-canvas {
+  cursor: grabbing;
+}
+.photo-crop-guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent calc(33.333% - 0.5px),
+      #ffffff75 33.333%,
+      transparent calc(33.333% + 0.5px),
+      transparent calc(66.666% - 0.5px),
+      #ffffff75 66.666%,
+      transparent calc(66.666% + 0.5px)
+    ),
+    linear-gradient(
+      transparent calc(33.333% - 0.5px),
+      #ffffff75 33.333%,
+      transparent calc(33.333% + 0.5px),
+      transparent calc(66.666% - 0.5px),
+      #ffffff75 66.666%,
+      transparent calc(66.666% + 0.5px)
+    );
+  opacity: 0.65;
+}
+.photo-editor-loading {
+  position: absolute;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #17161dcc;
+  color: #fff;
+  font-size: 12px;
+}
+.photo-editor-tools {
+  display: grid;
+  align-content: start;
+  gap: 26px;
+  padding: 24px 20px;
+  background: var(--card);
+}
+.photo-editor-position-heading {
+  display: grid;
+  gap: 4px;
+}
+.photo-editor-position-heading strong,
+.photo-editor-control-heading label {
+  color: var(--card-foreground);
+  font-size: 13px;
+  font-weight: 750;
+}
+.photo-editor-position-heading span {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.photo-editor-zoom {
+  display: grid;
+  gap: 12px;
+}
+.photo-editor-control-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.photo-editor-control-heading output {
+  min-width: 52px;
+  padding: 4px 7px;
+  border-radius: 6px;
   background: var(--muted);
+  color: var(--card-foreground);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.photo-editor-zoom-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.photo-editor-zoom-row button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.photo-editor-zoom-row button:hover:not(:disabled) {
+  border-color: var(--primary-text-accent);
+  color: var(--primary-text-accent);
+}
+.photo-editor-zoom-row input {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--primary-text-accent);
+  cursor: pointer;
+}
+.photo-editor-zoom-range-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.photo-editor-help {
+  margin: 0;
+  padding-top: 17px;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.photo-editor-crop-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 650;
+}
+.photo-editor-crop-label span {
+  color: var(--primary-text-accent);
+  font-size: 19px;
+  line-height: 1;
+}
+.photo-editor-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 18px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 11px;
 }
 .profile-settings {
   display: grid;
@@ -2312,7 +2600,6 @@ h2 {
 .account-editor-forms button {
   justify-self: start;
 }
-.photo-crop-layout + button:disabled,
 .profile-settings .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -2327,10 +2614,41 @@ h2 {
   .account-editor-forms--security {
     grid-template-columns: 1fr;
   }
+  .photo-editor-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .photo-editor-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .photo-editor-help {
+    padding-top: 0;
+    border-top: 0;
+  }
 }
 @media (max-width: 560px) {
-  .photo-crop-layout {
-    grid-template-columns: 1fr;
+  .photo-file-picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .photo-file-select {
+    justify-self: start;
+  }
+  .photo-file-picker > p {
+    grid-column: 1;
+  }
+  .photo-editor-toolbar {
+    padding: 15px;
+  }
+  .photo-editor-stage {
+    min-height: 0;
+    padding: 14px;
+  }
+  .photo-editor-tools {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    padding: 18px 16px;
   }
   .booking-time-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
