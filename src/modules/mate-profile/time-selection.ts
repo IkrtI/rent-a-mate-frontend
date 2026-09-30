@@ -9,6 +9,16 @@ export function clockTime(value: number) {
   return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
 }
 
+export function isCalendarDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+export function isCurrentOrFutureDate(value: string, today = bangkokToday()) {
+  return isCalendarDate(value) && value >= today;
+}
+
 export function availableStarts(windows: TimeWindow[], durationMinutes: number, earliest = 0) {
   const starts = new Set<number>();
   for (const window of windows) {

@@ -16,10 +16,14 @@ export function BookingCalendar({
   value,
   today,
   onChange,
+  markedDates = [],
+  disabled = false,
 }: {
   value: string;
   today: string;
   onChange: (value: string) => void;
+  markedDates?: string[];
+  disabled?: boolean;
 }) {
   const [visibleMonth, setVisibleMonth] = useState(() => value.slice(0, 7));
   const first = asUtcDate(`${visibleMonth}-01`);
@@ -32,6 +36,7 @@ export function BookingCalendar({
     year: "numeric",
     timeZone: "UTC",
   }).format(first);
+  const marked = new Set(markedDates);
 
   function moveMonth(amount: number) {
     setVisibleMonth((current) => {
@@ -48,13 +53,18 @@ export function BookingCalendar({
         <div>
           <button
             aria-label="Previous month"
-            disabled={visibleMonth <= today.slice(0, 7)}
+            disabled={disabled || visibleMonth <= today.slice(0, 7)}
             onClick={() => moveMonth(-1)}
             type="button"
           >
             ‹
           </button>
-          <button aria-label="Next month" onClick={() => moveMonth(1)} type="button">
+          <button
+            aria-label="Next month"
+            disabled={disabled}
+            onClick={() => moveMonth(1)}
+            type="button"
+          >
             ›
           </button>
         </div>
@@ -71,14 +81,16 @@ export function BookingCalendar({
         {Array.from({ length: daysInMonth }, (_, index) => {
           const day = String(index + 1).padStart(2, "0");
           const key = `${visibleMonth}-${day}`;
+          const hasOverride = marked.has(key);
           return (
             <button
-              aria-label={new Intl.DateTimeFormat("en", {
+              aria-label={`${new Intl.DateTimeFormat("en", {
                 dateStyle: "full",
                 timeZone: "UTC",
-              }).format(asUtcDate(key))}
+              }).format(asUtcDate(key))}${hasOverride ? ", date-specific hours set" : ""}`}
               aria-pressed={key === value}
-              disabled={key < today}
+              className={hasOverride ? "has-availability-override" : undefined}
+              disabled={disabled || key < today}
               key={key}
               onClick={() => onChange(key)}
               type="button"

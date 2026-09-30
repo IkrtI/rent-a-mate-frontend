@@ -7,6 +7,7 @@ import { clockTime, minutes } from "./time-selection";
 export type WeeklySlot = { dayOfWeek: number; startTime: string; endTime: string };
 
 const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+type GridDay = { dayOfWeek: number; label: string };
 export type AvailabilityDrag = {
   day: number;
   first: number;
@@ -58,14 +59,17 @@ export function WeeklyAvailabilityGrid({
   slots,
   onChange,
   disabled,
+  days,
 }: {
   slots: WeeklySlot[];
   onChange: (slots: WeeklySlot[]) => void;
   disabled: boolean;
+  days?: GridDay[];
 }) {
   const viewport = useRef<HTMLDivElement>(null);
   const drag = useRef<AvailabilityDrag | null>(null);
   const [preview, setPreview] = useState<AvailabilityDrag | null>(null);
+  const visibleDays = days ?? dayNames.map((label, index) => ({ dayOfWeek: index + 1, label }));
 
   useEffect(() => {
     if (viewport.current) viewport.current.scrollTop = 16 * 32;
@@ -90,10 +94,14 @@ export function WeeklyAvailabilityGrid({
         Drag across empty time to add hours. Start on a red block and drag to remove those hours.
         Edit or remove whole blocks below.
       </p>
-      <div className="availability-grid-head" aria-hidden="true">
+      <div
+        className="availability-grid-head"
+        aria-hidden="true"
+        style={{ gridTemplateColumns: `48px repeat(${visibleDays.length}, minmax(0, 1fr))` }}
+      >
         <span />
-        {dayNames.map((day) => (
-          <strong key={day}>{day}</strong>
+        {visibleDays.map((day) => (
+          <strong key={day.dayOfWeek}>{day.label}</strong>
         ))}
       </div>
       <div className="availability-grid-viewport" ref={viewport}>
@@ -107,12 +115,16 @@ export function WeeklyAvailabilityGrid({
           onPointerUp={finish}
         >
           {Array.from({ length: 47 }, (_, index) => (
-            <div className="availability-grid-row" key={index}>
+            <div
+              className="availability-grid-row"
+              key={index}
+              style={{ gridTemplateColumns: `48px repeat(${visibleDays.length}, minmax(0, 1fr))` }}
+            >
               <span className="availability-grid-hour" aria-hidden="true">
                 {index % 2 === 0 ? clockTime(index * 30) : ""}
               </span>
-              {dayNames.map((day, dayIndex) => {
-                const dayOfWeek = dayIndex + 1;
+              {visibleDays.map((day) => {
+                const dayOfWeek = day.dayOfWeek;
                 const selected = slots.some(
                   (slot) =>
                     slot.dayOfWeek === dayOfWeek &&
@@ -134,10 +146,10 @@ export function WeeklyAvailabilityGrid({
                     : "";
                 return (
                   <button
-                    aria-label={`${day} ${clockTime(index * 30)} to ${clockTime((index + 1) * 30)}`}
+                    aria-label={`${day.label} ${clockTime(index * 30)} to ${clockTime((index + 1) * 30)}`}
                     className={className}
                     disabled={disabled}
-                    key={day}
+                    key={day.dayOfWeek}
                     onPointerDown={(event) => {
                       if (event.pointerType === "touch") return;
                       event.preventDefault();

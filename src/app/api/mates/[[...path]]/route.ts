@@ -5,8 +5,10 @@ import { requestBackend } from "@/modules/backend-client/client";
 import {
   mateResultSchema,
   profileInputSchema,
+  replaceDateAvailabilitySchema,
   replaceAvailabilitySchema,
 } from "@/modules/mate-profile/schemas";
+import { isCalendarDate, isCurrentOrFutureDate } from "@/modules/mate-profile/time-selection";
 import { assertSameOrigin, parseJson, RouteError, routeErrorResponse } from "../../_lib/route";
 import { requestAuthenticatedBackend } from "../../_lib/session";
 
@@ -33,10 +35,25 @@ export async function GET(request: Request, { params }: Context) {
         }),
       );
     }
+    if (
+      path.length === 3 &&
+      path[0] === "me" &&
+      path[1] === "availability" &&
+      path[2] === "dates"
+    ) {
+      return NextResponse.json(
+        await requestAuthenticatedBackend({
+          path: "/mates/me/availability/dates",
+          responseSchema: unknownResponse,
+        }),
+      );
+    }
     if (path.length === 2 && /^[1-9]\d*$/.test(path[0]) && path[1] === "availability") {
       const date = new URL(request.url).searchParams.get("date");
-      if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date))
+      if (!date || !isCalendarDate(date))
         throw new RouteError(400, "INVALID_DATE", "Choose a valid date.");
+      if (!isCurrentOrFutureDate(date))
+        throw new RouteError(400, "DATE_IN_PAST", "Choose today or a future date.");
       return NextResponse.json(
         await requestBackend({
           path: `/mates/${path[0]}/availability?date=${encodeURIComponent(date)}`,
@@ -141,6 +158,26 @@ export async function PUT(request: Request, { params }: Context) {
   try {
     assertSameOrigin(request);
     const path = (await params).path ?? [];
+    if (
+      path.length === 4 &&
+      path[0] === "me" &&
+      path[1] === "availability" &&
+      path[2] === "dates"
+    ) {
+      const date = path[3];
+      if (!isCalendarDate(date)) throw new RouteError(400, "INVALID_DATE", "Choose a valid date.");
+      if (!isCurrentOrFutureDate(date))
+        throw new RouteError(400, "DATE_IN_PAST", "Choose today or a future date.");
+      const input = await parseJson(request, replaceDateAvailabilitySchema);
+      return NextResponse.json(
+        await requestAuthenticatedBackend({
+          path: `/mates/me/availability/dates/${encodeURIComponent(date)}`,
+          method: "PUT",
+          body: input,
+          responseSchema: unknownResponse,
+        }),
+      );
+    }
     if (path.length !== 2 || path[0] !== "me" || path[1] !== "availability")
       throw new RouteError(404, "NOT_FOUND", "The requested resource was not found.");
     const input = await parseJson(request, replaceAvailabilitySchema);
@@ -165,6 +202,24 @@ export async function DELETE(request: Request, { params }: Context) {
       return NextResponse.json(
         await requestAuthenticatedBackend({
           path: "/mates/me",
+          method: "DELETE",
+          responseSchema: unknownResponse,
+        }),
+      );
+    }
+    if (
+      path.length === 4 &&
+      path[0] === "me" &&
+      path[1] === "availability" &&
+      path[2] === "dates"
+    ) {
+      const date = path[3];
+      if (!isCalendarDate(date)) throw new RouteError(400, "INVALID_DATE", "Choose a valid date.");
+      if (!isCurrentOrFutureDate(date))
+        throw new RouteError(400, "DATE_IN_PAST", "Choose today or a future date.");
+      return NextResponse.json(
+        await requestAuthenticatedBackend({
+          path: `/mates/me/availability/dates/${encodeURIComponent(date)}`,
           method: "DELETE",
           responseSchema: unknownResponse,
         }),

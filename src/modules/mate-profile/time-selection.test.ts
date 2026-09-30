@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { availableStarts } from "./time-selection";
+import { availableStarts, isCalendarDate, isCurrentOrFutureDate } from "./time-selection";
 
 describe("booking start times", () => {
   it("offers only durations fully contained by an open window", () => {
@@ -24,5 +24,20 @@ describe("booking start times", () => {
       "10:30",
       "11:00",
     ]);
+  });
+});
+
+describe("booking calendar dates", () => {
+  const today = "2026-09-30";
+
+  it("allows today and future dates", () => {
+    expect(isCurrentOrFutureDate(today, today)).toBe(true);
+    expect(isCurrentOrFutureDate("2026-10-01", today)).toBe(true);
+  });
+
+  it("rejects past and impossible dates", () => {
+    expect(isCurrentOrFutureDate("2026-09-29", today)).toBe(false);
+    expect(isCalendarDate("2026-02-30")).toBe(false);
+    expect(isCurrentOrFutureDate("tomorrow", today)).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -13,9 +13,12 @@ import {
 } from "@/modules/backend-client/browser";
 import {
   availabilitySlotSchema,
+  dateAvailabilityOverrideSchema,
+  dateAvailabilityOverridesSchema,
   mateAvailabilitySchema,
   mateProfileSchema,
   mateResultSchema,
+  replaceDateAvailabilitySchema,
   replaceAvailabilitySchema,
 } from "./schemas";
 import type { MateProfile } from "./schemas";
@@ -26,6 +29,8 @@ import {
 } from "@/lib/i18n/english-labels";
 import { cropBlob, drawSquareCrop } from "./photo-crop";
 import { WeeklyAvailabilityGrid } from "./weekly-availability-grid";
+import { BookingCalendar } from "./booking-calendar";
+import { bangkokToday, isCurrentOrFutureDate } from "./time-selection";
 
 type Lookup = { id: number; name: string };
 type ProfileProps = {
@@ -544,6 +549,19 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
 
 const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 type Slot = z.infer<typeof availabilitySlotSchema>;
+type DateOverride = z.infer<typeof dateAvailabilityOverrideSchema>;
+
+function weekdayForDate(date: string) {
+  const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
+  return weekday === 0 ? 7 : weekday;
+}
+
+function formatAvailabilityDate(date: string) {
+  return new Intl.DateTimeFormat("en", { dateStyle: "full", timeZone: "UTC" }).format(
+    new Date(`${date}T00:00:00Z`),
+  );
+}
+
 export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
   const [slots, setSlots] = useState<Slot[]>(
     mate.availability.map(({ dayOfWeek, startTime, endTime }) => ({
@@ -555,6 +573,54 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [dateOverrides, setDateOverrides] = useState<DateOverride[]>([]);
+  const [datesLoadedFor, setDatesLoadedFor] = useState<number | null>(null);
+  const [datesLoadFailure, setDatesLoadFailure] = useState<{
+    retry: number;
+    message: string;
+  } | null>(null);
+  const [datesRetry, setDatesRetry] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(bangkokToday());
+  const [dateDraft, setDateDraft] = useState<{ date: string; slots: Slot[] } | null>(null);
+  const [dateBusy, setDateBusy] = useState(false);
+  const [dateError, setDateError] = useState("");
+  const [dateMessage, setDateMessage] = useState("");
+  const datesBusy = datesLoadedFor !== datesRetry;
+  const datesError = datesLoadFailure?.retry === datesRetry ? datesLoadFailure.message : "";
+  const selectedDayOfWeek = weekdayForDate(selectedDate);
+  const selectedOverride = dateOverrides.find((override) => override.date === selectedDate);
+  const inheritedDateSlots = useMemo(
+    () => slots.filter((slot) => slot.dayOfWeek === selectedDayOfWeek),
+    [selectedDayOfWeek, slots],
+  );
+  const savedDateSlots = useMemo(
+    () =>
+      selectedOverride
+        ? selectedOverride.slots.map((slot) => ({ ...slot, dayOfWeek: selectedDayOfWeek }))
+        : inheritedDateSlots,
+    [inheritedDateSlots, selectedDayOfWeek, selectedOverride],
+  );
+  const visibleDateSlots = dateDraft?.date === selectedDate ? dateDraft.slots : savedDateSlots;
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void requestSameOrigin("/api/mates/me/availability/dates", dateAvailabilityOverridesSchema, {
+      signal: controller.signal,
+    })
+      .then((result) => {
+        setDateOverrides(result.overrides);
+        setDatesLoadFailure(null);
+        setDatesLoadedFor(datesRetry);
+      })
+      .catch((cause: unknown) => {
+        if (!controller.signal.aborted) {
+          setDatesLoadFailure({ retry: datesRetry, message: errorText(cause) });
+          setDatesLoadedFor(datesRetry);
+        }
+      });
+    return () => controller.abort();
+  }, [datesRetry]);
+
   function update(index: number, field: keyof Slot, value: string) {
     setSlots((current) =>
       current.map((slot, position) =>
@@ -564,6 +630,82 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
       ),
     );
   }
+
+  function updateDateSlot(index: number, field: "startTime" | "endTime", value: string) {
+    setDateDraft((current) => {
+      const currentSlots = current?.date === selectedDate ? current.slots : savedDateSlots;
+      return {
+        date: selectedDate,
+        slots: currentSlots.map((slot, position) =>
+          position === index ? { ...slot, [field]: value } : slot,
+        ),
+      };
+    });
+  }
+
+  async function saveDateAvailability() {
+    setDateError("");
+    setDateMessage("");
+    if (!isCurrentOrFutureDate(selectedDate)) {
+      setDateError("Choose today or a future date.");
+      return;
+    }
+    const checked = replaceDateAvailabilitySchema.safeParse({
+      slots: visibleDateSlots.map(({ startTime, endTime }) => ({ startTime, endTime })),
+    });
+    if (!checked.success) {
+      setDateError(checked.error.issues[0]?.message ?? "Check the hours for this date.");
+      return;
+    }
+    setDateBusy(true);
+    try {
+      const result = await requestSameOrigin(
+        `/api/mates/me/availability/dates/${encodeURIComponent(selectedDate)}`,
+        dateAvailabilityOverrideSchema,
+        { method: "PUT", body: JSON.stringify(checked.data) },
+      );
+      setDateOverrides((current) =>
+        [...current.filter((override) => override.date !== result.date), result].sort((a, b) =>
+          a.date.localeCompare(b.date),
+        ),
+      );
+      setDateDraft({
+        date: result.date,
+        slots: result.slots.map((slot) => ({ ...slot, dayOfWeek: weekdayForDate(result.date) })),
+      });
+      setDateMessage(
+        result.slots.length === 0
+          ? "This date is closed for booking."
+          : `Availability saved for ${formatAvailabilityDate(result.date)}.`,
+      );
+    } catch (cause) {
+      setDateError(errorText(cause));
+    } finally {
+      setDateBusy(false);
+    }
+  }
+
+  async function restoreWeeklyHours() {
+    setDateError("");
+    setDateMessage("");
+    if (!selectedOverride || !isCurrentOrFutureDate(selectedDate)) return;
+    setDateBusy(true);
+    try {
+      await requestSameOrigin(
+        `/api/mates/me/availability/dates/${encodeURIComponent(selectedDate)}`,
+        z.object({ cleared: z.literal(true) }),
+        { method: "DELETE" },
+      );
+      setDateOverrides((current) => current.filter((override) => override.date !== selectedDate));
+      setDateDraft((current) => (current?.date === selectedDate ? null : current));
+      setDateMessage("Weekly hours now apply on this date.");
+    } catch (cause) {
+      setDateError(errorText(cause));
+    } finally {
+      setDateBusy(false);
+    }
+  }
+
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -598,7 +740,7 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
     <section className="border-border bg-card text-card-foreground mx-auto max-w-3xl rounded-2xl border p-6 shadow-sm sm:p-8">
       <p className="text-muted-foreground mb-5 text-sm">
         Set recurring weekly hours in Bangkok local time. The booking calendar will show open slots
-        after existing requests are accounted for.
+        after existing requests are accounted for. Set a date below to change one day only.
       </p>
       <form className="grid gap-4" onSubmit={save}>
         <WeeklyAvailabilityGrid
@@ -698,6 +840,177 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
           </p>
         )}
       </form>
+      <section
+        className="border-border mt-10 grid gap-4 border-t pt-6"
+        aria-labelledby="date-hours-heading"
+      >
+        <div>
+          <h2 className="text-xl font-semibold" id="date-hours-heading">
+            Specific dates
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Dates without a marker use your weekly hours. Save an empty date to close it.
+          </p>
+        </div>
+        <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)]">
+          <BookingCalendar
+            disabled={dateBusy}
+            markedDates={dateOverrides.map((override) => override.date)}
+            onChange={(date) => {
+              setSelectedDate(date);
+              setDateError("");
+              setDateMessage("");
+            }}
+            today={bangkokToday()}
+            value={selectedDate}
+          />
+          <div className="grid min-w-0 content-start gap-3">
+            <h3 className="text-base font-semibold">{formatAvailabilityDate(selectedDate)}</h3>
+            {datesBusy && <p role="status">Loading saved dates…</p>}
+            {datesError && (
+              <div className="grid gap-2" role="alert">
+                <p>{datesError}</p>
+                <button
+                  className="justify-self-start text-sm font-semibold underline"
+                  onClick={() => setDatesRetry((current) => current + 1)}
+                  type="button"
+                >
+                  Retry saved dates
+                </button>
+              </div>
+            )}
+            {!datesBusy && !datesError && (
+              <>
+                {selectedOverride ? (
+                  <p className="text-sm">Custom hours apply to this date only.</p>
+                ) : inheritedDateSlots.length > 0 ? (
+                  <p className="text-sm">
+                    Using your weekly {dayNames[selectedDayOfWeek - 1]} hours.
+                  </p>
+                ) : (
+                  <p className="text-sm text-neutral-600">No weekly hours are set for this day.</p>
+                )}
+                <WeeklyAvailabilityGrid
+                  days={[{ dayOfWeek: selectedDayOfWeek, label: "This date" }]}
+                  disabled={dateBusy || datesBusy || !mate.isActive}
+                  onChange={(next) => {
+                    setDateDraft({ date: selectedDate, slots: next });
+                  }}
+                  slots={visibleDateSlots}
+                />
+                <h4 className="text-sm font-semibold">Time blocks for this date</h4>
+                {visibleDateSlots.length === 0 && (
+                  <p className="text-sm text-neutral-600">
+                    No time blocks means this date will be unavailable for booking.
+                  </p>
+                )}
+                {visibleDateSlots.map((slot, index) => (
+                  <div
+                    className="bg-accent grid gap-3 rounded-xl p-3 sm:grid-cols-[1fr_1fr_auto]"
+                    key={`${slot.startTime}-${index}`}
+                  >
+                    <label className="grid gap-1 text-xs font-semibold">
+                      Starts at
+                      <input
+                        className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
+                        disabled={dateBusy}
+                        onChange={(event) => updateDateSlot(index, "startTime", event.target.value)}
+                        required
+                        type="time"
+                        value={slot.startTime}
+                      />
+                    </label>
+                    <label className="grid gap-1 text-xs font-semibold">
+                      Ends at
+                      <input
+                        className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
+                        disabled={dateBusy}
+                        onChange={(event) => updateDateSlot(index, "endTime", event.target.value)}
+                        required
+                        type="time"
+                        value={slot.endTime}
+                      />
+                    </label>
+                    <button
+                      className="border-border self-end rounded-lg border px-3 py-2 text-sm"
+                      disabled={dateBusy}
+                      onClick={() => {
+                        setDateDraft((current) => {
+                          const currentSlots =
+                            current?.date === selectedDate ? current.slots : savedDateSlots;
+                          return {
+                            date: selectedDate,
+                            slots: currentSlots.filter((_, position) => position !== index),
+                          };
+                        });
+                      }}
+                      type="button"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    className="border-border rounded-lg border px-4 py-2 text-sm font-semibold"
+                    disabled={dateBusy || !mate.isActive}
+                    onClick={() => {
+                      setDateDraft((current) => {
+                        const currentSlots =
+                          current?.date === selectedDate ? current.slots : savedDateSlots;
+                        return {
+                          date: selectedDate,
+                          slots: [
+                            ...currentSlots,
+                            { dayOfWeek: selectedDayOfWeek, startTime: "09:00", endTime: "12:00" },
+                          ],
+                        };
+                      });
+                    }}
+                    type="button"
+                  >
+                    Add time block
+                  </button>
+                  {selectedOverride && (
+                    <button
+                      className="border-border rounded-lg border px-4 py-2 text-sm font-semibold"
+                      disabled={dateBusy || !mate.isActive}
+                      onClick={restoreWeeklyHours}
+                      type="button"
+                    >
+                      Use weekly hours
+                    </button>
+                  )}
+                </div>
+                {dateError && (
+                  <p className="text-destructive text-sm" role="alert">
+                    {dateError}
+                  </p>
+                )}
+                {dateMessage && (
+                  <p className="text-foreground text-sm" role="status">
+                    {dateMessage}
+                  </p>
+                )}
+                <button
+                  className="button justify-self-start"
+                  disabled={
+                    dateBusy ||
+                    datesBusy ||
+                    Boolean(datesError) ||
+                    !mate.isActive ||
+                    !isCurrentOrFutureDate(selectedDate)
+                  }
+                  onClick={saveDateAvailability}
+                  type="button"
+                >
+                  {dateBusy ? "Saving…" : "Save date availability"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
     </section>
   );
 }

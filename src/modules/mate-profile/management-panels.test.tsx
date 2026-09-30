@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AvailabilityEditor, ProfileEditor } from "./management-panels";
 import type { MateProfile } from "./schemas";
+import { bangkokToday } from "./time-selection";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
@@ -184,4 +185,47 @@ it("drags across selected time to remove it and preserves the rest of the block"
   ).toEqual(["18:00", "19:00"]);
   expect(first).not.toHaveClass("is-selected");
   expect(last).toHaveClass("is-selected");
+});
+
+it("saves dragged hours for one date without changing the weekly schedule", async () => {
+  const selectedDate = bangkokToday();
+  const dateSlots = [{ startTime: "09:00", endTime: "12:00" }];
+  const fetchMock = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
+    if (url === "/api/mates/me/availability/dates" && !init?.method)
+      return Promise.resolve(new Response(JSON.stringify({ overrides: [] }), { status: 200 }));
+    if (url === `/api/mates/me/availability/dates/${selectedDate}` && init?.method === "PUT")
+      return Promise.resolve(
+        new Response(JSON.stringify({ date: selectedDate, slots: dateSlots }), { status: 200 }),
+      );
+    return Promise.resolve(new Response("{}", { status: 200 }));
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  render(<AvailabilityEditor mate={mate} />);
+
+  const cell = (start: string, end: string) =>
+    document.querySelector<HTMLButtonElement>(
+      `.availability-grid button[aria-label="This date ${start} to ${end}"]`,
+    );
+  await waitFor(() => expect(cell("09:00", "09:30")).not.toBeNull());
+  const first = cell("09:00", "09:30")!;
+  const last = cell("12:00", "12:30")!;
+  fireEvent.pointerDown(first, { pointerType: "mouse" });
+  fireEvent.pointerEnter(last);
+  fireEvent.pointerUp(last);
+  fireEvent.click(screen.getByRole("button", { name: "Save date availability" }));
+
+  await waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith(
+      `/api/mates/me/availability/dates/${selectedDate}`,
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ slots: dateSlots }),
+      }),
+    ),
+  );
+  expect(screen.getByRole("status")).toHaveTextContent("Availability saved for");
+  expect(fetchMock).not.toHaveBeenCalledWith(
+    "/api/mates/me/availability",
+    expect.objectContaining({ method: "PUT" }),
+  );
 });

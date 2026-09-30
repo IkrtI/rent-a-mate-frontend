@@ -10,6 +10,7 @@ import {
   bangkokNowMinutes,
   bangkokToday,
   clockTime,
+  isCurrentOrFutureDate,
   minutes,
 } from "./time-selection";
 
@@ -25,7 +26,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Props) {
   const router = useRouter();
   const today = bangkokToday();
-  const [date, setDate] = useState(initialDate < today ? today : initialDate);
+  const [date, setDate] = useState(isCurrentOrFutureDate(initialDate, today) ? initialDate : today);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [availability, setAvailability] = useState<AvailabilityState>("loading");
   const [duration, setDuration] = useState(2);
@@ -74,6 +75,10 @@ export function BookingEntry({ mateId, activities, initialDate, hourlyRate }: Pr
     event.preventDefault();
     setError("");
     setSuccessId(null);
+    if (!isCurrentOrFutureDate(date)) {
+      setError("Choose today or a future date.");
+      return;
+    }
     if (!activityId || !startTime || !starts.includes(startTime)) {
       setError("Choose an activity and an available start time to continue.");
       return;

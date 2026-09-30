@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isCalendarDate } from "./time-selection";
 
 export const lookupSchema = z.object({ id: z.number().int().positive(), name: z.string() });
 export const mateAvailabilitySchema = z.object({
@@ -69,6 +70,43 @@ export const replaceAvailabilitySchema = z
               slot.startTime < other.endTime &&
               other.startTime < slot.endTime,
           )
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["slots", index],
+          message: "Availability slots cannot overlap.",
+        });
+      }
+    }
+  });
+
+export const dateAvailabilitySlotSchema = z.object({
+  startTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+  endTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+});
+export const dateAvailabilityOverrideSchema = z.object({
+  date: z.string().refine(isCalendarDate),
+  slots: z.array(dateAvailabilitySlotSchema),
+});
+export const dateAvailabilityOverridesSchema = z.object({
+  overrides: z.array(dateAvailabilityOverrideSchema),
+});
+export const replaceDateAvailabilitySchema = z
+  .object({ slots: z.array(dateAvailabilitySlotSchema).max(70) })
+  .superRefine(({ slots }, context) => {
+    for (let index = 0; index < slots.length; index += 1) {
+      const slot = slots[index];
+      if (slot.startTime >= slot.endTime) {
+        context.addIssue({
+          code: "custom",
+          path: ["slots", index],
+          message: "End time must be after start time.",
+        });
+      }
+      if (
+        slots
+          .slice(index + 1)
+          .some((other) => slot.startTime < other.endTime && other.startTime < slot.endTime)
       ) {
         context.addIssue({
           code: "custom",
