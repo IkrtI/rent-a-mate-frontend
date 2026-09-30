@@ -133,6 +133,30 @@ test("keeps the logged-in account visible after returning home", async ({ page }
   await expect(page.getByRole("link", { name: "Sign up" })).toHaveCount(0);
 });
 
+test("uses dashboard navigation for signed-in mate discovery pages", async ({ page }) => {
+  await page.route("**/api/auth/session", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ user: { id: 7, name: "Mew", role: "renter" } }),
+    }),
+  );
+  await page.route("**/api/notifications", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ notifications: [] }),
+    }),
+  );
+
+  for (const path of ["/mates", "/mates/404"]) {
+    await page.goto(path);
+    await expect(page.getByRole("navigation", { name: "Private navigation" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+  }
+});
+
 test("redirects a guest from a private route to sign in", async ({ page }) => {
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({
@@ -242,4 +266,16 @@ test("shows Mate profile and weekly hours without crowding the desktop navigatio
   await expect(navigation.getByRole("link", { name: "Profile" })).toBeVisible();
   await expect(navigation.getByRole("link", { name: "Weekly hours" })).toBeVisible();
   await expect(page.getByText("Mate tools", { exact: true })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileNavigation = page.getByRole("navigation", { name: "Mobile navigation" });
+  await expect(mobileNavigation).toBeVisible();
+  await expect(mobileNavigation.getByRole("link")).toHaveCount(5);
+  await expect(mobileNavigation.getByRole("link", { name: "Dashboard" })).toContainText("Home");
+  await expect(mobileNavigation.getByRole("link", { name: "Weekly hours" })).toContainText("Hours");
+  const mobileNavigationBox = await mobileNavigation.boundingBox();
+  expect(mobileNavigationBox).not.toBeNull();
+  expect(mobileNavigationBox!.x).toBeGreaterThanOrEqual(0);
+  expect(mobileNavigationBox!.x + mobileNavigationBox!.width).toBeLessThanOrEqual(390);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });

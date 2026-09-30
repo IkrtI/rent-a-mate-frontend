@@ -149,6 +149,9 @@ body {
   background: var(--card);
 }
 .account-mobile-nav {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100vw;
   border-color: var(--border);
   background: var(--card);
   padding-bottom: env(safe-area-inset-bottom);
@@ -1610,6 +1613,25 @@ h2 {
   font-family: var(--font-display), Georgia, serif;
   font-size: 130px;
 }
+.profile-photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 12px;
+  width: min(1156px, 100%);
+  margin: 12px auto 0;
+}
+.profile-photo-gallery-item {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  margin: 0;
+  border-radius: 14px;
+  background: #f3e7e1;
+}
+.profile-photo-gallery-item img {
+  object-fit: cover;
+}
 .profile-layout {
   width: min(1156px, 100%);
   margin: 0 auto;
@@ -1922,6 +1944,44 @@ h2 {
 }
 .availability-grid-wrap {
   display: none;
+  min-width: 0;
+}
+.availability-editor-form {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.availability-editor-calendar,
+.availability-blocks {
+  min-width: 0;
+}
+.availability-blocks {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+.availability-block-list {
+  display: grid;
+  gap: 10px;
+  max-height: 640px;
+  overflow: auto;
+  padding: 1px;
+}
+.availability-time-block {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.availability-time-block button {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+.availability-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 10px 16px;
   min-width: 0;
 }
 .availability-grid-head,
@@ -2448,6 +2508,13 @@ h2 {
   .availability-grid-wrap {
     display: grid;
     gap: 9px;
+  }
+}
+@media (min-width: 1100px) {
+  .availability-editor-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 20px 28px;
   }
 }
 @media (max-width: 900px) {

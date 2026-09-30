@@ -33,6 +33,19 @@ const navigation = [
 const mateHours = { href: "/mate/availability", label: "Weekly hours", icon: Clock3 };
 const findMate = { href: "/mates", label: "Find a Mate", icon: Search };
 
+function mobileLabel(label: string) {
+  switch (label) {
+    case "Find a Mate":
+      return "Find";
+    case "Dashboard":
+      return "Home";
+    case "Weekly hours":
+      return "Hours";
+    default:
+      return label;
+  }
+}
+
 export function AuthenticatedShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
   const router = useRouter();
@@ -202,7 +215,9 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
             href={href}
             key={href}
           >
-            <Icon aria-hidden size={18} /> {label}
+            <Icon aria-hidden size={18} />
+            <span className="sr-only">{label}</span>
+            <span aria-hidden="true">{mobileLabel(label)}</span>
           </Link>
         ))}
       </nav>
