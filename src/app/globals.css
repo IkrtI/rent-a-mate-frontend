@@ -346,9 +346,71 @@ html.dark body {
 .account-mobile-nav {
   border-color: var(--border);
   background: var(--card);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 .account-page {
   color: var(--foreground);
+}
+.account-page--message-thread {
+  display: flex;
+  height: calc(100dvh - 4rem - 1px);
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.account-page--message-thread .messages-page--thread {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+.account-page--message-thread .messages-layout--thread {
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  flex: 1;
+  margin-top: 1.75rem;
+}
+.account-page--message-thread .messages-thread {
+  min-height: 0;
+}
+.account-page--message-thread .messages-thread__history {
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+@media (max-width: 1279px) {
+  .account-page--message-thread-mate {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom) + 0.75rem);
+  }
+  .account-page--message-thread-mate .messages-page__heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+  .account-page--message-thread-mate .messages-layout--thread {
+    margin-top: 0;
+  }
+}
+@media (max-width: 1023px) {
+  .account-page--message-thread:not(.account-page--message-thread-mate) {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom) + 0.75rem);
+  }
+  .account-page--message-thread:not(.account-page--message-thread-mate) .messages-page__heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+  .account-page--message-thread:not(.account-page--message-thread-mate) .messages-layout--thread {
+    margin-top: 0;
+  }
 }
 .account-loading,
 .auth-frame {
