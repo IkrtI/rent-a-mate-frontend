@@ -1,5 +1,5 @@
-import { PublicLayout } from "@/components/layout/public-shell";
+import { PublicRouteShell } from "@/components/layout/public-route-shell";
 
 export default function PublicRouteLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <PublicLayout>{children}</PublicLayout>;
+  return <PublicRouteShell>{children}</PublicRouteShell>;
 }

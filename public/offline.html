@@ -5,20 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#fcf8f6" />
     <title>You’re offline · mateflow.</title>
-    <script>
-      try {
-        const cookieTheme = document.cookie
-          .split("; ")
-          .find((item) => item.startsWith("mateflow-theme="))
-          ?.split("=")[1];
-        const savedTheme = localStorage.getItem("mateflow-theme") || cookieTheme;
-        const theme =
-          savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-        document.documentElement.classList.toggle("dark", theme === "dark");
-        document.documentElement.classList.toggle("light", theme !== "dark");
-        document.documentElement.style.colorScheme = theme;
-      } catch {}
-    </script>
     <style>
       :root {
         color-scheme: light;
@@ -29,16 +15,6 @@
         --surface: #fff;
         --primary: #d63d47;
         --primary-text: #20212a;
-      }
-      :root.dark {
-        color-scheme: dark;
-        --bg: #17171b;
-        --fg: #f6f0ed;
-        --muted: #b8aeab;
-        --line: #403b3d;
-        --surface: #222126;
-        --primary: #ed6870;
-        --primary-text: #17171b;
       }
       * {
         box-sizing: border-box;

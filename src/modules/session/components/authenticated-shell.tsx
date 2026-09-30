@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   CalendarDays,
-  CreditCard,
   LayoutDashboard,
   LogOut,
   MessageCircle,
@@ -22,19 +21,30 @@ import { requestSameOrigin } from "@/modules/backend-client/browser";
 import { mateResultSchema } from "@/modules/mate-profile/schemas";
 import { listNotifications } from "@/modules/notification/client";
 import { NotificationPanel } from "@/modules/notification/components/notification-panel";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 import { getSession, logout } from "../client";
 
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/bookings", label: "Bookings", icon: CalendarDays },
-  { href: "/payments", label: "Payments", icon: CreditCard },
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/profile", label: "Profile", icon: UserRound },
 ];
 const mateHours = { href: "/mate/availability", label: "Weekly hours", icon: Clock3 };
 const findMate = { href: "/mates", label: "Find a Mate", icon: Search };
+
+function mobileLabel(label: string) {
+  switch (label) {
+    case "Find a Mate":
+      return "Find";
+    case "Dashboard":
+      return "Home";
+    case "Weekly hours":
+      return "Hours";
+    default:
+      return label;
+  }
+}
 
 export function AuthenticatedShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
@@ -79,11 +89,12 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
   }
 
   const user = session.data.user;
+  const isMessageThread = pathname.startsWith("/messages/");
   const unreadCount = notifications.data?.notifications.filter((item) => !item.isRead).length ?? 0;
   const avatarUrl = mateProfile.data?.mate.photos[0]?.url;
   const visibleNavigation =
     user.role === "mate"
-      ? [navigation[0], navigation[1], navigation[4], mateHours, navigation[2], navigation[3]]
+      ? [navigation[0], navigation[1], navigation[3], mateHours, navigation[2]]
       : [findMate, ...navigation];
   const handleLogout = async () => {
     try {
@@ -145,7 +156,6 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
                 </span>
               ) : null}
             </button>
-            <ThemeToggle />
             <Link
               className="hidden items-center gap-2 sm:flex"
               href="/profile"
@@ -178,13 +188,19 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
           </div>
         </div>
       </header>
-      <div className="account-page mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</div>
+      <div
+        className={cn(
+          "account-page mx-auto max-w-7xl px-4 py-8 sm:px-6",
+          isMessageThread && "account-page--message-thread",
+          isMessageThread && user.role === "mate" && "account-page--message-thread-mate",
+        )}
+      >
+        {children}
+      </div>
       <nav
         className={cn(
           "account-mobile-nav fixed inset-x-0 bottom-0 z-30 border-t",
-          user.role === "mate"
-            ? "flex overflow-x-auto xl:hidden"
-            : "flex overflow-x-auto lg:hidden",
+          user.role === "mate" ? "flex xl:hidden" : "flex lg:hidden",
         )}
         aria-label="Mobile navigation"
       >
@@ -192,14 +208,16 @@ export function AuthenticatedShell({ children }: Readonly<{ children: React.Reac
           <Link
             className={cn(
               "account-mobile-link grid min-h-16 place-items-center gap-1 py-2 text-xs font-semibold",
-              "min-w-20 flex-1 text-center",
+              "min-w-0 flex-1 px-1 text-center leading-tight break-words",
               pathname.startsWith(href) && "is-active",
             )}
             aria-current={pathname.startsWith(href) ? "page" : undefined}
             href={href}
             key={href}
           >
-            <Icon aria-hidden size={18} /> {label}
+            <Icon aria-hidden size={18} />
+            <span className="sr-only">{label}</span>
+            <span aria-hidden="true">{mobileLabel(label)}</span>
           </Link>
         ))}
       </nav>

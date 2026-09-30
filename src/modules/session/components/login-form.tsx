@@ -74,7 +74,7 @@ export function LoginForm() {
       </p>
       {searchParams.get("registered") === "1" ? (
         <p
-          className="mt-5 rounded-md bg-emerald-100 px-3 py-2 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
+          className="mt-5 rounded-md bg-emerald-100 px-3 py-2 text-sm text-emerald-900"
           role="status"
         >
           Account created. Sign in to continue.

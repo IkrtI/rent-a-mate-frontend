@@ -132,7 +132,7 @@ export function ProfileEditor({
     }
   }
   return (
-    <section className="border-border bg-card text-card-foreground mx-auto max-w-3xl rounded-2xl border p-6 shadow-sm sm:p-8">
+    <section className="border-border bg-card text-card-foreground mx-auto w-full max-w-7xl rounded-2xl border p-6 shadow-sm sm:p-8">
       <form className="grid gap-5 sm:grid-cols-2" onSubmit={submit}>
         {lookupError && (
           <div
@@ -546,7 +546,7 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
                 </button>
               </header>
               <div className="photo-editor-workspace">
-                <div className={`photo-editor-stage${dragging ? "is-dragging" : ""}`}>
+                <div className={dragging ? "photo-editor-stage is-dragging" : "photo-editor-stage"}>
                   <div className="photo-crop-frame">
                     <canvas
                       aria-label="Photo crop. Drag to reposition, use arrow keys to move, or scroll to zoom."
@@ -733,103 +733,108 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
         Set recurring weekly hours in Bangkok local time. The booking calendar will show open slots
         after existing requests are accounted for.
       </p>
-      <form className="grid gap-4" onSubmit={save}>
-        <WeeklyAvailabilityGrid
-          disabled={busy || !mate.isActive}
-          onChange={setSlots}
-          slots={slots}
-        />
-        <h2 className="text-lg font-semibold">Your time blocks</h2>
-        {slots.length === 0 && (
-          <p className="text-sm text-neutral-600">
-            No weekly hours yet. Add a time block below. On desktop, you can also drag on the
-            calendar.
-          </p>
-        )}
-        {slots.map((slot, index) => (
-          <div
-            className="bg-accent grid gap-3 rounded-xl p-3 sm:grid-cols-[1fr_1fr_1fr_auto]"
-            key={index}
-          >
-            <label className="grid gap-1 text-xs font-semibold">
-              Day
-              <select
-                className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
-                onChange={(event) => update(index, "dayOfWeek", event.target.value)}
-                value={slot.dayOfWeek}
-              >
-                {dayNames.map((day, position) => (
-                  <option key={day} value={position + 1}>
-                    {day}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="grid gap-1 text-xs font-semibold">
-              From
-              <input
-                className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
-                onChange={(event) => update(index, "startTime", event.target.value)}
-                required
-                type="time"
-                value={slot.startTime}
-              />
-            </label>
-            <label className="grid gap-1 text-xs font-semibold">
-              Until
-              <input
-                className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
-                onChange={(event) => update(index, "endTime", event.target.value)}
-                required
-                type="time"
-                value={slot.endTime}
-              />
-            </label>
-            <button
-              className="border-border self-end rounded-lg border px-3 py-2 text-sm"
-              onClick={() =>
-                setSlots((current) => current.filter((_, position) => position !== index))
-              }
-              type="button"
-            >
-              Remove
-            </button>
+      <form className="availability-editor-form" onSubmit={save}>
+        <div className="availability-editor-calendar">
+          <WeeklyAvailabilityGrid
+            disabled={busy || !mate.isActive}
+            onChange={setSlots}
+            slots={slots}
+          />
+        </div>
+        <div className="availability-blocks">
+          <h2 className="text-lg font-semibold">Your time blocks</h2>
+          <div className="availability-block-list">
+            {slots.length === 0 && (
+              <p className="text-sm text-neutral-600">
+                No weekly hours yet. Add a time block below. On desktop, you can also drag on the
+                calendar.
+              </p>
+            )}
+            {slots.map((slot, index) => (
+              <div className="availability-time-block bg-accent rounded-xl p-3" key={index}>
+                <label className="grid gap-1 text-xs font-semibold">
+                  Day
+                  <select
+                    className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
+                    onChange={(event) => update(index, "dayOfWeek", event.target.value)}
+                    value={slot.dayOfWeek}
+                  >
+                    {dayNames.map((day, position) => (
+                      <option key={day} value={position + 1}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="grid gap-1 text-xs font-semibold">
+                  From
+                  <input
+                    className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
+                    onChange={(event) => update(index, "startTime", event.target.value)}
+                    required
+                    type="time"
+                    value={slot.startTime}
+                  />
+                </label>
+                <label className="grid gap-1 text-xs font-semibold">
+                  Until
+                  <input
+                    className="border-border bg-card text-card-foreground rounded-lg border px-2 py-2 text-sm"
+                    onChange={(event) => update(index, "endTime", event.target.value)}
+                    required
+                    type="time"
+                    value={slot.endTime}
+                  />
+                </label>
+                <button
+                  className="border-border self-end rounded-lg border px-3 py-2 text-sm"
+                  onClick={() =>
+                    setSlots((current) => current.filter((_, position) => position !== index))
+                  }
+                  type="button"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-        <button
-          className="border-border justify-self-start rounded-lg border px-4 py-2 text-sm font-semibold"
-          onClick={() =>
-            setSlots((current) => [
-              ...current,
-              { dayOfWeek: 1, startTime: "09:00", endTime: "17:00" },
-            ])
-          }
-          type="button"
-        >
-          Add time block
-        </button>
-        {error && (
-          <p className="text-destructive text-sm" role="alert">
-            {error}
-          </p>
-        )}
-        {message && (
-          <p className="text-foreground text-sm" role="status">
-            {message}
-          </p>
-        )}
-        <button
-          className="button justify-self-start"
-          disabled={busy || !mate.isActive}
-          type="submit"
-        >
-          {busy ? "Saving…" : "Save weekly availability"}
-        </button>
-        {!mate.isActive && (
-          <p className="text-foreground text-sm">
-            Reactivate your profile before changing availability.
-          </p>
-        )}
+          <button
+            className="border-border rounded-lg border px-4 py-2 text-sm font-semibold"
+            onClick={() =>
+              setSlots((current) => [
+                ...current,
+                { dayOfWeek: 1, startTime: "09:00", endTime: "17:00" },
+              ])
+            }
+            type="button"
+          >
+            Add time block
+          </button>
+        </div>
+        <div className="availability-editor-actions">
+          {error && (
+            <p className="text-destructive text-sm" role="alert">
+              {error}
+            </p>
+          )}
+          {message && (
+            <p className="text-foreground text-sm" role="status">
+              {message}
+            </p>
+          )}
+          <button
+            className="button justify-self-start"
+            disabled={busy || !mate.isActive}
+            type="submit"
+          >
+            {busy ? "Saving…" : "Save weekly availability"}
+          </button>
+          {!mate.isActive && (
+            <p className="text-foreground text-sm">
+              Reactivate your profile before changing availability.
+            </p>
+          )}
+        </div>
       </form>
     </section>
   );

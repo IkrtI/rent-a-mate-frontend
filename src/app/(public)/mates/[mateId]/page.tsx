@@ -59,7 +59,8 @@ export default async function MateProfilePage({ params }: Props) {
       </main>
     );
   const reviews = await getPublicMateReviews(mate.id);
-  const photo = [...mate.photos].sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url;
+  const photos = [...mate.photos].sort((a, b) => a.sortOrder - b.sortOrder);
+  const photo = photos[0]?.url;
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Bangkok",
     year: "numeric",
@@ -90,6 +91,24 @@ export default async function MateProfilePage({ params }: Props) {
           </div>
         )}
       </div>
+      {photos.length > 1 && (
+        <div
+          className="profile-photo-gallery"
+          aria-label={`${mate.user.name}'s other profile photos`}
+        >
+          {photos.slice(1).map((item, index) => (
+            <figure className="profile-photo-gallery-item" key={item.id}>
+              <Image
+                alt={`${mate.user.name}'s profile photo ${index + 2}`}
+                fill
+                sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 220px"
+                src={item.url}
+                unoptimized
+              />
+            </figure>
+          ))}
+        </div>
+      )}
       <div className="profile-layout">
         <article className="profile-copy">
           <p className="eyebrow">A MATE IN BANGKOK</p>

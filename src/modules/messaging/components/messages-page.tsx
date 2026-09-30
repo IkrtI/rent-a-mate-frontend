@@ -19,6 +19,7 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
   const [isPageVisible, setIsPageVisible] = useState(false);
   const typingSentRef = useRef(false);
   const typingStopTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const historyRef = useRef<HTMLDivElement>(null);
   const pendingMessageRef = useRef<{
     bookingId: number;
     content: string;
@@ -59,6 +60,13 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     enabled: selectedBookingId !== undefined,
     refetchInterval: status === "connected" ? false : 10_000,
   });
+  const latestMessageId = messages.data?.items.at(-1)?.id;
+
+  useEffect(() => {
+    const history = historyRef.current;
+    if (history && latestMessageId) history.scrollTop = history.scrollHeight;
+  }, [latestMessageId, selectedBookingId]);
+
   useEffect(() => {
     const updateVisibility = () => setIsPageVisible(document.visibilityState === "visible");
     updateVisibility();
@@ -130,14 +138,18 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
     : "Conversation";
 
   return (
-    <main className="pb-24">
-      <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
+    <main className={`messages-page ${selectedBookingId ? "messages-page--thread" : "pb-24"}`}>
+      <p className="messages-page__heading font-mono text-[11px] tracking-[0.12em] text-[#b43740] uppercase">
         Stay connected
       </p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Messages</h1>
-      <div className="mt-7 grid min-h-[620px] overflow-hidden rounded-md border border-neutral-200 bg-white lg:grid-cols-[280px_minmax(0,1fr)]">
+      <h1 className="messages-page__heading mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+        Messages
+      </h1>
+      <div
+        className={`messages-layout mt-7 grid min-h-[620px] overflow-hidden rounded-md border border-neutral-200 bg-white lg:grid-cols-[280px_minmax(0,1fr)] ${selectedBookingId ? "messages-layout--thread" : ""}`}
+      >
         <aside
-          className={`${selectedBookingId ? "hidden lg:block" : "block"} border-r border-neutral-200`}
+          className={`${selectedBookingId ? "hidden lg:block" : "block"} overflow-y-auto border-r border-neutral-200`}
           aria-label="Conversations"
         >
           <div className="border-b border-neutral-200 px-4 py-4 text-sm font-bold">
@@ -168,10 +180,10 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
           })}
         </aside>
         {selectedBookingId ? (
-          <section className="flex min-h-[620px] flex-col">
+          <section className="messages-thread flex min-h-[620px] flex-col">
             <div className="border-b border-neutral-200 px-5 py-4">
               <Link
-                className="mb-2 inline-block text-xs font-semibold text-[#d74653] lg:hidden"
+                className="mb-2 inline-block text-xs font-semibold text-[#b43740] lg:hidden"
                 href="/messages"
               >
                 Back to conversations
@@ -184,11 +196,14 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                 {status === "connected"
                   ? "Live updates connected"
                   : status === "connecting"
-                    ? "Connecting live updates…"
-                    : "Live updates unavailable — using refresh fallback"}
+                    ? "Connecting to live updates."
+                    : "Live updates unavailable. Refreshing every 10 seconds."}
               </p>
             </div>
-            <div className="flex flex-1 flex-col justify-end gap-3 overflow-y-auto bg-[#fffdfc] p-5">
+            <div
+              className="messages-thread__history bg-card flex flex-1 flex-col gap-3 overflow-y-auto p-5"
+              ref={historyRef}
+            >
               {messages.isPending ? (
                 <p className="text-sm text-neutral-500">Loading messages...</p>
               ) : null}
@@ -201,20 +216,20 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                   <p className="mt-3 text-sm text-neutral-500">Start the conversation.</p>
                 </div>
               ) : null}
-              {messages.data?.items.map((message) => {
+              {messages.data?.items.map((message, index) => {
                 const mine = message.senderId === user?.id;
                 return (
                   <div
-                    className={`max-w-[82%] rounded-md px-3 py-2 text-sm leading-6 ${
+                    className={`messages-thread__message ${index === 0 ? "mt-auto" : ""} max-w-[82%] rounded-md px-3 py-2 text-sm leading-6 ${
                       mine
-                        ? "ml-auto bg-[#23212b] text-white"
-                        : "mr-auto bg-neutral-100 text-neutral-900"
+                        ? "messages-thread__message--own ml-auto bg-[#23212b] text-white"
+                        : "messages-thread__message--other bg-muted mr-auto"
                     }`}
                     key={message.id}
                   >
-                    <p>{message.content}</p>
+                    <p className="[overflow-wrap:anywhere] break-words">{message.content}</p>
                     <p
-                      className={`mt-1 text-[10px] ${mine ? "text-white/60" : "text-neutral-400"}`}
+                      className={`mt-1 text-[10px] ${mine ? "text-white/60" : "text-neutral-600"}`}
                     >
                       {new Intl.DateTimeFormat("en-GB", {
                         hour: "2-digit",
@@ -250,7 +265,7 @@ export function MessagesPage({ selectedBookingId }: { selectedBookingId?: number
                 }
               }}
             >
-              <div className="flex items-end gap-2 rounded-md bg-neutral-100 p-2">
+              <div className="bg-muted flex items-end gap-2 rounded-md p-2">
                 <label className="sr-only" htmlFor="message-content">
                   Message
                 </label>

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { BrandLink } from "@/components/layout/brand-link";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function AuthFrame({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -32,7 +31,6 @@ export function AuthFrame({ children }: Readonly<{ children: React.ReactNode }>)
       <section className="auth-frame-form flex min-h-screen flex-col px-6 py-6 sm:px-10 lg:px-14">
         <div className="flex items-center justify-end gap-4">
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Link className="auth-back-link text-sm" href="/">
               Back to home
             </Link>

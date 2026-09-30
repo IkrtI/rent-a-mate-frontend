@@ -6,17 +6,13 @@ import Link from "next/link";
 import { listPayments } from "../client";
 import { formatPrice } from "../format";
 
-export function PaymentsPage() {
+export function PaymentsPage({ embedded = false }: { embedded?: boolean } = {}) {
   const payments = useQuery({
     queryKey: ["payments"],
     queryFn: () => listPayments({ limit: 100 }),
   });
-  return (
-    <main className="pb-24">
-      <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
-        Your account
-      </p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Payment history</h1>
+  const paymentHistory = (
+    <>
       {payments.isPending ? (
         <p className="mt-8 text-sm text-neutral-500">Loading payments…</p>
       ) : null}
@@ -45,6 +41,33 @@ export function PaymentsPage() {
           ))}
         </div>
       ) : null}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <section className="mt-8" aria-labelledby="embedded-payment-history-title">
+        <h2 className="text-lg font-bold" id="embedded-payment-history-title">
+          Payment history
+        </h2>
+        {paymentHistory}
+      </section>
+    );
+  }
+
+  return (
+    <main className="pb-24">
+      <p className="font-mono text-[11px] tracking-[0.12em] text-[#b43740] uppercase">
+        Your account
+      </p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Payment history</h1>
+      <Link
+        className="mt-3 inline-block text-sm font-semibold text-[#b43740]"
+        href="/bookings?view=payments"
+      >
+        Open in bookings
+      </Link>
+      {paymentHistory}
     </main>
   );
 }
