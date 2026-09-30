@@ -175,9 +175,15 @@ test("renders the private shell for an authenticated user", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Good morning, Mew." })).toBeVisible();
   await expect(page.getByText("Mew", { exact: true })).toBeVisible();
   await expect(page.getByText("No upcoming bookings yet.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Find a Mate" }).first()).toHaveAttribute(
+    "href",
+    "/mates",
+  );
 });
 
-test("groups mate tools without crowding the desktop navigation", async ({ page }) => {
+test("shows Mate profile and weekly hours without crowding the desktop navigation", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({
@@ -239,8 +245,7 @@ test("groups mate tools without crowding the desktop navigation", async ({ page 
   expect(accountActionsBox).not.toBeNull();
   expect(navigationBox!.x + navigationBox!.width).toBeLessThan(accountActionsBox!.x);
 
-  await page.getByText("Mate tools", { exact: true }).click();
-  await expect(page.getByRole("link", { name: "Mate profile" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Photos" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Availability" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Profile" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Weekly hours" })).toBeVisible();
+  await expect(page.getByText("Mate tools", { exact: true })).toHaveCount(0);
 });

@@ -1970,6 +1970,356 @@ h2 {
   text-decoration: underline;
   cursor: pointer;
 }
+.booking-step {
+  margin: 0 0 9px;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 700;
+}
+.booking-calendar {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+.booking-calendar-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 9px;
+  font-size: 13px;
+}
+.booking-calendar-heading > div {
+  display: flex;
+  gap: 4px;
+}
+.booking-calendar-heading button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 22px;
+  line-height: 1;
+}
+.booking-calendar-heading button:disabled {
+  opacity: 0.35;
+}
+.booking-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.booking-calendar-weekday {
+  padding: 6px 0;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  text-align: center;
+}
+.booking-calendar-grid button {
+  min-width: 0;
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 12px;
+}
+.booking-calendar-grid button:hover:not(:disabled) {
+  background: var(--accent);
+}
+.booking-calendar-grid button[aria-pressed="true"] {
+  background: var(--foreground);
+  color: var(--background);
+  font-weight: 700;
+}
+.booking-calendar-grid button:disabled {
+  color: var(--muted-foreground);
+  opacity: 0.55;
+}
+.booking-times {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.booking-times > p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.booking-time-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  max-height: 168px;
+  overflow-y: auto;
+}
+.booking-time-grid button {
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 650;
+}
+.booking-time-grid button:hover {
+  border-color: var(--primary-text-accent);
+}
+.booking-time-grid button[aria-pressed="true"] {
+  border-color: var(--primary-text-accent);
+  background: var(--accent);
+  color: var(--foreground);
+}
+.booking-selection {
+  margin: 0;
+  color: var(--primary-text-accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+.booking-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.booking-calendar button:focus-visible,
+.booking-time-grid button:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+.availability-grid-wrap {
+  display: none;
+  min-width: 0;
+}
+.availability-grid-head,
+.availability-grid-row {
+  display: grid;
+  grid-template-columns: 48px repeat(7, minmax(0, 1fr));
+}
+.availability-grid-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--card);
+}
+.availability-grid-head strong {
+  padding: 7px 0;
+  text-align: center;
+  font-size: 12px;
+}
+.availability-grid-viewport {
+  max-height: 640px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.availability-grid-row {
+  min-height: 32px;
+}
+.availability-grid-hour {
+  padding: 3px;
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+.availability-grid-row button {
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--card);
+  touch-action: none;
+}
+.availability-grid-row button:hover {
+  background: var(--accent);
+}
+.availability-grid-row button.is-selected {
+  border-color: var(--primary-text-accent);
+  background: var(--primary);
+}
+.availability-grid-row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.photo-crop-layout {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+  align-items: start;
+}
+.photo-crop-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: var(--muted);
+}
+.profile-settings {
+  display: grid;
+  gap: 48px;
+  padding-bottom: 96px;
+}
+.profile-settings-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.profile-settings-heading p {
+  color: var(--primary-text-accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.profile-settings-heading h1 {
+  margin: 5px 0 10px;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 750;
+}
+.profile-settings-heading span,
+.profile-settings-section-heading p {
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+.profile-settings-section {
+  display: grid;
+  gap: 18px;
+  scroll-margin-top: 90px;
+}
+.profile-settings-section-heading h2,
+.account-editor-heading h2 {
+  margin: 0 0 5px;
+  font-size: 24px;
+  font-weight: 700;
+}
+.profile-settings-section-heading p,
+.account-editor-heading p {
+  margin: 0;
+}
+.profile-settings-section > section {
+  max-width: none;
+  margin: 0;
+}
+.profile-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--card);
+  color: var(--card-foreground);
+  font-size: 13px;
+  cursor: pointer;
+}
+.profile-option:has(input:checked) {
+  border-color: var(--primary-text-accent);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+.profile-option input {
+  accent-color: var(--primary-text-accent);
+}
+.profile-option:has(input:focus-visible) {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+.profile-settings-error {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+.profile-settings-error a {
+  color: var(--primary-text-accent);
+  font-weight: 700;
+  text-decoration: underline;
+}
+.account-editor {
+  display: grid;
+  gap: 18px;
+}
+.account-editor-heading p {
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+.account-editor-forms {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.account-editor-forms form {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+.account-editor-forms h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+.account-editor-forms label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 650;
+}
+.account-editor-forms input {
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--input);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--card-foreground);
+  font: inherit;
+  font-size: 14px;
+}
+.account-editor-forms p {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.account-editor-forms p[role="alert"] {
+  color: var(--destructive);
+}
+.account-editor-forms p[role="status"] {
+  color: var(--foreground);
+}
+.account-editor-forms button {
+  justify-self: start;
+}
+.photo-crop-layout + button:disabled,
+.profile-settings .button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@media (min-width: 768px) {
+  .availability-grid-wrap {
+    display: grid;
+    gap: 9px;
+  }
+}
+@media (max-width: 900px) {
+  .account-editor-forms {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .photo-crop-layout {
+    grid-template-columns: 1fr;
+  }
+  .booking-time-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 .profile-state {
   width: min(600px, 100%);
   min-height: 320px;

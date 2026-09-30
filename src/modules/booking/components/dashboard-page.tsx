@@ -44,12 +44,20 @@ export function DashboardPage() {
               : "Your upcoming plans and booking updates, all in one place."}
           </p>
         </div>
-        <Link
-          className="bg-foreground text-background rounded-md px-4 py-2.5 text-sm font-bold"
-          href="/bookings"
-        >
-          View all bookings
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            className="bg-foreground text-background rounded-md px-4 py-2.5 text-sm font-bold"
+            href={user?.role === "mate" ? "/mate/availability" : "/mates"}
+          >
+            {user?.role === "mate" ? "Set your available hours" : "Find a Mate"}
+          </Link>
+          <Link
+            className="border-border rounded-md border px-4 py-2.5 text-sm font-bold"
+            href="/bookings"
+          >
+            View bookings
+          </Link>
+        </div>
       </div>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-3" aria-label="Booking summary">

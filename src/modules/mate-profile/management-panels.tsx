@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 
 import {
@@ -23,6 +24,8 @@ import {
   englishInterestName,
   englishLookupName,
 } from "@/lib/i18n/english-labels";
+import { cropBlob, drawSquareCrop } from "./photo-crop";
+import { WeeklyAvailabilityGrid } from "./weekly-availability-grid";
 
 type Lookup = { id: number; name: string };
 type ProfileProps = {
@@ -51,6 +54,7 @@ export function ProfileEditor({
   districts: initialDistricts,
   lookupError,
 }: ProfileProps) {
+  const router = useRouter();
   const [provinceId, setProvinceId] = useState(String(mate?.province.id ?? ""));
   const [districts, setDistricts] = useState(initialDistricts);
   const [districtsForProvince, setDistrictsForProvince] = useState(String(mate?.province.id ?? ""));
@@ -102,6 +106,7 @@ export function ProfileEditor({
       setProfileExists(true);
       setProfileActive(result.mate.isActive);
       setMessage("Profile saved.");
+      if (!profileExists) router.refresh();
     } catch (cause) {
       setError(errorText(cause));
     } finally {
@@ -127,11 +132,11 @@ export function ProfileEditor({
     }
   }
   return (
-    <section className="mx-auto max-w-3xl rounded-2xl border border-rose-100 bg-white p-6 shadow-sm sm:p-8">
+    <section className="border-border bg-card text-card-foreground mx-auto max-w-3xl rounded-2xl border p-6 shadow-sm sm:p-8">
       <form className="grid gap-5 sm:grid-cols-2" onSubmit={submit}>
         {lookupError && (
           <div
-            className="flex flex-wrap items-center gap-3 text-sm text-amber-800 sm:col-span-2"
+            className="text-foreground flex flex-wrap items-center gap-3 text-sm sm:col-span-2"
             role="alert"
           >
             <span>Some profile options could not load. Retry before changing your profile.</span>
@@ -214,49 +219,55 @@ export function ProfileEditor({
             placeholder="Share what you enjoy doing with renters."
           />
         </label>
-        <label className="grid gap-2 text-sm font-semibold">
-          Activities
-          <select
-            className="min-h-36 rounded-lg border border-neutral-300 px-3 py-2"
-            defaultValue={ids(mate?.activities ?? []).map(String)}
-            multiple
-            name="activityIds"
-          >
+        <fieldset className="grid content-start gap-2 text-sm font-semibold">
+          <legend>Activities you offer</legend>
+          <div className="flex flex-wrap gap-2">
             {activities.map((item) => (
-              <option key={item.id} value={item.id}>
-                {englishActivityName(item.name)}
-              </option>
+              <label className="profile-option" key={item.id}>
+                <input
+                  defaultChecked={ids(mate?.activities ?? []).includes(item.id)}
+                  name="activityIds"
+                  type="checkbox"
+                  value={item.id}
+                />
+                <span>{englishActivityName(item.name)}</span>
+              </label>
             ))}
-          </select>
-          <span className="text-xs font-normal text-neutral-500">
-            Select all activities you offer.
-          </span>
-        </label>
-        <label className="grid gap-2 text-sm font-semibold">
-          Interests
-          <select
-            className="min-h-36 rounded-lg border border-neutral-300 px-3 py-2"
-            defaultValue={ids(mate?.interests ?? []).map(String)}
-            multiple
-            name="interestIds"
-          >
+            {activities.length === 0 && (
+              <span className="text-xs font-normal text-neutral-500">
+                No activity options available.
+              </span>
+            )}
+          </div>
+        </fieldset>
+        <fieldset className="grid content-start gap-2 text-sm font-semibold">
+          <legend>Interests</legend>
+          <div className="flex flex-wrap gap-2">
             {interests.map((item) => (
-              <option key={item.id} value={item.id}>
-                {englishInterestName(item.name)}
-              </option>
+              <label className="profile-option" key={item.id}>
+                <input
+                  defaultChecked={ids(mate?.interests ?? []).includes(item.id)}
+                  name="interestIds"
+                  type="checkbox"
+                  value={item.id}
+                />
+                <span>{englishInterestName(item.name)}</span>
+              </label>
             ))}
-          </select>
-          <span className="text-xs font-normal text-neutral-500">
-            Select all interests you want to share.
-          </span>
-        </label>
+            {interests.length === 0 && (
+              <span className="text-xs font-normal text-neutral-500">
+                No interest options available.
+              </span>
+            )}
+          </div>
+        </fieldset>
         {error && (
-          <p className="text-sm text-red-700 sm:col-span-2" role="alert">
+          <p className="text-destructive text-sm sm:col-span-2" role="alert">
             {error}
           </p>
         )}
         {message && (
-          <p className="text-sm text-green-700 sm:col-span-2" role="status">
+          <p className="text-foreground text-sm sm:col-span-2" role="status">
             {message}
           </p>
         )}
@@ -270,7 +281,7 @@ export function ProfileEditor({
           </button>
           {profileExists && profileActive && (
             <button
-              className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700"
+              className="border-destructive text-destructive rounded-lg border px-4 py-2 text-sm font-semibold"
               disabled={busy}
               onClick={deactivate}
               type="button"
@@ -280,7 +291,7 @@ export function ProfileEditor({
           )}
         </div>
         {profileExists && !profileActive && (
-          <p className="text-sm text-amber-800 sm:col-span-2">
+          <p className="text-foreground text-sm sm:col-span-2">
             This profile is inactive and hidden from discovery.
           </p>
         )}
@@ -292,33 +303,66 @@ export function ProfileEditor({
 export function PhotosEditor({ mate }: { mate: MateProfile }) {
   const queryClient = useQueryClient();
   const [photos, setPhotos] = useState(mate.photos);
+  const [file, setFile] = useState<File | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [horizontal, setHorizontal] = useState(50);
+  const [vertical, setVertical] = useState(50);
+  const [previewReady, setPreviewReady] = useState(false);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const image = useRef<HTMLImageElement | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  useEffect(() => {
+    if (!file) {
+      image.current = null;
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const loaded = new window.Image();
+    loaded.onload = () => {
+      image.current = loaded;
+      setPreviewReady(true);
+    };
+    loaded.onerror = () => setError("We couldn’t open that image. Choose another file.");
+    loaded.src = url;
+    return () => {
+      URL.revokeObjectURL(url);
+      image.current = null;
+      setPreviewReady(false);
+    };
+  }, [file]);
+  useEffect(() => {
+    if (previewReady && canvas.current && image.current) {
+      drawSquareCrop(canvas.current, image.current, zoom, horizontal, vertical);
+    }
+  }, [horizontal, previewReady, vertical, zoom]);
   async function upload(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");
     setMessage("");
     const formElement = event.currentTarget;
-    const form = new FormData(formElement);
-    const file = form.get("photo");
-    const url = String(form.get("url") ?? "").trim();
-    if (file instanceof File && file.size > 5 * 1024 * 1024) {
+    if (!file || !previewReady || !canvas.current) {
+      setError("Choose an image and wait for its preview.");
+      setBusy(false);
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
       setError("Photo must be 5 MB or smaller.");
       setBusy(false);
       return;
     }
-    const body = new FormData();
-    if (file instanceof File && file.size > 0) body.append("photo", file);
-    else if (url) body.append("url", url);
-    else {
-      setError("Choose an image file or provide an image URL.");
-      setBusy(false);
-      return;
-    }
     try {
+      const cropped = await cropBlob(canvas.current);
+      const body = new FormData();
+      body.append(
+        "photo",
+        new File([cropped], `${file.name.replace(/\.[^.]+$/, "")}-crop.jpg`, {
+          type: "image/jpeg",
+        }),
+      );
       setUploadProgress(0);
       const result = await requestSameOriginUpload(
         "/api/mates/me/photos",
@@ -329,6 +373,10 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
       setPhotos((current) => [...current, result.photo].sort((a, b) => a.sortOrder - b.sortOrder));
       await queryClient.invalidateQueries({ queryKey: ["mate-profile"] });
       formElement.reset();
+      setFile(null);
+      setZoom(1);
+      setHorizontal(50);
+      setVertical(50);
       setMessage("Photo added.");
     } catch (cause) {
       setError(errorText(cause));
@@ -353,9 +401,10 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
     }
   }
   return (
-    <section className="mx-auto grid max-w-4xl gap-6 rounded-2xl border border-rose-100 bg-white p-6 shadow-sm sm:p-8">
+    <section className="border-border bg-card text-card-foreground mx-auto grid max-w-4xl gap-6 rounded-2xl border p-6 shadow-sm sm:p-8">
       <p className="text-sm text-neutral-600">
-        Add up to six photos. Image files must be 5 MB or smaller.
+        Add up to six photos. Choose a file, adjust the square crop, then upload. Files must be 5 MB
+        or smaller.
       </p>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {photos.map((photo) => (
@@ -369,7 +418,7 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
               width={480}
             />
             <button
-              className="rounded-lg border border-red-300 px-3 py-2 text-sm font-semibold text-red-700"
+              className="border-destructive text-destructive rounded-lg border px-3 py-2 text-sm font-semibold"
               disabled={busy || !mate.isActive}
               onClick={() => void remove(photo.id)}
               type="button"
@@ -380,36 +429,82 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
         ))}
       </div>
       {mate.isActive && photos.length < 6 && (
-        <form
-          className="grid gap-4 border-t border-neutral-200 pt-5 sm:grid-cols-2"
-          onSubmit={upload}
-        >
+        <form className="grid gap-4 border-t border-neutral-200 pt-5" onSubmit={upload}>
           <label className="grid gap-2 text-sm font-semibold">
             Image file
             <input
               accept="image/jpeg,image/png,image/gif,image/webp"
               className="rounded-lg border border-neutral-300 p-2"
+              onChange={(event) => {
+                setFile(event.target.files?.[0] ?? null);
+                setPreviewReady(false);
+                setError("");
+              }}
               name="photo"
               type="file"
             />
           </label>
-          <label className="grid gap-2 text-sm font-semibold">
-            Or image URL
-            <input
-              className="rounded-lg border border-neutral-300 px-3 py-2"
-              maxLength={2048}
-              name="url"
-              placeholder="https://, /image.jpg, or data:image/…"
-              type="text"
-            />
-          </label>
+          {file && (
+            <div className="photo-crop-layout">
+              <div>
+                <canvas
+                  aria-label="Photo crop preview"
+                  className="photo-crop-preview"
+                  height={600}
+                  ref={canvas}
+                  role="img"
+                  width={600}
+                />
+                {!previewReady && (
+                  <p className="text-sm text-neutral-600" role="status">
+                    Preparing preview…
+                  </p>
+                )}
+              </div>
+              <div className="grid content-start gap-4">
+                <label className="grid gap-1 text-sm font-semibold">
+                  Zoom
+                  <input
+                    max="3"
+                    min="1"
+                    onChange={(event) => setZoom(Number(event.target.value))}
+                    step="0.05"
+                    type="range"
+                    value={zoom}
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold">
+                  Move left or right
+                  <input
+                    max="100"
+                    min="0"
+                    onChange={(event) => setHorizontal(Number(event.target.value))}
+                    type="range"
+                    value={horizontal}
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold">
+                  Move up or down
+                  <input
+                    max="100"
+                    min="0"
+                    onChange={(event) => setVertical(Number(event.target.value))}
+                    type="range"
+                    value={vertical}
+                  />
+                </label>
+                <p className="text-xs text-neutral-600">
+                  The square preview is the image that will be uploaded.
+                </p>
+              </div>
+            </div>
+          )}
           {uploadProgress !== null && (
             <div
               aria-label="Photo upload progress"
               aria-valuemax={100}
               aria-valuemin={0}
               aria-valuenow={uploadProgress}
-              className="sm:col-span-2"
               role="progressbar"
             >
               <div className="h-2 rounded-full bg-rose-100">
@@ -421,23 +516,27 @@ export function PhotosEditor({ mate }: { mate: MateProfile }) {
               <p className="mt-1 text-xs text-neutral-600">Uploading: {uploadProgress}%</p>
             </div>
           )}
-          <button className="button sm:col-span-2" disabled={busy} type="submit">
+          <button
+            className="button justify-self-start"
+            disabled={busy || !previewReady}
+            type="submit"
+          >
             {busy ? "Uploading…" : "Add photo"}
           </button>
         </form>
       )}
       {error && (
-        <p className="text-sm text-red-700" role="alert">
+        <p className="text-destructive text-sm" role="alert">
           {error}
         </p>
       )}
       {message && (
-        <p className="text-sm text-green-700" role="status">
+        <p className="text-foreground text-sm" role="status">
           {message}
         </p>
       )}
       {!mate.isActive && (
-        <p className="text-sm text-amber-800">Reactivate your profile before changing photos.</p>
+        <p className="text-foreground text-sm">Reactivate your profile before changing photos.</p>
       )}
     </section>
   );
@@ -502,10 +601,22 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
         after existing requests are accounted for.
       </p>
       <form className="grid gap-4" onSubmit={save}>
+        <WeeklyAvailabilityGrid
+          disabled={busy || !mate.isActive}
+          onChange={setSlots}
+          slots={slots}
+        />
+        <h2 className="text-lg font-semibold">Your time blocks</h2>
+        {slots.length === 0 && (
+          <p className="text-sm text-neutral-600">
+            No weekly hours yet. Add a time block below. On desktop, you can also drag on the
+            calendar.
+          </p>
+        )}
         {slots.map((slot, index) => (
           <div
             className="bg-accent grid gap-3 rounded-xl p-3 sm:grid-cols-[1fr_1fr_1fr_auto]"
-            key={`${index}-${slot.dayOfWeek}-${slot.startTime}`}
+            key={index}
           >
             <label className="grid gap-1 text-xs font-semibold">
               Day
@@ -565,12 +676,12 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
           Add time block
         </button>
         {error && (
-          <p className="text-sm text-red-700" role="alert">
+          <p className="text-destructive text-sm" role="alert">
             {error}
           </p>
         )}
         {message && (
-          <p className="text-sm text-green-700" role="status">
+          <p className="text-foreground text-sm" role="status">
             {message}
           </p>
         )}
@@ -582,7 +693,7 @@ export function AvailabilityEditor({ mate }: { mate: MateProfile }) {
           {busy ? "Saving…" : "Save weekly availability"}
         </button>
         {!mate.isActive && (
-          <p className="text-sm text-amber-800">
+          <p className="text-foreground text-sm">
             Reactivate your profile before changing availability.
           </p>
         )}
