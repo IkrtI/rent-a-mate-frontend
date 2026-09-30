@@ -2137,6 +2137,16 @@ h2 {
   border-color: var(--primary-text-accent);
   background: var(--primary);
 }
+.availability-grid-row button.is-removing {
+  border: 1px dashed var(--primary-text-accent);
+  background: repeating-linear-gradient(
+    135deg,
+    var(--card),
+    var(--card) 5px,
+    var(--muted) 5px,
+    var(--muted) 10px
+  );
+}
 .availability-grid-row button:disabled {
   cursor: not-allowed;
   opacity: 0.5;

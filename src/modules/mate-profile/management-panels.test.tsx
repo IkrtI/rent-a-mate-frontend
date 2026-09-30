@@ -150,3 +150,38 @@ it("drags two separate weekly blocks and saves both", async () => {
     ),
   );
 });
+
+it("drags across selected time to remove it and preserves the rest of the block", () => {
+  const scheduledMate: MateProfile = {
+    ...mate,
+    availability: [
+      {
+        id: 3,
+        mateId: mate.id,
+        dayOfWeek: 1,
+        startTime: "18:00",
+        endTime: "20:00",
+      },
+    ],
+  };
+  render(<AvailabilityEditor mate={scheduledMate} />);
+  const cell = (start: string, end: string) =>
+    document.querySelector<HTMLButtonElement>(
+      `.availability-grid button[aria-label="Mon ${start} to ${end}"]`,
+    )!;
+  const first = cell("18:30", "19:00");
+  const last = cell("19:00", "19:30");
+
+  fireEvent.pointerDown(first, { pointerType: "mouse" });
+  fireEvent.pointerEnter(last);
+  expect(first).toHaveClass("is-removing");
+  expect(last).toHaveClass("is-selected");
+  expect(last).not.toHaveClass("is-removing");
+  fireEvent.pointerUp(last);
+
+  expect(
+    screen.getAllByLabelText("From").map((input) => (input as HTMLInputElement).value),
+  ).toEqual(["18:00", "19:00"]);
+  expect(first).not.toHaveClass("is-selected");
+  expect(last).toHaveClass("is-selected");
+});
