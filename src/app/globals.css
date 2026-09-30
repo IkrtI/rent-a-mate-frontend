@@ -2246,10 +2246,26 @@ h2 {
   color: var(--muted-foreground);
   font-size: 14px;
 }
+.account-editor-link {
+  display: inline-flex;
+  margin-top: 10px;
+  color: var(--primary-text-accent);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .account-editor-forms {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.account-editor-forms--profile {
+  max-width: 560px;
+  grid-template-columns: minmax(0, 1fr);
+}
+.account-editor-forms--security {
+  max-width: 960px;
 }
 .account-editor-forms form {
   display: grid;
@@ -2308,7 +2324,7 @@ h2 {
   }
 }
 @media (max-width: 900px) {
-  .account-editor-forms {
+  .account-editor-forms--security {
     grid-template-columns: 1fr;
   }
 }

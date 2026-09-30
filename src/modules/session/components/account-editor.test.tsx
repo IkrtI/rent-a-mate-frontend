@@ -9,10 +9,10 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, refresh }) }));
 
 const user = { id: 12, name: "Mew", email: "mew@example.com", role: "mate" as const };
 
-function show() {
+function show(mode: "profile" | "security" = "profile") {
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <AccountEditor user={user} />
+      <AccountEditor mode={mode} user={user} />
     </QueryClientProvider>,
   );
 }
@@ -32,6 +32,12 @@ it("saves the display name and updates the visible account", async () => {
     );
   vi.stubGlobal("fetch", fetchMock);
   show();
+  expect(screen.getByRole("link", { name: "Change email or password" })).toHaveAttribute(
+    "href",
+    "/profile/security",
+  );
+  expect(screen.queryByRole("heading", { name: "Email address" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Password" })).not.toBeInTheDocument();
   fireEvent.change(screen.getByLabelText("Name shown on your profile"), {
     target: { value: "Mew Updated" },
   });
@@ -56,7 +62,11 @@ it("checks password confirmation before changing it and returns to sign-in", asy
       ),
     );
   vi.stubGlobal("fetch", fetchMock);
-  show();
+  show("security");
+  expect(screen.getByRole("heading", { name: "Sign-in & security" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Email address" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Update email" })).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Display name" })).not.toBeInTheDocument();
   const form = screen.getByRole("heading", { name: "Password" }).closest("form")!;
   fireEvent.change(within(form).getByLabelText("Current password"), {
     target: { value: "old-password" },
