@@ -10,6 +10,7 @@ import { listBookings } from "../client";
 import { formatBookingDate, formatBookingTime, formatPrice } from "../format";
 import { bookingStatusSchema, type BookingStatus } from "../schemas";
 import { PaymentsPage } from "./payments-page";
+import { displayBookingStatus } from "../schemas";
 import { StatusBadge } from "./status-badge";
 
 const filters: Array<{ label: string; value?: BookingStatus }> = [
@@ -137,7 +138,7 @@ export function BookingsPage() {
                   {booking.activity.name} with{" "}
                   {session.data?.user.role === "mate" ? booking.renter.name : booking.mate.name}
                 </h2>
-                <StatusBadge status={booking.status} />
+                <StatusBadge status={displayBookingStatus(booking)} />
               </div>
               <p className="mt-2 text-sm text-neutral-600">
                 {formatBookingDate(booking.date)} · {formatBookingTime(booking.startTime)}–
