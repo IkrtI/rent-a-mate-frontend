@@ -10,6 +10,7 @@ import { getBooking, getPayment, updateBooking } from "../client";
 import { formatBookingDate, formatBookingTime, formatPrice } from "../format";
 import { BookingPayment } from "./booking-payment";
 import { BookingReview } from "./booking-review";
+import { displayBookingStatus } from "../schemas";
 import { StatusBadge } from "./status-badge";
 
 export function BookingDetailPage({ bookingId }: { bookingId: number }) {
@@ -58,8 +59,7 @@ export function BookingDetailPage({ bookingId }: { bookingId: number }) {
   const canComplete = isMate && item.status === "confirmed";
   const canReview = isRenter && item.status === "completed";
   const canPay = isRenter && item.status === "confirmed";
-  const displayStatus =
-    item.status === "confirmed" && payment.data?.status === "paid" ? "paid" : item.status;
+  const displayStatus = displayBookingStatus(item, payment.data?.status ?? item.paymentStatus);
 
   return (
     <main className="pb-24">

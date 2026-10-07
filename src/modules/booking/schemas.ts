@@ -20,6 +20,7 @@ export const bookingSchema = z.object({
   renter: participantSchema,
   mate: participantSchema,
   activity: participantSchema,
+  paymentStatus: z.enum(["pending", "paid", "failed", "refunding", "refunded"]).nullish(),
   review: z
     .object({
       id: z.number().int().positive(),
@@ -32,6 +33,13 @@ export const bookingSchema = z.object({
 });
 
 export type Booking = z.infer<typeof bookingSchema>;
+
+export function displayBookingStatus(
+  booking: Pick<Booking, "status" | "paymentStatus">,
+  paymentStatus = booking.paymentStatus,
+) {
+  return booking.status === "confirmed" && paymentStatus === "paid" ? "paid" : booking.status;
+}
 
 export const reviewInputSchema = z.object({
   rating: z.number().int().min(1, "Choose a rating from 1 to 5.").max(5),
