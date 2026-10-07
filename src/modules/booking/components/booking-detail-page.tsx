@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { getSession } from "@/modules/session/client";
-import { getBooking, updateBooking } from "../client";
+import { getBooking, getPayment, updateBooking } from "../client";
 import { formatBookingDate, formatBookingTime, formatPrice } from "../format";
 import { BookingPayment } from "./booking-payment";
 import { BookingReview } from "./booking-review";
@@ -35,6 +35,13 @@ export function BookingDetailPage({ bookingId }: { bookingId: number }) {
       setMessage(error instanceof Error ? error.message : "The booking could not be updated."),
   });
 
+  const payment = useQuery({
+    queryKey: ["payment", bookingId],
+    queryFn: () => getPayment(bookingId),
+    enabled: booking.data?.status === "confirmed",
+    retry: false,
+  });
+
   if (booking.isPending) {
     return <p className="py-12 text-sm text-neutral-600">Loading booking...</p>;
   }
@@ -51,6 +58,8 @@ export function BookingDetailPage({ bookingId }: { bookingId: number }) {
   const canComplete = isMate && item.status === "confirmed";
   const canReview = isRenter && item.status === "completed";
   const canPay = isRenter && item.status === "confirmed";
+  const displayStatus =
+    item.status === "confirmed" && payment.data?.status === "paid" ? "paid" : item.status;
 
   return (
     <main className="pb-24">
@@ -66,7 +75,7 @@ export function BookingDetailPage({ bookingId }: { bookingId: number }) {
             <p className="font-mono text-[11px] tracking-[0.12em] text-[#e34b58] uppercase">
               Booking #{item.id}
             </p>
-            <StatusBadge status={item.status} />
+            <StatusBadge status={displayStatus} />
           </div>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
             {item.activity.name} with {isMate ? item.renter.name : item.mate.name}
